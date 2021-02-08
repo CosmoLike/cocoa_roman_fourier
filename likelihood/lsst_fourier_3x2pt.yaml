@@ -1,0 +1,7 @@
+path: null
+data_file: Y3xplanck.dataset
+acc: 1
+speed: 2
+print_intermediate_products: False
+
+params: !defaults [params_lsst_fourier_3x2pt]
