@@ -477,7 +477,7 @@ void cpp_init_distances(std::vector<double> io_z, std::vector<double> io_chi ) {
 }
 
 
-void cpp_init_data_real(std::string COV, std::string MASK, std::string DATA) {
+void cpp_init_data(std::string COV, std::string MASK, std::string DATA) {
   ima::RealData& instance = ima::RealData::get_instance();
   instance.set_data(DATA);
   instance.set_mask(MASK);
@@ -1124,109 +1124,9 @@ bool ima::RealData::is_inv_cov_set() const {
   return this->is_inv_cov_set_;
 }
 
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-// Routines to test functions that were modified by Cocoa
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-arma::Mat<double> cpp_print_a() {
-  const int Nchi = 1000;
-  arma::Mat<double> r(Nchi, 2, arma::fill::zeros);
-  const double chi_min = 10.;
-  const double chi_max = 7000.;
-  const double dlnchi = std::log(chi_max/chi_min)/(Nchi-1.);
-  for(int i=0; i<Nchi; i++) {
-    r(i,0) = chi_min*exp(dlnchi*i)/cosmology.coverH0;
-    r(i,1) = a_chi(r(i,0));
-  }
-  return r;
-}
-
-arma::Mat<double> cpp_print_chi() {
-  arma::Mat<double> r(Ntable.N_a, 2, arma::fill::zeros);
-  const double da = ((1.0-limits.a_min)/(Ntable.N_a-1.0));
-  for (int i=0; i<Ntable.N_a; i++) {
-    r(i,0) = limits.a_min + i * da;
-    r(i,1) = chi(r(i,0));
-  }
-  return r;
-}
-
-arma::Mat<double> cpp_print_dchi_da() {
-  arma::Mat<double> r(Ntable.N_a, 2, arma::fill::zeros);
-  const double da = ((1.0-limits.a_min)/(Ntable.N_a-1.0));
-  for (int i=0; i<Ntable.N_a; i++) {
-    r(i,0) = limits.a_min + i * da;
-    r(i,1) = dchi_da(r(i,0));
-  }
-  return r;
-}
-
-arma::Mat<double> cpp_print_growth() {
-  arma::Mat<double> r(Ntable.N_a, 2, arma::fill::zeros);
-  const double da = ((1.0-limits.a_min)/(Ntable.N_a-1.0));
-  for (int i=0; i<Ntable.N_a; i++) {
-    r(i,0) = limits.a_min + i * da;
-    r(i,1) = growfac(r(i,0));
-  }
-  return r;
-}
-
-arma::Mat<double> cpp_print_fgrowth() {
-  arma::Mat<double> r(Ntable.N_a, 2, arma::fill::zeros);
-  const double da = ((1.0-limits.a_min)/(Ntable.N_a-1.0));
-  for (int i=0; i<Ntable.N_a; i++) {
-    r(i,0) = limits.a_min + i * da;
-    r(i,1) = f_growth(1.0/r(i,0)-1.0);
-  }
-  return r;
-}
-
-arma::Mat<double> cpp_print_hoverh0() {
-  arma::Mat<double> r(Ntable.N_a, 2, arma::fill::zeros);
-  const double da = ((1.0-limits.a_min)/(Ntable.N_a-1.));
-  for (int i=0; i<Ntable.N_a; i++) {
-    r(i,0) = limits.a_min + i * da;
-    r(i,1) = hoverh0(r(i,0));
-  }
-  return r;
-}
-
-arma::Mat<double> cpp_print_ps() {
-  const double da = ((1.0-limits.a_min)/(Ntable.N_a-1.));
-  const double logkmin = std::log(limits.k_min_mpc*cosmology.coverH0);
-  const double logkmax = std::log(limits.k_max_mpc_class*cosmology.coverH0);
-  const double dk = (logkmax-logkmin)/(Ntable.N_k_nlin-1.0);
-  arma::Mat<double> r(Ntable.N_a*Ntable.N_k_nlin, 4, arma::fill::zeros);
-  for (int i=0; i<Ntable.N_a; i++) {
-    const double a = limits.a_min + i * da;
-    for (int j=0; j<Ntable.N_k_nlin; j++) {
-      const double k = std::exp(logkmin + j * dk);
-      r(i*Ntable.N_k_nlin+j,0) = a;
-      r(i*Ntable.N_k_nlin+j,1) = k/cosmology.coverH0;
-      r(i*Ntable.N_k_nlin+j,2) = p_lin(k, a);
-      r(i*Ntable.N_k_nlin+j,3) = p_nonlin(k, a);
-    }
-  }
-  return r;
-}
-
-arma::Mat<double> cpp_print_datavector() {
-  std::vector<double> tmp = cpp_compute_data_vector();
-  arma::Mat<double> r(tmp.size(), 2, arma::fill::zeros);
-  for (int i=0; i<static_cast<int>(tmp.size()); i++) {
-    r(i,0) = i;
-    r(i,1) = tmp[i];
-  }
-  return r;
-}
-
 #ifdef PYBIND11
 PYBIND11_MODULE(cosmolike_lsst_foutier_interface, m) {
-    m.doc() = "CosmoLike Interface for LSST-FOURIER 3x2 Module";
+    m.doc() = "CosmoLike Interface for LSST-FOURIER 3x2pt Module";
 
     m.def("initial_setup", &cpp_initial_setup, "Def Setup");
 
@@ -1270,23 +1170,7 @@ PYBIND11_MODULE(cosmolike_lsst_foutier_interface, m) {
 
     m.def("set_cosmological_parameters", &cpp_set_cosmological_parameters,  "Set Cosmological Parameters", py::arg("omega_matter"), py::arg("hubble"), py::arg("is_cached"));
 
-    m.def("init_data_real", &cpp_init_data_real,"Init cov, mask and data", py::arg("COV"), py::arg("MASK"), py::arg("DATA"));
-
-    m.def("print_chi", &cpp_print_chi,"Print Distance");
-
-    m.def("print_dchi_da", &cpp_print_dchi_da, "Print dchi/da");
-
-    m.def("print_growth", &cpp_print_growth, "Print Growth");
-
-    m.def("print_fgrowth", &cpp_print_fgrowth, "Print f Growth");
-
-    m.def("print_hoverh0", &cpp_print_hoverh0, "Print hoverh0");
-
-    m.def("print_ps", &cpp_print_ps, "Print Linear and Non-Linear Power Spectrum");
-
-    m.def("print_a", &cpp_print_a,"Print Scale Factor");
-
-    m.def("print_datavector", &cpp_print_datavector, "Print data vector");
+    m.def("init_data", &cpp_init_data,"Init cov, mask and data", py::arg("COV"), py::arg("MASK"), py::arg("DATA"));
 }
 #endif // PYBIND11
 

@@ -12,7 +12,7 @@ from cobaya.likelihoods._base_classes import _DataSetLikelihood
 from cobaya.log import LoggedError
 from getdist import IniFile
 
-import cosmolike_des_y3_6x2_interface as ci
+import cosmolike_lsst_fourier_interface as ci
 
 # default is best fit LCDM - just need to be an ok Cosmology
 default_omega_matter = 0.315
@@ -105,33 +105,24 @@ class _cosmolike_prototype_base(_DataSetLikelihood):
 
     self.l_max = ini.float("l_max")
 
-    self.cmb_noise_file = ini.relativeFileName('cmb_noise_file')
-
     # ------------------------------------------------------------------------
-
-    self.z_interp_1D = np.linspace(0,1.5,250)
-    self.z_interp_1D = np.concatenate((self.z_interp_1D,np.linspace(1.5,10.1,50)),axis=0)
-    self.z_interp_1D = np.concatenate((self.z_interp_1D,np.linspace(10,1300.1,10)),axis=0)
+    self.z_interp_1D = np.linspace(0,2.0,1000)
+    self.z_interp_1D = np.concatenate((self.z_interp_1D,np.linspace(2.0,10.1,200)),axis=0)
     self.z_interp_1D[0] = 0
-    self.z_interp_1D[len(self.z_interp_1D)-1] = 1091.01
 
-    self.z_interp_2D = np.linspace(0,1.7,100)
-    self.z_interp_2D = np.concatenate((self.z_interp_2D,np.linspace(1.7,10.1,25)),axis=0)
+    self.z_interp_2D = np.linspace(0,2.0,100)
+    self.z_interp_2D = np.concatenate((self.z_interp_2D,np.linspace(2.0,10.1,50)),axis=0)
     self.z_interp_2D[0] = 0
 
     self.len_z_interp_2D = len(self.z_interp_2D)
-    self.len_log10k_interp_2D = int(550*(1+(self.acc-1.0)/3.0))
-
-    self.log10k_interp_2D = np.linspace(-4.5,8.0,self.len_log10k_interp_2D)
+    self.len_log10k_interp_2D = 1200
+    self.log10k_interp_2D = np.linspace(-4.2,2.0,self.len_log10k_interp_2D)
 
     # Cobaya wants k in 1/Mpc
     self.k_interp_2D = np.power(10.0,self.log10k_interp_2D)
-
     self.len_k_interp_2D = len(self.k_interp_2D)
-
     self.len_pkz_interp_2D = self.len_log10k_interp_2D*self.len_z_interp_2D
-
-    self.extrap_kmax = 5e8 * self.acc
+    self.extrap_kmax = 2.5e2 * self.acc
     # ------------------------------------------------------------------------
 
     ci.initial_setup()
@@ -162,7 +153,7 @@ class _cosmolike_prototype_base(_DataSetLikelihood):
 
     ci.init_size_data_vector()
 
-    ci.init_data_real(self.cov_file, self.mask_file, self.data_vector_file)
+    ci.init_data(self.cov_file, self.mask_file, self.data_vector_file)
 
     # ------------------------------------------------------------------------
 
@@ -186,13 +177,16 @@ class _cosmolike_prototype_base(_DataSetLikelihood):
       "omegam": None,
       "Pk_interpolator": {
         "z": self.z_interp_2D,
-        "k_max": 12 * self.acc,
+        "k_max": 20 * self.acc,
         "nonlinear": (True,False),
         "vars_pairs": ([("delta_tot", "delta_tot")])
       },
       "comoving_radial_distance": {
         "z": self.z_interp_1D
       # Get comoving radial distance from us to redshift z in Mpc.
+      },
+      "Cl": { # DONT REMOVE THIS - SOME WEIRD BEHAVIOR IN CAMB WITHOUT WANTS_CL
+        'tt': 0
       }
     }
 
@@ -289,8 +283,6 @@ class _cosmolike_prototype_base(_DataSetLikelihood):
 
       ci.init_distances(z = self.z_interp_1D, chi = chi)
 
-
-
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -299,7 +291,7 @@ class _cosmolike_prototype_base(_DataSetLikelihood):
     ci.set_nuisance_shear_calib(
       M = [
         params_values.get(p, None) for p in [
-          "DES_M"+str(i+1) for i in range(self.source_ntomo)
+          "LSST_M"+str(i+1) for i in range(self.source_ntomo)
         ]
       ]
     )
@@ -307,7 +299,7 @@ class _cosmolike_prototype_base(_DataSetLikelihood):
     ci.set_nuisance_shear_photoz(
       bias = [
         params_values.get(p, None) for p in [
-          "DES_DZ_S"+str(i+1) for i in range(self.source_ntomo)
+          "LSST_DZ_S"+str(i+1) for i in range(self.source_ntomo)
         ]
       ]
     )
@@ -315,17 +307,17 @@ class _cosmolike_prototype_base(_DataSetLikelihood):
     ci.set_nuisance_ia(
       A1 = [
         params_values.get(p, None) for p in [
-          "DES_A1_"+str(i+1) for i in range(self.source_ntomo)
+          "LSST_A1_"+str(i+1) for i in range(self.source_ntomo)
         ]
       ],
       A2 = [
         params_values.get(p, None) for p in [
-          "DES_A2_"+str(i+1) for i in range(self.source_ntomo)
+          "LSST_A2_"+str(i+1) for i in range(self.source_ntomo)
         ]
       ],
       B_TA = [
         params_values.get(p, None) for p in [
-          "DES_BTA_"+str(i+1) for i in range(self.source_ntomo)
+          "LSST_BTA_"+str(i+1) for i in range(self.source_ntomo)
         ]
       ],
     )
@@ -338,55 +330,27 @@ class _cosmolike_prototype_base(_DataSetLikelihood):
     ci.set_nuisance_bias(
       B1 = [
         params_values.get(p, None) for p in [
-          "DES_B1_"+str(i+1) for i in range(self.lens_ntomo)
+          "LSST_B1_"+str(i+1) for i in range(self.lens_ntomo)
         ]
       ],
       B2 = [
         params_values.get(p, None) for p in [
-          "DES_B2_"+str(i+1) for i in range(self.lens_ntomo)
+          "LSST_B2_"+str(i+1) for i in range(self.lens_ntomo)
         ]
       ],
       B_MAG = [
         params_values.get(p, None) for p in [
-          "DES_BMAG_"+str(i+1) for i in range(self.lens_ntomo)
+          "LSST_BMAG_"+str(i+1) for i in range(self.lens_ntomo)
         ]
       ]
     )
     ci.set_nuisance_clustering_photoz(
       bias = [
         params_values.get(p, None) for p in [
-          "DES_DZ_L"+str(i+1) for i in range(self.lens_ntomo)
+          "LSST_DZ_L"+str(i+1) for i in range(self.lens_ntomo)
         ]
       ]
     )
-
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
-  def test_all(self):
-    np.savetxt('./projects/desxplanck/chains/cobaya_chi.txt', ci.print_chi(), fmt='%1.7e')
-
-    np.savetxt('./projects/desxplanck/chains/cobaya_dchida.txt', ci.print_dchi_da(), fmt='%1.7e')
-
-    np.savetxt('./projects/desxplanck/chains/cobaya_growth.txt', ci.print_growth(), fmt='%1.7e')
-
-    np.savetxt('./projects/desxplanck/chains/cobaya_f_growth.txt', ci.print_fgrowth(),
-      fmt='%1.7e')
-
-    np.savetxt('./projects/desxplanck/chains/cobaya_hoverh0.txt', ci.print_hoverh0(), fmt='%1.7e')
-
-    np.savetxt('./projects/desxplanck/chains/cobaya_ps.txt', ci.print_ps(), fmt='%1.7e')
-
-    np.savetxt('./projects/desxplanck/chains/cobaya_a.txt', ci.print_a(), fmt='%1.7e')
-
-    np.savetxt('./projects/desxplanck/chains/cobaya_datavector.txt', ci.print_datavector(),
-      fmt='%d %1.7e')
-
-    np.savetxt('./projects/desxplanck/chains/cobaya_z1z2.txt', ci.print_z1z2(), fmt='%d')
-
-    np.savetxt('./projects/desxplanck/chains/cobaya_wswk.txt', ci.print_ws_wk(),
-      fmt='%d %d %1.7e %1.7e %1.7e %1.7e %1.7e')
-
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
