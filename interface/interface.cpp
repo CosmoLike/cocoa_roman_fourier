@@ -30,6 +30,7 @@ namespace py = pybind11;
 #include "cosmolike/cosmo2D_exact_fft.h"
 #include "cosmolike/cosmo3D.h"
 #include "cosmolike/halo.h"
+#include "cosmolike/IA.h"
 #include "cosmolike/radial_weights.h"
 #include "cosmolike/recompute.h"
 #include "cosmolike/pt_cfastpt.h"

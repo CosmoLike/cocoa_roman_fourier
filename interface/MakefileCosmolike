@@ -117,7 +117,7 @@ endif
 LDFLAGS += -lm
 
 all:  shared
-shared: cosmolike_des_y3_interface.so
+shared: cosmolike_lsst_fourier_interface.so
 
 CSOURCES += \
 		${ROOTDIR}/external_modules/code/cfftlog/cfftlog.c \
@@ -133,6 +133,7 @@ CSOURCES += \
 		${ROOTDIR}/external_modules/code/cosmolike/cosmo2D_exact_fft.c \
 		${ROOTDIR}/external_modules/code/cosmolike/cosmo2D_fullsky_TATT.c \
 		${ROOTDIR}/external_modules/code/cosmolike/halo.c \
+		${ROOTDIR}/external_modules/code/cosmolike/IA.c \
 		${ROOTDIR}/external_modules/code/cosmolike/recompute.c \
 		${ROOTDIR}/external_modules/code/cosmolike/radial_weights.c \
 		${ROOTDIR}/external_modules/code/cosmolike/redshift_spline.c \
@@ -153,6 +154,7 @@ OBJECTC += \
 		./cosmo2D_fourier.o \
 		./cosmo2D_fullsky_TATT.o \
 		./halo.o \
+		./IA.o \
 		./radial_weights.o \
 		./recompute.o \
 		./redshift_spline.o \
