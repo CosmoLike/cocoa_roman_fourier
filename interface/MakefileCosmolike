@@ -130,8 +130,6 @@ CSOURCES += \
 		${ROOTDIR}/external_modules/code/cosmolike/bias.c \
 		${ROOTDIR}/external_modules/code/cosmolike/cosmo3D.c \
 		${ROOTDIR}/external_modules/code/cosmolike/cosmo2D_fourier.c \
-		${ROOTDIR}/external_modules/code/cosmolike/cosmo2D_exact_fft.c \
-		${ROOTDIR}/external_modules/code/cosmolike/cosmo2D_fullsky_TATT.c \
 		${ROOTDIR}/external_modules/code/cosmolike/halo.c \
 		${ROOTDIR}/external_modules/code/cosmolike/IA.c \
 		${ROOTDIR}/external_modules/code/cosmolike/recompute.c \
@@ -150,9 +148,7 @@ OBJECTC += \
 		./basics.o \
 		./bias.o \
 		./cosmo3D.o \
-		./cosmo2D_exact_fft.o \
 		./cosmo2D_fourier.o \
-		./cosmo2D_fullsky_TATT.o \
 		./halo.o \
 		./IA.o \
 		./radial_weights.o \

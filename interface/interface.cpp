@@ -27,7 +27,6 @@ namespace py = pybind11;
 #include "cosmolike/basics.h"
 #include "cosmolike/bias.h"
 #include "cosmolike/cosmo2D_fourier.h"
-#include "cosmolike/cosmo2D_exact_fft.h"
 #include "cosmolike/cosmo3D.h"
 #include "cosmolike/halo.h"
 #include "cosmolike/IA.h"
@@ -345,8 +344,8 @@ void cpp_init_size_data_vector() {
   like.Ndata = like.Ncl*(tomo.shear_Npowerspectra +
                          tomo.ggl_Npowerspectra + tomo.clustering_Npowerspectra);
 
-  spdlog::debug("\x1b[90m{}\x1b[0m: {} = {} selected.", "init_size_data_vector", "Ndata",
-    like.Ndata);
+  spdlog::debug("\x1b[90m{}\x1b[0m: {} = {} selected.", "init_size_data_vector",
+    "Ndata", like.Ndata);
   spdlog::debug("\x1b[90m{}\x1b[0m: Ends", "init_size_data_vector");
 }
 
@@ -364,9 +363,9 @@ std::vector<double> io_z, std::vector<double> io_lnP) {
       }
     }
     if (debug_fail) {
-      spdlog::critical("\x1b[90m{}\x1b[0m: incompatible input w/ k.size = {}, z.size = {}, "
-        "and lnP.size = {}", "init_linear_power_spectrum", io_log10k.size(),
-        io_z.size(), io_lnP.size());
+      spdlog::critical("\x1b[90m{}\x1b[0m: incompatible input w/ k.size = {}"
+        ", z.size = {}, and lnP.size = {}", "init_linear_power_spectrum",
+        io_log10k.size(), io_z.size(), io_lnP.size());
       exit(1);
     }
   }
@@ -397,9 +396,9 @@ void cpp_init_non_linear_power_spectrum(std::vector<double> io_log10k,
       }
     }
     if (debug_fail) {
-      spdlog::critical("\x1b[90m{}\x1b[0m: incompatible input w/ k.size = {}, z.size = {}, "
-        "and lnP.size = {}", "init_non_linear_power_spectrum", io_log10k.size(),
-        io_z.size(), io_lnP.size());
+      spdlog::critical("\x1b[90m{}\x1b[0m: incompatible input w/ k.size = {}"
+        ", z.size = {},  and lnP.size = {}", "init_non_linear_power_spectrum",
+        io_log10k.size(), io_z.size(), io_lnP.size());
       exit(1);
     }
   }
@@ -462,8 +461,8 @@ void cpp_init_distances(std::vector<double> io_z, std::vector<double> io_chi ) {
       }
     }
     if (debug_fail) {
-      spdlog::critical("\x1b[90m{}\x1b[0m: incompatible input w/ z.size = {} and G.size = {}",
-        "init_distances", io_z.size(), io_chi.size());
+      spdlog::critical("\x1b[90m{}\x1b[0m: incompatible input w/ z.size = {}"
+        " and G.size = {}", "init_distances", io_z.size(), io_chi.size());
       exit(1);
     }
   }
@@ -522,13 +521,13 @@ const double hubble, const bool is_cached_cosmology) {
 void cpp_set_nuisance_shear_calib(std::vector<double> M) {
 #ifdef DEBUG
   if (tomo.shear_Nbin == 0) {
-    spdlog::critical("\x1b[90m{}\x1b[0m: {} = 0 is invalid", "set_nuisance_shear_calib",
-      "shear_Nbin");
+    spdlog::critical("\x1b[90m{}\x1b[0m: {} = 0 is invalid",
+      "set_nuisance_shear_calib", "shear_Nbin");
     exit(1);
   }
   if (tomo.shear_Nbin != static_cast<int>(M.size())) {
-    spdlog::critical("\x1b[90m{}\x1b[0m: incompatible input w/ size = {} (!= {})",
-        "set_nuisance_shear_calib", M.size(), tomo.shear_Nbin);
+    spdlog::critical("\x1b[90m{}\x1b[0m: incompatible input w/ size = {}"
+      " (!= {})", "set_nuisance_shear_calib", M.size(), tomo.shear_Nbin);
     exit(1);
   }
 #endif
@@ -540,13 +539,13 @@ void cpp_set_nuisance_shear_calib(std::vector<double> M) {
 void cpp_set_nuisance_shear_photoz(std::vector<double> SP) {
 #ifdef DEBUG
   if (tomo.shear_Nbin == 0) {
-    spdlog::critical("\x1b[90m{}\x1b[0m: {} = 0 is invalid", "set_nuisance_shear_photoz",
-      "shear_Nbin");
+    spdlog::critical("\x1b[90m{}\x1b[0m: {} = 0 is invalid",
+      "set_nuisance_shear_photoz", "shear_Nbin");
     exit(1);
   }
   if (tomo.shear_Nbin != static_cast<int>(SP.size())) {
-    spdlog::critical("\x1b[90m{}\x1b[0m: incompatible input w/ size = {} (!= {})",
-        "set_nuisance_shear_photoz", SP.size(), tomo.shear_Nbin);
+    spdlog::critical("\x1b[90m{}\x1b[0m: incompatible input w/ size = {}"
+      " (!= {})", "set_nuisance_shear_photoz", SP.size(), tomo.shear_Nbin);
     exit(1);
   }
 #endif
@@ -558,13 +557,14 @@ void cpp_set_nuisance_shear_photoz(std::vector<double> SP) {
 void cpp_set_nuisance_clustering_photoz(std::vector<double> CP) {
 #ifdef DEBUG
   if (tomo.clustering_Nbin == 0) {
-    spdlog::critical("\x1b[90m{}\x1b[0m: {} = 0 is invalid", "set_nuisance_clustering_photoz",
-      "clustering_Nbin");
+    spdlog::critical("\x1b[90m{}\x1b[0m: {} = 0 is invalid",
+      "set_nuisance_clustering_photoz", "clustering_Nbin");
     exit(1);
   }
   if (tomo.clustering_Nbin != static_cast<int>(CP.size())) {
-    spdlog::critical("\x1b[90m{}\x1b[0m: incompatible input w/ size = {} (!= {})",
-        "set_nuisance_clustering_photoz", CP.size(), tomo.clustering_Nbin);
+    spdlog::critical("\x1b[90m{}\x1b[0m: incompatible input w/ size = {}"
+      " (!= {})", "set_nuisance_clustering_photoz", CP.size(),
+      tomo.clustering_Nbin);
     exit(1);
   }
 #endif
@@ -576,13 +576,13 @@ void cpp_set_nuisance_clustering_photoz(std::vector<double> CP) {
 void cpp_set_nuisance_linear_bias(std::vector<double> B1) {
 #ifdef DEBUG
   if (tomo.clustering_Nbin == 0) {
-    spdlog::critical("\x1b[90m{}\x1b[0m: {} = 0 is invalid", "set_nuisance_linear_bias",
-      "clustering_Nbin");
+    spdlog::critical("\x1b[90m{}\x1b[0m: {} = 0 is invalid",
+      "set_nuisance_linear_bias", "clustering_Nbin");
     exit(1);
   }
   if (tomo.clustering_Nbin != static_cast<int>(B1.size())) {
-    spdlog::critical("\x1b[90m{}\x1b[0m: incompatible input w/ size = {} (!= {})",
-        "set_nuisance_linear_bias", B1.size(), tomo.clustering_Nbin);
+    spdlog::critical("\x1b[90m{}\x1b[0m: incompatible input w/ size = {}"
+      " (!= {})", "set_nuisance_linear_bias", B1.size(), tomo.clustering_Nbin);
     exit(1);
   }
 #endif
@@ -594,15 +594,15 @@ void cpp_set_nuisance_linear_bias(std::vector<double> B1) {
 void cpp_set_nuisance_nonlinear_bias(std::vector<double> B1, std::vector<double> B2) {
 #ifdef DEBUG
   if (tomo.clustering_Nbin == 0) {
-    spdlog::critical("\x1b[90m{}\x1b[0m: {} = 0 is invalid", "set_nuisance_nonlinear_bias",
-      "clustering_Nbin");
+    spdlog::critical("\x1b[90m{}\x1b[0m: {} = 0 is invalid",
+      "set_nuisance_nonlinear_bias", "clustering_Nbin");
     exit(1);
   }
   if (tomo.clustering_Nbin != static_cast<int>(B1.size()) ||
       tomo.clustering_Nbin != static_cast<int>(B2.size())) {
-    spdlog::critical("\x1b[90m{}\x1b[0m: incompatible input w/ sizes = {} and {} (!= {})",
-        "set_nuisance_nonlinear_bias", B1.size(), B2.size(),
-        tomo.clustering_Nbin);
+    spdlog::critical("\x1b[90m{}\x1b[0m: incompatible input w/ sizes = {} and"
+      " {} (!= {})", "set_nuisance_nonlinear_bias", B1.size(), B2.size(),
+      tomo.clustering_Nbin);
     exit(1);
   }
 #endif
@@ -771,26 +771,11 @@ std::vector<double> cpp_compute_data_vector() {
   }
   start = start + like.Ncl*tomo.ggl_Npowerspectra;
   if (like.pos_pos == 1) {
-    {
-      const int nz = 0;
-      {
-        const int i = 0;
-        if (cpp_compute_mask(start+(like.Ncl*nz)+i)) {
-          data_vector[start+(like.Ncl*nz)+i] = C_cl_tomo_nointerp(like.ell[i],nz,nz);
-        }
-      }
-      #pragma omp parallel for
-      for (int i=1; i<like.Ncl; i++) {
-        if (cpp_compute_mask(start+(like.Ncl*nz)+i)) {
-          data_vector[start+(like.Ncl*nz)+i] = C_cl_tomo_nointerp(like.ell[i],nz,nz);
-        }
-      }
-    }
-    #pragma omp parallel for
-    for (int nz=1; nz<tomo.clustering_Npowerspectra; nz++) {
+    for (int nz=0; nz<tomo.clustering_Npowerspectra; nz++) {
       for (int i=0; i<like.Ncl; i++) {
         if (cpp_compute_mask(start+(like.Ncl*nz)+i)) {
-          data_vector[start+(like.Ncl*nz)+i] = C_cl_tomo_nointerp(like.ell[i],nz,nz);
+          data_vector[start+(like.Ncl*nz)+i] =
+            C_cl_tomo_nointerp(like.ell[i],nz,nz);
         }
       }
     }
