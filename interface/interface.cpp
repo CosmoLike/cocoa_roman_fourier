@@ -749,7 +749,7 @@ std::vector<double> cpp_compute_data_vector() {
       for (int i = 0; i<like.Ncl; i++) {
         if (cpp_compute_mask(like.Ncl*nz+i)) {
           data_vector[like.Ncl*nz+i] =
-            C_shear_shear_IA_tab(like.ell[i],z1,z2)*
+            C_ss_tomo_limber(like.ell[i], z1, z2)*
             (1.0 + nuisance.shear_calibration_m[z1])*
             (1.0 + nuisance.shear_calibration_m[z2]);
         }
@@ -763,7 +763,8 @@ std::vector<double> cpp_compute_data_vector() {
       const int zs = ZS(nz);
       for (int i=0; i<like.Ncl; i++) {
         if (cpp_compute_mask(start+(like.Ncl*nz)+i)) {
-          data_vector[start+(like.Ncl*nz)+i] = C_ggl_IA_tab(like.ell[i],zl,zs)
+          data_vector[start+(like.Ncl*nz)+i] =
+            C_gs_tomo_limber(like.ell[i], zl, zs)
             *(1.0+nuisance.shear_calibration_m[zs]);
         }
       }
@@ -775,7 +776,7 @@ std::vector<double> cpp_compute_data_vector() {
       for (int i=0; i<like.Ncl; i++) {
         if (cpp_compute_mask(start+(like.Ncl*nz)+i)) {
           data_vector[start+(like.Ncl*nz)+i] =
-            C_cl_tomo_nointerp(like.ell[i],nz,nz);
+            C_gg_tomo_limber(like.ell[i],nz,nz);
         }
       }
     }
