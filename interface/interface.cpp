@@ -26,7 +26,7 @@ namespace py = pybind11;
 
 #include "cosmolike/basics.h"
 #include "cosmolike/bias.h"
-#include "cosmolike/cosmo2D_fourier.h"
+#include "cosmolike/cosmo2D.h"
 #include "cosmolike/cosmo3D.h"
 #include "cosmolike/halo.h"
 #include "cosmolike/IA.h"
@@ -468,10 +468,10 @@ void cpp_init_distances(std::vector<double> io_z, std::vector<double> io_chi ) {
 }
 
 
-void cpp_init_data(std::string COV, std::string MASK, std::string DATA) {
+void cpp_init_data(std::string COV, std::string DATA)
+{
   ima::RealData& instance = ima::RealData::get_instance();
   instance.set_data(DATA);
-  instance.set_mask(MASK);
   instance.set_inv_cov(COV);
 }
 
@@ -692,20 +692,17 @@ double cpp_compute_chi2(std::vector<double> datavector) {
   return instance.get_chi2(datavector);
 }
 
-int cpp_compute_mask(const int i) {
-  ima::RealData& instance = ima::RealData::get_instance();
-  return instance.get_mask(i);
-}
-
 std::vector<double> cpp_compute_data_vector() {
   spdlog::debug("\x1b[90m{}\x1b[0m: Begins", "compute_data_vector");
 #ifdef DEBUG
-  if (tomo.shear_Nbin == 0) {
+  if (tomo.shear_Nbin == 0)
+  {
     spdlog::critical("\x1b[90m{}\x1b[0m: {} = 0 is invalid",
       "compute_data_vector", "shear_Nbin");
     exit(1);
   }
-  if (tomo.clustering_Nbin == 0) {
+  if (tomo.clustering_Nbin == 0)
+  {
     spdlog::critical("\x1b[90m{}\x1b[0m: {} = 0 is invalid",
       "compute_data_vector", "clustering_Nbin");
     exit(1);
@@ -715,17 +712,14 @@ std::vector<double> cpp_compute_data_vector() {
       "compute_data_vector", "Ncl");
     exit(1);
   }
-  if (!ima::RealData::get_instance().is_mask_set()) {
-    spdlog::critical("\x1b[90m{}\x1b[0m: {} not set prior to this function call",
-      "compute_data_vector", "mask");
-    exit(1);
-  }
-  if (!ima::RealData::get_instance().is_data_set()) {
+  if (!ima::RealData::get_instance().is_data_set())
+  {
     spdlog::critical("\x1b[90m{}\x1b[0m: {} not set prior to this function call",
       "compute_data_vector", "data_vector");
     exit(1);
   }
-  if (!ima::RealData::get_instance().is_inv_cov_set()) {
+  if (!ima::RealData::get_instance().is_inv_cov_set())
+  {
     spdlog::critical("\x1b[90m{}\x1b[0m: {} not set prior to this function call",
       "compute_data_vector", "inv_cov");
     exit(1);
@@ -734,40 +728,60 @@ std::vector<double> cpp_compute_data_vector() {
   std::vector<double> data_vector(like.Ndata,0.0);
   int start = 0;
   if (like.shear_shear == 1) {
-    for (int nz = 0; nz<tomo.shear_Npowerspectra; nz++) {
+    for (int nz=0; nz<tomo.shear_Npowerspectra; nz++) {
       const int z1 = Z1(nz);
       const int z2 = Z2(nz);
       for (int i = 0; i<like.Ncl; i++) {
-        if (cpp_compute_mask(like.Ncl*nz+i)) {
-          data_vector[like.Ncl*nz+i] =
+        if (like.ell[i] < like.lmax_shear)
+        {
+          data_vector[like.Ncl*nz + i] =
             C_ss_tomo_limber(like.ell[i], z1, z2)*
-            (1.0 + nuisance.shear_calibration_m[z1])*
-            (1.0 + nuisance.shear_calibration_m[z2]);
+              (1.0 + nuisance.shear_calibration_m[z1])*
+              (1.0 + nuisance.shear_calibration_m[z2]);
+        }
+        else
+        {
+          data_vector[like.Ncl*nz + i] = 0.0;
         }
       }
     }
   }
   start = start + like.Ncl*tomo.shear_Npowerspectra;
   if (like.shear_pos == 1) {
-    for (int nz=0; nz<tomo.ggl_Npowerspectra; nz++) {
+    for (int nz=0; nz<tomo.ggl_Npowerspectra; nz++)
+    {
       const int zl = ZL(nz);
       const int zs = ZS(nz);
-      for (int i=0; i<like.Ncl; i++) {
-        if (cpp_compute_mask(start+(like.Ncl*nz)+i)) {
-          data_vector[start+(like.Ncl*nz)+i] =
-            C_gs_tomo_limber(like.ell[i], zl, zs)
-            *(1.0+nuisance.shear_calibration_m[zs]);
+      for (int i=0; i<like.Ncl; i++)
+      {
+        if (test_kmax(like.ell[i], zl))
+        {
+          data_vector[start+(like.Ncl*nz) + i] =
+            C_gs_tomo_limber(like.ell[i], zl, zs)*
+              (1.0 + nuisance.shear_calibration_m[zs]);
+        }
+        else
+        {
+          data_vector[start+(like.Ncl*nz) + i] = 0.0;
         }
       }
     }
   }
   start = start + like.Ncl*tomo.ggl_Npowerspectra;
-  if (like.pos_pos == 1) {
-    for (int nz=0; nz<tomo.clustering_Npowerspectra; nz++) {
-      for (int i=0; i<like.Ncl; i++) {
-        if (cpp_compute_mask(start+(like.Ncl*nz)+i)) {
-          data_vector[start+(like.Ncl*nz)+i] =
-            C_gg_tomo_limber(like.ell[i],nz,nz);
+  if (like.pos_pos == 1)
+  {
+    for (int nz=0; nz<tomo.clustering_Npowerspectra; nz++)
+    {
+      for (int i=0; i<like.Ncl; i++)
+      {
+        if (test_kmax(like.ell[i],nz))
+        {
+          data_vector[start+(like.Ncl*nz) + i] =
+            C_gg_tomo_limber(like.ell[i], nz, nz);
+        }
+        else
+        {
+          data_vector[start+(like.Ncl*nz) + i] = 0.0;
         }
       }
     }
@@ -779,7 +793,7 @@ std::vector<double> cpp_compute_data_vector() {
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-// CLASS RealData MEMBER FUNCTIONS (& RELATED) - READ MASK, COV..
+// CLASS RealData MEMBER FUNCTIONS (& RELATED) - READ COV..
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -863,125 +877,61 @@ void ima::RealData::set_data(std::string DATA) {
   this->is_data_set_ = true;
 }
 
-void ima::RealData::set_mask(std::string MASK) {
+void ima::RealData::set_inv_cov(std::string COV)
+{
 #ifdef DEBUG
-  if (!(like.Ndata>0)) {
-    spdlog::critical("\x1b[90m{}\x1b[0m: {} not set prior to this function call",
-      "set_mask", "like.Ndata");
-    exit(1);
-  }
-#endif
-  this->mask_.set_size(like.Ndata);
-  arma::Mat<double> table = ima::read_table(MASK);
-  for (int i=0; i<like.Ndata; i++) {
-    this->mask_(i) = table(i,1);
-  }
-  if (like.shear_shear==0) {
-    const int M = like.Ncl*tomo.shear_Npowerspectra;
-    for (int i=0; i<M; i++) {
-      this->mask_(i) = 0.0;
-    }
-  }
-  if (like.shear_pos==0) {
-    const int N = like.Ncl*tomo.shear_Npowerspectra;
-    const int M = N + like.Ncl*tomo.ggl_Npowerspectra;
-    for (int i=N; i<M; i++) {
-      this->mask_(i) = 0.0;
-    }
-  }
-  if (like.pos_pos==0) {
-    const int N = like.Ncl*(tomo.shear_Npowerspectra +
-      tomo.ggl_Npowerspectra);
-    const int M = N + like.Ncl*tomo.clustering_Npowerspectra;
-    for (int i=N; i<M; i++) {
-      this->mask_(i) = 0.0;
-    }
-  }
-#ifdef DEBUG
-  if(!(std::accumulate(this->mask_.begin(),this->mask_.end(),0.0)>0)) {
-    spdlog::critical(
-      "\x1b[90m{}\x1b[0m: mask file {} left no data points after masking",
-      "set_mask",
-      MASK
-    );
-      exit(1);
-  }
-  spdlog::info(
-    "\x1b[90m{}\x1b[0m: mask file {} left {} non-masked elements after masking",
-    "set_mask",
-    MASK,
-    arma::accu(this->mask_)
-  );
-#endif
-  this->mask_filename_ = MASK;
-  this->is_mask_set_ = true;
-}
-
-
-void ima::RealData::set_inv_cov(std::string COV) {
-#ifdef DEBUG
-  if (!(like.Ndata>0)) {
+  if (!(like.Ndata>0))
+  {
     spdlog::critical("\x1b[90m{}\x1b[0m: {} not set prior to this function call",
       "set_inv_cov", "like.Ndata");
     exit(1);
   }
-  if (!(this->is_mask_set_)) {
-    spdlog::critical("\x1b[90m{}\x1b[0m: {} not set prior to this function call",
-      "set_inv_cov", "mask");
-    exit(1);
-  }
 #endif
   arma::Mat<double> table = ima::read_table(COV); // this reads cov!
-  this->inv_cov_mask_.set_size(like.Ndata,like.Ndata);
-  this->inv_cov_mask_.zeros();
+  this->inv_cov_.set_size(like.Ndata,like.Ndata);
+  this->inv_cov_.zeros();
   switch (table.n_cols) {
     case 3:
     {
-      for (int i=0; i<static_cast<int>(table.n_rows); i++) {
+      for (int i=0; i<static_cast<int>(table.n_rows); i++)
+      {
         const int j = static_cast<int>(table(i,0));
         const int k = static_cast<int>(table(i,1));
-        this->inv_cov_mask_(j,k) = table(i,2);
-        if (j!=k) {
-          // apply mask to off-diagonal covariance elements
-          this->inv_cov_mask_(j,k) *= this->get_mask(j);
-          this->inv_cov_mask_(j,k) *= this->get_mask(k);
+        this->inv_cov_(j,k) = table(i,2);
+        if (j!=k)
+        {
           // m(i,j) = m(j,i)
-          this->inv_cov_mask_(k,j) = this->inv_cov_mask_(j,k);
+          this->inv_cov_(k,j) = this->inv_cov_(j,k);
         }
       };
       break;
     }
     case 4:
     {
-      for (int i=0; i<static_cast<int>(table.n_rows); i++) {
+      for (int i=0; i<static_cast<int>(table.n_rows); i++)
+      {
         const int j = static_cast<int>(table(i,0));
         const int k = static_cast<int>(table(i,1));
-        this->inv_cov_mask_(j,k) = table(i,2) + table(i,3);
-        this->inv_cov_mask_(k,j) = this->inv_cov_mask_(j,k);
-        if (j!=k) {
-          // apply mask to off-diagonal covariance elements
-          this->inv_cov_mask_(j,k) *= this->get_mask(j);
-          this->inv_cov_mask_(j,k) *= this->get_mask(k);
+        this->inv_cov_(j,k) = table(i,2) + table(i,3);
+        if (j!=k)
+        {
           // m(i,j) = m(j,i)
-          this->inv_cov_mask_(k,j) = this->inv_cov_mask_(j,k);
+          this->inv_cov_(k, j) = this->inv_cov_(j,k);
         }
       };
       break;
     }
     case 10:
     {
-      for (int i=0; i<static_cast<int>(table.n_rows); i++) {
+      for (int i=0; i<static_cast<int>(table.n_rows); i++)
+      {
         const int j = static_cast<int>(table(i,0));
         const int k = static_cast<int>(table(i,1));
-        this->inv_cov_mask_(j,k) = table(i,8) + table(i,9);
-        this->inv_cov_mask_(k,j) = this->inv_cov_mask_(j,k);
-        this->inv_cov_mask_(k,j) = this->inv_cov_mask_(j,k);
-        if (j!=k) {
-          // apply mask to off-diagonal covariance elements
-          this->inv_cov_mask_(j,k) *= this->get_mask(j);
-          this->inv_cov_mask_(j,k) *= this->get_mask(k);
+        this->inv_cov_(j,k) = table(i,8) + table(i,9);
+        if (j!=k)
+        {
           // m(i,j) = m(j,i)
-          this->inv_cov_mask_(k,j) = this->inv_cov_mask_(j,k);
+          this->inv_cov_(k,j) = this->inv_cov_(j,k);
         }
       }
       break;
@@ -991,35 +941,9 @@ void ima::RealData::set_inv_cov(std::string COV) {
         "set_inv_cov", COV);
       exit(1);
   }
-  this->inv_cov_mask_ = arma::inv(this->inv_cov_mask_);
-  // apply mask again, to make sure numerical errors in matrix
-  // inversion don't cause problems...
-  // also, set diagonal elements corresponding to datavector elements
-  // outside mask to zero, so that these elements don't contribute to chi2
-  for (int i = 0; i < like.Ndata; i++) {
-    this->inv_cov_mask_(i,i) *= this->get_mask(i)*this->get_mask(i);
-    for (int j=0; j<i; j++) {
-      this->inv_cov_mask_(i,j) *= this->get_mask(i)*this->get_mask(j);
-      this->inv_cov_mask_(j,i) = this->inv_cov_mask_(i,j);
-    }
-  };
+  this->inv_cov_ = arma::inv(this->inv_cov_);
   this->cov_filename_ = COV;
   this->is_inv_cov_set_ = true;
-}
-
-arma::Col<double> ima::RealData::get_mask() const {
-  return this->mask_;
-}
-
-int ima::RealData::get_mask(const int ci) const {
-#ifdef DEBUG
-  if (ci > like.Ndata || ci < 0) {
-    spdlog::critical("\x1b[90m{}\x1b[0m: index i = {} is not valid (min = {}, max = {})",
-      "get_mask", ci, 0.0, like.Ndata);
-    exit(1);
-  }
-#endif
-  return static_cast<int>(this->mask_(ci)+1e-13);
 }
 
 double ima::RealData::get_data(const int ci) const {
@@ -1050,37 +974,32 @@ double ima::RealData::get_inv_cov(const int ci, const int cj) const {
     exit(1);
   }
 #endif
-  return this->inv_cov_mask_(ci,cj);
+  return this->inv_cov_(ci,cj);
 }
 
 double ima::RealData::get_chi2(std::vector<double> datavector) const {
 #ifdef DEBUG
-  if (!(this->is_data_set_)) {
+  if (!(this->is_data_set_))
+  {
     spdlog::critical("\x1b[90m{}\x1b[0m: {} not set prior to this function call", "get_chi2",
       "data_vector");
     exit(1);
   }
-  if (!(this->is_mask_set_)) {
-    spdlog::critical("\x1b[90m{}\x1b[0m: {} not set prior to this function call", "get_chi2",
-      "mask");
-    exit(1);
-  }
-  if (!(this->is_inv_cov_set_)) {
+  if (!(this->is_inv_cov_set_))
+  {
     spdlog::critical("\x1b[90m{}\x1b[0m: {} not set prior to this function call", "get_chi2",
       "inv_cov");
     exit(1);
   }
 #endif
   double chisqr = 0.0;
-  for (int i=0; i<like.Ndata; i++) {
-    if (this->get_mask(i)) {
-      const double x = datavector[i]-this->get_data(i);
-      for (int j=0; j<like.Ndata; j++) {
-        if (this->get_mask(j)) {
-          const double y = datavector[j]-this->get_data(j);
-          chisqr += x*this->get_inv_cov(i,j)*y;
-        }
-      }
+  for (int i=0; i<like.Ndata; i++)
+  {
+    const double x = datavector[i]-this->get_data(i);
+    for (int j=0; j<like.Ndata; j++)
+    {
+        const double y = datavector[j]-this->get_data(j);
+        chisqr += x*this->get_inv_cov(i,j)*y;
     }
   }
   if (chisqr<0.0) {
@@ -1088,10 +1007,6 @@ double ima::RealData::get_chi2(std::vector<double> datavector) const {
     exit(1);
   }
   return chisqr;
-}
-
-bool ima::RealData::is_mask_set() const {
-  return this->is_mask_set_;
 }
 
 bool ima::RealData::is_data_set() const {
@@ -1148,7 +1063,7 @@ PYBIND11_MODULE(cosmolike_lsst_foutier_interface, m) {
 
     m.def("set_cosmological_parameters", &cpp_set_cosmological_parameters,  "Set Cosmological Parameters", py::arg("omega_matter"), py::arg("hubble"), py::arg("is_cached"));
 
-    m.def("init_data", &cpp_init_data,"Init cov, mask and data", py::arg("COV"), py::arg("MASK"), py::arg("DATA"));
+    m.def("init_data", &cpp_init_data,"Init cov, data", py::arg("COV"), py::arg("DATA"));
 }
 #endif // PYBIND11
 
