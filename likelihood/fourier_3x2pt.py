@@ -1,13 +1,13 @@
-from cobaya.likelihoods.lsst_fourier._cosmolike_prototype_base import _cosmolike_prototype_base
-import cosmolike_lsst_fourier_interface as ci
+from cobaya.likelihoods.fourier._cosmolike_prototype_base import _cosmolike_prototype_base
+import cosmolike_fourier_interface as ci
 
-class lsst_fourier_3x2pt(_cosmolike_prototype_base):
+class fourier_3x2pt(_cosmolike_prototype_base):
 	# ------------------------------------------------------------------------
 	# ------------------------------------------------------------------------
 	# ------------------------------------------------------------------------
 
 	def initialize(self):
-		super(lsst_fourier_3x2pt,self).initialize(probe="3x2pt")
+		super(fourier_3x2pt,self).initialize(probe="3x2pt")
 
 	# ------------------------------------------------------------------------
 	# ------------------------------------------------------------------------

@@ -9,9 +9,9 @@ fi
 # ----------------------------------------------------------------------------
 # ----------------------------------------------------------------------------
 
-addvar LD_LIBRARY_PATH $ROOTDIR/projects/lsst_fourier/interface
+addvar LD_LIBRARY_PATH $ROOTDIR/projects/fourier/interface
 
-addvar PYTHONPATH $ROOTDIR/projects/lsst_fourier/interface
+addvar PYTHONPATH $ROOTDIR/projects/fourier/interface
 
 if [ -n "${COSMOLIKE_DEBUG_MODE}" ]; then
     export SPDLOG_LEVEL=debug

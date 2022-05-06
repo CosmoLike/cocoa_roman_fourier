@@ -21,7 +21,7 @@ fi
 # ----------------------------------------------------------------------------
 # ----------------------------------------------------------------------------
 
-cd $ROOTDIR/projects/lsst_fourier/interface
+cd $ROOTDIR/projects/fourier/interface
 
 make -f MakefileCosmolike clean
 
