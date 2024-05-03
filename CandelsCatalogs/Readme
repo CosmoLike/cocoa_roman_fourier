@@ -1,0 +1,16 @@
+
+
+The fits files below were used to obtain clustering and lensing galaxy sample described in the Roman multi-probe analysis of Eifler et al 2021 https://ui.adsabs.harvard.edu/abs/2021MNRAS.507.1746E/abstract
+
+Suggested cuts for the clustering sample (goal was to maximize the number of galaxies with sufficient flux in LSST and Roman bands for PZs) starting out from CANDELS_LSST+WFIRSTfilters_spec_new.fits
+redshift>=0 && redshift<4 && cstar<0.9 && (u_LSST-g_LSST)<3.5 && (g_LSST-r_LSST)<3.5 && (r_LSST-i_LSST)<3.5 && (i_LSST-z_LSST)<3.5 && (z_LSST-y_WFIRST)<3.5 && (y_WFIRST-j_WFIRST)<3.5 && (j_WFIRST-h_WFIRST)<3.5 && (h_WFIRST-F184W_WFIRST)<3.5 && (u_LSST-g_LSST)>-2.5 && (g_LSST-r_LSST)>-2.5 && (r_LSST-i_LSST)>-2.5 && (i_LSST-z_LSST)>-2.5 && (z_LSST-y_WFIRST)>-2.5 && (y_WFIRST-j_WFIRST)>-2.5 && (j_WFIRST-h_WFIRST)>-2.5 && (h_WFIRST-F184W_WFIRST)>-2.5 && SNR>5 && fwhm>0
+
+
+
+The source sample, aka the one used for weak lensing, is based on a different fits file lensing_sample.fits closely following Hemmati et al. (2019) https://ui.adsabs.harvard.edu/abs/2019ApJ...877..117H/abstract 
+
+Text excerpt from Eifler et al 2021: "In order to obtain accurate redshift distributions, we closely follow Hemmati et al. (2019) in applying the ETC results to the CANDELS data set (Grogin et al. 2011; Koekemoer et al. 2011), which is the only data set available that is sufficiently deep in the near infrared to model Roman Space Telescope observations. The ETC has a built-in option to obtain a weak lensing catalogue based on an input catalogue of detected sources. The criteria for galaxies to be considered suitable for weak lensing are signal-to-noise ratio (S/N) > 18 (J + H band combined, matched filter), ellipticity dispersion σ < 0.2, and resolution factor R > 0.4, where we used the Bernstein & Jarvis (2002) convention (i.e.  = (a2 − b2)/(a2 + b2) instead of (a− b)/(a + b))."
+
+Further cuts cuts on lensing_sample.fits redshift in order to obtain a galaxy sample that has sufficient flux measurements from LSST and Roman
+
+redshift>=0 && redshift<4 && cstar<0.9 && (u_LSST-g_LSST)<3.5 && (g_LSST-r_LSST)<3.5 && (r_LSST-i_LSST)<3.5 && (i_LSST-z_LSST)<3.5 && (z_LSST-y_WFIRST)<3.5 && (y_WFIRST-j_WFIRST)<3.5 && (j_WFIRST-h_WFIRST)<3.5 && (h_WFIRST-F184W_WFIRST)<3.5 && (u_LSST-g_LSST)>-2.5 && (g_LSST-r_LSST)>-2.5 && (r_LSST-i_LSST)>-2.5 && (i_LSST-z_LSST)>-2.5 && (z_LSST-y_WFIRST)>-2.5 && (y_WFIRST-j_WFIRST)>-2.5 && (j_WFIRST-h_WFIRST)>-2.5 && (h_WFIRST-F184W_WFIRST)>-2.5

@@ -12,7 +12,7 @@ from cobaya.likelihoods._base_classes import _DataSetLikelihood
 from cobaya.log import LoggedError
 from getdist import IniFile
 
-import cosmolike_lsst_fourier_interface as ci
+import roman_fourier_interface as ci
 
 # default is best fit LCDM - just need to be an ok Cosmology
 default_omega_matter = 0.315

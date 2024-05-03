@@ -1,0 +1,12 @@
+data_file = Y3_unblinded_11_13_20.txt
+cov_file = cov_unblinded_11_13_20.txt
+mask_file = 3x2pt_baseline.mask
+nz_lens_file = nz_lens_Y3_unblinded_11_13_20.txt
+nz_source_file = nz_source_Y3_unblinded_11_13_20.txt
+nuisance_params = DES.paramnames
+lens_ntomo = 10
+source_ntomo = 10
+n_ell = 15
+IA_model = 6
+l_min= 30
+l_max = 3000
