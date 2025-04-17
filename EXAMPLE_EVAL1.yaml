@@ -109,13 +109,14 @@ params:
     latex: \Omega_\mathrm{m}
     drop: true
   mnu:
-    prior:
-      min: 0.06
-      max: 0.6
-    ref:
-      dist: norm
-      loc: 0.25
-      scale: 0.1
+#    prior:
+#      min: 0.06
+#      max: 0.6
+#    ref:
+#      dist: norm
+#      loc: 0.25
+#      scale: 0.1
+    value: 0.0
     proposal: 0.05
   w0pwa:
     prior:
@@ -226,12 +227,13 @@ sampler:
   evaluate:
     N: 1
     override:
-      As_1e9: 2.1
-      ns: 0.96605
-      H0: 67.32
-      omegab: 0.04
-      omegam: 0.3
-      mnu: 0.06
+      # sigma8=0.831
+      As_1e9: 2.12808
+      ns: 0.9645
+      H0: 67.27
+      omegab: 0.0492
+      omegam: 0.3156
+      #mnu: 0.0
       roman_DZ_L1: 0.0
       roman_DZ_L2: 0.0
       roman_DZ_L3: 0.0

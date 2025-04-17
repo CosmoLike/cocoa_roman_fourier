@@ -8,4 +8,5 @@ source_ntomo = 8
 n_cl = 15
 l_min= 30
 l_max = 4000
+l_max_shear = 4000
 # baryon_pca_file = build_your_own_pca_file
