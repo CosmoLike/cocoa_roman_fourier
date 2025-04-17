@@ -81,10 +81,12 @@ void init_ggl_exclude(std::vector<int> ggl_exclude)
 {
   arma::Col<int> _ggl_excl_ = arma::conv_to<arma::Col<int>>::from(ggl_exclude);
   tomo.ggl_exclude = (int*) malloc(sizeof(int)*_ggl_excl_.n_elem);
-  tomo.N_ggl_exclude = _ggl_excl_.n_elem;
+  tomo.N_ggl_exclude = int(_ggl_excl_.n_elem/2);
+  spdlog::info("init_ggl_exclude: {} ggl pairs excluded", tomo.N_ggl_exclude);
   for(int i=0; i<_ggl_excl_.n_elem; i++)
   {
     tomo.ggl_exclude[i] = _ggl_excl_(i);
+    spdlog::info("{:d}", _ggl_excl_(i));
   }
 }
 
@@ -423,7 +425,7 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
 
   m.def("set_log_level_debug", 
       &set_log_level_debug,
-      "Set the SPDLOG level to debug",
+      "Set the SPDLOG level to debug"
     );
 
   // --------------------------------------------------------------------
