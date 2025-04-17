@@ -89,8 +89,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     ci.init_binning(self.ncl, self.l_min, self.l_max, self.l_max_shear)
 
-    if self.probe != "xi":
-      ci.init_ggl_exclude(np.array(self.ggl_exclude).flatten())
+    ci.init_ggl_exclude(np.array(self.ggl_exclude).flatten())
 
     ci.init_cosmo_runmode(is_linear=False)
 
