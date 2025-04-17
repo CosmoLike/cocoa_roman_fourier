@@ -57,7 +57,7 @@ if [ -z "${IGNORE_COSMOLIKE_ROMANY1_CODE}" ]; then
 
   PROJECT="${ROOTDIR:?}/projects"
 
-  FOLDER="${roman_real_NAME:-"roman_fourier"}"
+  FOLDER="${roman_fourier_NAME:-"roman_fourier"}"
 
   PACKDIR="${PROJECT:?}/${FOLDER:?}"
 
