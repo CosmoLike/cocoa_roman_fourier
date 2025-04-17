@@ -48,6 +48,8 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     self.l_max = ini.float("l_max")
 
+    self.l_max_shear = ini.float("l_max_shear")
+
     # ------------------------------------------------------------------------
     
     self.z_interp_1D = np.linspace(0,2.0,1000)
@@ -85,7 +87,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     ci.init_probes(possible_probes=self.probe)
 
-    ci.init_binning(self.ncl, self.l_min, self.l_max)
+    ci.init_binning(self.ncl, self.l_min, self.l_max, self.l_max_shear)
 
     if self.probe != "xi":
       ci.init_ggl_exclude(np.array(self.ggl_exclude).flatten())

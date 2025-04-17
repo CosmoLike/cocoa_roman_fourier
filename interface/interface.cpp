@@ -299,7 +299,8 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
       "Init Bining related variables",
       py::arg("ncl_bins").none(false).noconvert(),
       py::arg("lmin").none(false),
-      py::arg("lmax").none(false)
+      py::arg("lmax").none(false),
+      py::arg("lmax_shear").none(false)
     );
 
   m.def("init_cosmo_runmode",
