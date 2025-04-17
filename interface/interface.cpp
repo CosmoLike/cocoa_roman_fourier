@@ -200,6 +200,10 @@ void set_pm(std::vector<double> PM)
     );
 }
 
+void set_log_level_debug() {
+    spdlog::set_level(spdlog::level::debug);
+}
+
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
@@ -415,6 +419,11 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
       &set_pm,
        "Set the point mass amplitudes",
       py::arg("PMV").none(false)
+    );
+
+  m.def("set_log_level_debug", 
+      &set_log_level_debug,
+      "Set the SPDLOG level to debug",
     );
 
   // --------------------------------------------------------------------
