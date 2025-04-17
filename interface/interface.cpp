@@ -87,7 +87,6 @@ void init_ggl_exclude(std::vector<int> ggl_exclude)
   for(int i=0; i<_ggl_excl_.n_elem; i++)
   {
     tomo.ggl_exclude[i] = _ggl_excl_(i);
-    spdlog::info("{:d}", _ggl_excl_(i));
   }
 }
 
