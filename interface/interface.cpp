@@ -12,6 +12,7 @@
 #include <random>
 #include <map>
 
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/cfg/env.h>
@@ -423,7 +424,7 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
 
   m.def("set_log_level_debug", 
       &set_log_level_debug,
-      "Set the SPDLOG level to debug",
+      "Set the SPDLOG level to debug"
     );
 
   // --------------------------------------------------------------------

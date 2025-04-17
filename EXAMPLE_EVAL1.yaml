@@ -1,6 +1,6 @@
 timing: True
-debug: False
-stop_at_error: False
+debug: True
+stop_at_error: True
 
 likelihood:
   roman_fourier.roman_fourier_3x2pt:
@@ -18,6 +18,7 @@ likelihood:
     IA_redshift_evolution: 3
     print_datavector: True
     print_datavector_file: "./projects/roman_fourier/data/example1.modelvector"
+    debug: True
 
 
 #ASSUME DATA VECTOR WAS CREATED WITH FOLLOWING PARAMS
