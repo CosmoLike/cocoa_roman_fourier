@@ -6,7 +6,7 @@ likelihood:
   roman_fourier.roman_fourier_3x2pt:
     ### Here you can overwrite options in roman_fourier_${probe}.yaml
     path: ./external_modules/data/roman_fourier
-    data_file: roman_fourier.dataset
+    data_file: roman_example.dataset
     accuracyboost: 1.0
     integration_accuracy: 0
     kmax_boltzmann: 20.0
