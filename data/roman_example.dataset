@@ -1,0 +1,12 @@
+data_file = roman_example.datavector
+cov_file = roman_example.cov
+mask_file = roman_example.mask
+nz_lens_file = roman_example.nz
+nz_source_file = roman_example.nz
+lens_ntomo = 8
+source_ntomo = 8
+n_cl = 15
+l_min= 30
+l_max = 4000
+l_max_shear = 4000
+# baryon_pca_file = build_your_own_pca_file

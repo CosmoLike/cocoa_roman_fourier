@@ -1,0 +1,325 @@
+# WL photo-z errors
+roman_DZ_S1:
+  prior:
+    dist: norm
+    loc: 0.0
+    scale: 0.002
+  ref:
+    dist: norm
+    loc: 0.0
+    scale: 0.002
+  proposal: 0.002
+  latex: \Delta z_\mathrm{s,roman}^1
+roman_DZ_S2:
+  prior:
+    dist: norm
+    loc: 0.0
+    scale: 0.002
+  ref:
+    dist: norm
+    loc: 0.0
+    scale: 0.002
+  proposal: 0.002
+  latex: \Delta z_\mathrm{s,roman}^2
+roman_DZ_S3:
+  prior:
+    dist: norm
+    loc: 0.0
+    scale: 0.002
+  ref:
+    dist: norm
+    loc: 0.0
+    scale: 0.002
+  proposal: 0.002
+  latex: \Delta z_\mathrm{s,roman}^3
+roman_DZ_S4:
+  prior:
+    dist: norm
+    loc: 0.0
+    scale: 0.002
+  ref:
+    dist: norm
+    loc: 0.0
+    scale: 0.002
+  proposal: 0.002
+  latex: \Delta z_\mathrm{s,roman}^4
+roman_DZ_S5:
+  prior:
+    dist: norm
+    loc: 0.0
+    scale: 0.002
+  ref:
+    dist: norm
+    loc: 0.0
+    scale: 0.002
+  proposal: 0.002
+  latex: \Delta z_\mathrm{s,roman}^5
+roman_DZ_S6:
+  prior:
+    dist: norm
+    loc: 0.0
+    scale: 0.002
+  ref:
+    dist: norm
+    loc: 0.0
+    scale: 0.002
+  proposal: 0.002
+  latex: \Delta z_\mathrm{s,roman}^6
+roman_DZ_S7:
+  prior:
+    dist: norm
+    loc: 0.0
+    scale: 0.002
+  ref:
+    dist: norm
+    loc: 0.0
+    scale: 0.002
+  proposal: 0.002
+  latex: \Delta z_\mathrm{s,roman}^7
+roman_DZ_S8:
+  prior:
+    dist: norm
+    loc: 0.0
+    scale: 0.002
+  ref:
+    dist: norm
+    loc: 0.0
+    scale: 0.002
+  proposal: 0.002
+  latex: \Delta z_\mathrm{s,roman}^8
+
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+# Intrinsic alignment
+roman_A1_1:
+  prior:
+    min: -5
+    max:  5
+  ref:
+    dist: norm
+    loc: 0.7
+    scale: 0.5
+  proposal: 0.5
+  latex: A_\mathrm{1-IA,roman}^1
+roman_A1_2:
+  prior:
+    min: -5
+    max:  5
+  ref:
+    dist: norm
+    loc: -1.7
+    scale: 0.5
+  proposal: 0.5
+  latex: A_\mathrm{1-IA,roman}^2
+roman_A1_3:
+  value: 0
+  latex: A_\mathrm{1-IA,roman}^3
+roman_A1_4:
+  value: 0
+  latex: A_\mathrm{1-IA,roman}^4
+roman_A1_5:
+  value: 0
+  latex: A_\mathrm{1-IA,roman}^5
+roman_A1_6:
+  value: 0
+  latex: A_\mathrm{1-IA,roman}^6
+roman_A1_7:
+  value: 0
+  latex: A_\mathrm{1-IA,roman}^7
+roman_A1_8:
+  value: 0
+  latex: A_\mathrm{1-IA,roman}^8
+
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+roman_A2_1:
+  value: 0.0
+  #prior:
+  #  min: -5
+  #  max:  5
+  #ref:
+  #  dist: norm
+  #  loc: -1.36
+  #  scale: 0.5
+  #proposal: 0.5
+  latex: A_\mathrm{2-IA,roman}^1
+roman_A2_2:
+  value: 0.0
+  #prior:
+  #  min: -5
+  #  max:  5
+  #ref:
+  #  dist: norm
+  #  loc: -2.5
+  #  scale: 0.5
+  #proposal: 0.5
+  latex: A_\mathrm{2-IA,roman}^2
+roman_A2_3:
+  value: 0
+  latex: A_\mathrm{2-IA,roman}^3
+roman_A2_4:
+  value: 0
+  latex: A_\mathrm{2-IA,roman}^4
+roman_A2_5:
+  value: 0
+  latex: A_\mathrm{2-IA,roman}^5
+roman_A2_6:
+  value: 0
+  latex: A_\mathrm{2-IA,roman}^6
+roman_A2_7:
+  value: 0
+  latex: A_\mathrm{2-IA,roman}^7
+roman_A2_8:
+  value: 0
+  latex: A_\mathrm{2-IA,roman}^8
+
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+roman_BTA_1:
+  value: 0.0
+  #prior:
+  #  min: 0
+  #  max: 2
+  #ref:
+  #  dist: norm
+  #  loc: 1
+  #  scale: 0.15
+  #proposal: 0.1
+  latex: A_\mathrm{BTA-IA,roman}^1
+roman_BTA_2:
+  value: 0
+  latex: A_\mathrm{BTA-IA,roman}^2
+roman_BTA_3:
+  value: 0
+  latex: A_\mathrm{BTA-IA,roman}^3
+roman_BTA_4:
+  value: 0
+  latex: A_\mathrm{BTA-IA,roman}^4
+roman_BTA_5:
+  value: 0
+  latex: A_\mathrm{BTA-IA,roman}^5
+roman_BTA_6:
+  value: 0
+  latex: A_\mathrm{BTA-IA,roman}^6
+roman_BTA_7:
+  value: 0
+  latex: A_\mathrm{BTA-IA,roman}^7
+roman_BTA_8:
+  value: 0
+  latex: A_\mathrm{BTA-IA,roman}^8
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+# Shear calibration parameters
+roman_M1:
+  prior:
+    dist: norm
+    loc: 0.0
+    scale: 0.005
+  ref:
+    dist: norm
+    loc: 0.0
+    scale: 0.005
+  proposal: 0.005
+  latex: m_\mathrm{roman}^1
+roman_M2:
+  prior:
+    dist: norm
+    loc: 0.0
+    scale: 0.005
+  ref:
+    dist: norm
+    loc: 0.0
+    scale: 0.005
+  proposal: 0.005
+  latex: m_\mathrm{roman}^2
+roman_M3:
+  prior:
+    dist: norm
+    loc: 0.0
+    scale: 0.005
+  ref:
+    dist: norm
+    loc: 0.0
+    scale: 0.005
+  proposal: 0.005
+  latex: m_\mathrm{roman}^3
+roman_M4:
+  prior:
+    dist: norm
+    loc: 0.0
+    scale: 0.005
+  ref:
+    dist: norm
+    loc: 0.0
+    scale: 0.005
+  proposal: 0.005
+  latex: m_\mathrm{roman}^4
+roman_M5:
+  prior:
+    dist: norm
+    loc: 0.0
+    scale: 0.005
+  ref:
+    dist: norm
+    loc: 0.0
+    scale: 0.005
+  proposal: 0.005
+  latex: m_\mathrm{roman}^5
+roman_M6:
+  prior:
+    dist: norm
+    loc: 0.0
+    scale: 0.005
+  ref:
+    dist: norm
+    loc: 0.0
+    scale: 0.005
+  proposal: 0.005
+  latex: m_\mathrm{roman}^6
+roman_M7:
+  prior:
+    dist: norm
+    loc: 0.0
+    scale: 0.005
+  ref:
+    dist: norm
+    loc: 0.0
+    scale: 0.005
+  proposal: 0.005
+  latex: m_\mathrm{roman}^7
+roman_M8:
+  prior:
+    dist: norm
+    loc: 0.0
+    scale: 0.005
+  ref:
+    dist: norm
+    loc: 0.0
+    scale: 0.005
+  proposal: 0.005
+  latex: m_\mathrm{roman}^8
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+# BARYON PCA
+roman_BARYON_Q1:
+  value: 0.0
+  latex: Q1_\mathrm{roman}^1
+roman_BARYON_Q2:
+  value: 0.0
+  latex: Q2_\mathrm{roman}^2
+roman_BARYON_Q3:
+  value: 0.0
+  latex: Q3_\mathrm{roman}^3
+roman_BARYON_Q4:
+  value: 0.0
+  latex: Q4_\mathrm{roman}^4

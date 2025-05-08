@@ -4,3 +4,6 @@
 *.pyo
 *.cfg
 chains/
+ROMAN_*.yaml
+ROMAN_*.sbatch
+notebooks/*
