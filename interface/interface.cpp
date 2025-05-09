@@ -78,6 +78,7 @@ void init_data_3x2pt_fourier_space(
   cosmolike_interface::init_data_3x2pt_fourier_space(cov, mask, data, order);
 }
 
+/*
 void init_ggl_exclude(std::vector<int> ggl_exclude)
 {
   arma::Col<int> _ggl_excl_ = arma::conv_to<arma::Col<int>>::from(ggl_exclude);
@@ -88,6 +89,14 @@ void init_ggl_exclude(std::vector<int> ggl_exclude)
   {
     tomo.ggl_exclude[i] = _ggl_excl_(i);
   }
+}
+*/
+
+void init_ggl_exclude(std::vector<int> ggl_exclude)
+{
+  cosmolike_interface::init_ggl_exclude(
+      arma::conv_to<arma::Col<int>>::from(ggl_exclude)
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -203,7 +212,11 @@ void set_pm(std::vector<double> PM)
 }
 
 void set_log_level_debug() {
-    spdlog::set_level(spdlog::level::debug);
+  spdlog::set_level(spdlog::level::debug);
+}
+
+void set_log_level_info() {
+  spdlog::set_level(spdlog::level::info);
 }
 
 // ---------------------------------------------------------------------------
@@ -427,6 +440,11 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
   m.def("set_log_level_debug", 
       &set_log_level_debug,
       "Set the SPDLOG level to debug"
+    );
+
+  m.def("set_log_level_info", 
+      &set_log_level_info,
+      "Set the SPDLOG level to info"
     );
 
   // --------------------------------------------------------------------

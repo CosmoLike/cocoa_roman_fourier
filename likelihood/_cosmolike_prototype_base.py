@@ -77,6 +77,8 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     if self.debug:
       ci.set_log_level_debug()
+    else:
+      ci.set_log_level_info()
 
     ci.initial_setup()
 
