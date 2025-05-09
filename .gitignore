@@ -1,3 +1,10 @@
+.DS_Store
+chains/.DS_Store
+data/.DS_Store
+interface/.DS_Store
+likelihood/.DS_Store
+notebooks/.DS_Store
+scripts/.DS_Store
 *.o
 *.pyc
 *.so
