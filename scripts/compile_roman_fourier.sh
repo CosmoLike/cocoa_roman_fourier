@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
-if [ -z "${IGNORE_COSMOLIKE_ROMANY1_CODE}" ]; then
+if [ -z "${IGNORE_COSMOLIKE_ROMAN_FOURIER_CODE}" ]; then
 
   if [ -z "${ROOTDIR}" ]; then
     source start_cocoa.sh || { pfail 'ROOTDIR'; return 1; }
@@ -57,30 +57,28 @@ if [ -z "${IGNORE_COSMOLIKE_ROMANY1_CODE}" ]; then
 
   PROJECT="${ROOTDIR:?}/projects"
 
-  FOLDER="${roman_fourier_NAME:-"roman_fourier"}"
+  FOLDER="${ROMAN_FOURIER_NAME:-"roman_fourier"}"
 
   PACKDIR="${PROJECT:?}/${FOLDER:?}"
 
   # Name to be printed on this shell script messages
-  PRINTNAME="roman_fourier"
+  PRINTNAME="ROMAN_FOURIER"
 
   ptop "COMPILING ${PRINTNAME:?}" || return 1
 
   # ---------------------------------------------------------------------------
   # cleaning any previous compilation
-
   rm -rf "${PACKDIR:?}"/interface/*.o
   rm -rf "${PACKDIR:?}"/interface/*.so
-
   cd "${PACKDIR}"/interface
-  
-  make -f MakefileCosmolike clean \
-      >${OUT1:?} 2>${OUT2:?} || { error "${EC2:?}"; return 1; }
+  make -f MakefileCosmolike clean >${OUT1:?} 2>${OUT2:?} || { error "${EC2:?}"; return 1; }
 
   # ---------------------------------------------------------------------------
+  cd "${PACKDIR}"/interface
 
-  make -j $MNT -f MakefileCosmolike all \
-      >${OUT1:?} 2>${OUT2:?} || { error "${EC8:?}"; return 1; }
+  (export LD_LIBRARY_PATH=${CONDA_PREFIX:?}/lib:$LD_LIBRARY_PATH && \
+   export LD_LIBRARY_PATH=${ROOTDIR:?}/.local/lib:$LD_LIBRARY_PATH && \
+   make -j $MNT -f MakefileCosmolike all >${OUT1:?} 2>${OUT2:?} || { error "${EC8:?}"; return 1; })
 
   cd ${ROOTDIR:?}
 
