@@ -87,6 +87,31 @@ roman_DZ_L8:
     scale: 0.005
   proposal: 0.005
   latex: \Delta z_\mathrm{l,roman}^8
+# Lensing photo-z stretch
+roman_STRETCH_L1:
+  value: 1.0
+  latex: \sigma z_\mathrm{l,roman}^1
+roman_STRETCH_L2:
+  value: 1.0
+  latex: \sigma z_\mathrm{l,roman}^2
+roman_STRETCH_L3:
+  value: 1.0
+  latex: \sigma z_\mathrm{l,roman}^3
+roman_STRETCH_L4:
+  value: 1.0
+  latex: \sigma z_\mathrm{l,roman}^4
+roman_STRETCH_L5:
+  value: 1.0
+  latex: \sigma z_\mathrm{l,roman}^5
+roman_STRETCH_L6:
+  value: 1.0
+  latex: \sigma z_\mathrm{l,roman}^6
+roman_STRETCH_L7:
+  value: 1.0
+  latex: \sigma z_\mathrm{l,roman}^7
+roman_STRETCH_L8:
+  value: 1.0
+  latex: \sigma z_\mathrm{l,roman}^8
 # ------------------------------------------------------------------------
 # ------------------------------------------------------------------------
 # ------------------------------------------------------------------------

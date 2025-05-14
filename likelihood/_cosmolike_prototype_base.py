@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 import os
 import numpy as np
 import scipy
-from scipy.interpolate import UnivariateSpline
+from scipy.interpolate import UnivariateSpline, interp1d
 import sys
 import time
 
@@ -12,7 +12,7 @@ from cobaya.likelihoods.base_classes import DataSetLikelihood
 from cobaya.log import LoggedError
 from getdist import IniFile
 
-import euclidemu2
+import euclidemu2 as ee2
 import math
 
 import cosmolike_roman_fourier_interface as ci
@@ -59,8 +59,9 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       np.linspace(1080,2000,20)),axis=0) #CMB 6x2pt g_CMB (possible in the future)
     self.z_interp_1D[0] = 0
 
-    self.z_interp_2D = np.linspace(0,2.0,120)
-    self.z_interp_2D = np.concatenate((self.z_interp_2D, np.linspace(2.01,10,30)),axis=0)
+    # EUCLID EMULATOR CAN ONLY HANDLE 100 Z's BELOW Z=10
+    self.z_interp_2D = np.linspace(0,2.0,80)
+    self.z_interp_2D = np.concatenate((self.z_interp_2D, np.linspace(2.01,10,20)),axis=0)
     self.z_interp_2D[0] = 0
 
     self.len_z_interp_2D = len(self.z_interp_2D)
@@ -127,7 +128,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     self.baryon_pcs_qs = np.zeros(self.npcs)
         
     if self.non_linear_emul == 1:
-      self.emulator = ee2=euclidemu2.PyEuclidEmulator()
+      self.emulator = ee2 # or ee2.PyEuclidEmulator()?
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
