@@ -17,6 +17,9 @@ IA_redshift_evolution: 3
 # IA_MODEL: 0 = NLA, 1 = TATT
 IA_model: 0 
 
+# exclude ggl nl-ns bin pairs
+ggl_exclude: [[4,0],[5,0],[6,0],[6,1],[6,2],[7,0],[7,1],[7,2],[7,3]]
+
 print_intermediate_products: False
 
 use_baryonic_simulations_for_dv_contamination: False

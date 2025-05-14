@@ -1,12 +1,12 @@
 timing: True
-debug: False
-stop_at_error: False
+debug: True
+stop_at_error: True
 
 likelihood:
   roman_fourier.roman_fourier_3x2pt:
     ### Here you can overwrite options in roman_fourier_${probe}.yaml
     path: ./external_modules/data/roman_fourier
-    data_file: roman_fourier.dataset
+    data_file: roman_example.dataset
     accuracyboost: 1.0
     integration_accuracy: 0
     kmax_boltzmann: 20.0
@@ -18,36 +18,7 @@ likelihood:
     IA_redshift_evolution: 3
     print_datavector: True
     print_datavector_file: "./projects/roman_fourier/data/example1.modelvector"
-
-
-#ASSUME DATA VECTOR WAS CREATED WITH FOLLOWING PARAMS
-#  As_1e9: 2.1
-#  ns: 0.96605
-#  H0: 67.32
-#  omegab: 0.04
-#  omegam: 0.3
-#  mnu: 0.06
-#  roman_DZ_S1: 0.0
-#  roman_DZ_S2: 0.0
-#  roman_DZ_S3: 0.0
-#  roman_DZ_S4: 0.0
-#  roman_DZ_S5: 0.0
-#  roman_DZ_S6: 0.0
-#  roman_DZ_S7: 0.0
-#  roman_DZ_S8: 0.0
-#  roman_M1: 0.0
-#  roman_M2: 0.0
-#  roman_M3: 0.0
-#  roman_M4: 0.0
-#  roman_M5: 0.0
-#  roman_M6: 0.0
-#  roman_M7: 0.0
-#  roman_M8: 0.0
-#  roman_A1_1: 0.6
-#  roman_A1_2: -1.5
-#  w0pwa: -1.0
-#  w0: -1.0
-
+    debug: True
 
 params:
   # ----------------------------------------------------------------------------
@@ -109,7 +80,7 @@ params:
     drop: true
   mnu:
     prior:
-      min: 0.06
+      min: 0.05
       max: 0.6
     ref:
       dist: norm

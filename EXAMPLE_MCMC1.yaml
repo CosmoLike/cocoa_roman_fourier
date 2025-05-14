@@ -7,10 +7,9 @@ likelihood:
   roman_fourier.roman_fourier_3x2pt:
     ### Here you can overwrite options in roman_fourier_${probe}.yaml
     path: ./external_modules/data/roman_fourier
-    data_file: roman_fourier.dataset
+    data_file: roman_example.dataset
     accuracyboost: 1.0
     integration_accuracy: 0
-    kmax_boltzmann: 5.0
     # 1 EE2, 2 Halofit
     non_linear_emul: 2
     # 0 NLA, 1 TATT
@@ -22,34 +21,6 @@ likelihood:
     integration_accuracy: 0 
     kmax_boltzmann: 20.0
 
-
-#ASSUME DATA VECTOR WAS CREATED WITH FOLLOWING PARAMS
-#  As_1e9: 2.1
-#  ns: 0.96605
-#  H0: 67.32
-#  omegab: 0.04
-#  omegam: 0.3
-#  mnu: 0.06
-#  roman_DZ_S1: 0.0
-#  roman_DZ_S2: 0.0
-#  roman_DZ_S3: 0.0
-#  roman_DZ_S4: 0.0
-#  roman_DZ_S5: 0.0
-#  roman_DZ_S6: 0.0
-#  roman_DZ_S7: 0.0
-#  roman_DZ_S8: 0.0
-#  roman_M1: 0.0
-#  roman_M2: 0.0
-#  roman_M3: 0.0
-#  roman_M4: 0.0
-#  roman_M5: 0.0
-#  roman_M6: 0.0
-#  roman_M7: 0.0
-#  roman_M8: 0.0
-#  roman_A1_1: 0.6
-#  roman_A1_2: -1.5
-#  w0pwa: -1.0
-#  w0: -1.0
 
 
 params:
@@ -114,7 +85,14 @@ params:
     value: -1.0
     latex: w_{0,\mathrm{DE}}
   mnu:
-    value: 0.06
+    prior:
+      min: 0.05
+      max: 0.6
+    ref:
+      dist: norm
+      loc: 0.25
+      scale: 0.1
+    proposal: 0.05
   tau:
     value: 0.0697186
     latex: \tau_\mathrm{reio}
@@ -239,7 +217,7 @@ sampler:
     blocking:
     - [1,
         [
-          As_1e9, ns, H0, omegab, omegam,
+          As_1e9, ns, H0, omegab, omegam, mnu,
         ]
       ]
     - [6,
