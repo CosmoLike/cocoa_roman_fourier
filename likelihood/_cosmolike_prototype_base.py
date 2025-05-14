@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 import os
 import numpy as np
 import scipy
-from scipy.interpolate import UnivariateSpline
+from scipy.interpolate import UnivariateSpline, interp1d
 import sys
 import time
 
@@ -134,7 +134,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     self.baryon_pcs_qs = np.zeros(self.npcs)
         
     if self.non_linear_emul == 1:
-      self.emulator = ee2
+      self.emulator = ee2 # or ee2.PyEuclidEmulator()?
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
