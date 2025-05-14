@@ -312,6 +312,13 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         ]
       ]
     )
+    ci.set_nuisance_clustering_photoz_stretch(
+      stretch = [
+        params_values.get(p, 1.0) for p in [
+          survey+"_STRETCH_L"+str(i+1) for i in range(self.lens_ntomo)
+        ]
+      ]
+    )
     ### Point-mass not implemented in Fourier space
 
   # ------------------------------------------------------------------------

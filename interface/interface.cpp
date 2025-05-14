@@ -181,6 +181,13 @@ void set_nuisance_clustering_photoz(std::vector<double> CP)
     );
 }
 
+void set_nuisance_clustering_photoz_stretch(std::vector<double> CPS)
+{
+  cosmolike_interface::set_nuisance_clustering_photoz_stretch(
+      arma::conv_to<arma::Col<double>>::from(CPS)
+    );
+}
+
 void set_nuisance_bias(
     std::vector<double> B1, 
     std::vector<double> B2, 
@@ -407,8 +414,14 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
 
   m.def("set_nuisance_clustering_photoz",
       &set_nuisance_clustering_photoz,
-      "Set nuisance clustering shear photo-z bias amplitudes",
+      "Set nuisance clustering photo-z bias amplitudes",
       py::arg("bias")
+    );
+
+  m.def("set_nuisance_clustering_photoz_stretch",
+      &set_nuisance_clustering_photoz_stretch,
+      "Set nuisance clustering photo-z stretch amplitudes",
+      py::arg("stretch")
     );
 
   m.def("set_nuisance_shear_photoz",
