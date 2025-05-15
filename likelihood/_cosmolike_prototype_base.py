@@ -312,20 +312,29 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         ]
       ]
     )
-    ci.set_nuisance_clustering_photoz(
-      bias = [
-        params_values.get(p, None) for p in [
-          survey+"_DZ_L"+str(i+1) for i in range(self.lens_ntomo)
+    if self.lens_equal_source:
+      ci.set_nuisance_clustering_photoz(
+        bias = [
+          params_values.get(p, None) for p in [
+            survey+"_DZ_S"+str(i+1) for i in range(self.lens_ntomo)
+          ]
         ]
-      ]
-    )
-    ci.set_nuisance_clustering_photoz_stretch(
-      stretch = [
-        params_values.get(p, 1.0) for p in [
-          survey+"_STRETCH_L"+str(i+1) for i in range(self.lens_ntomo)
+      )
+    else:
+      ci.set_nuisance_clustering_photoz(
+        bias = [
+          params_values.get(p, None) for p in [
+            survey+"_DZ_L"+str(i+1) for i in range(self.lens_ntomo)
+          ]
         ]
-      ]
-    )
+      )
+      ci.set_nuisance_clustering_photoz_stretch(
+        stretch = [
+          params_values.get(p, 1.0) for p in [
+            survey+"_STRETCH_L"+str(i+1) for i in range(self.lens_ntomo)
+          ]
+        ]
+      )
     ### Point-mass not implemented in Fourier space
 
   # ------------------------------------------------------------------------
