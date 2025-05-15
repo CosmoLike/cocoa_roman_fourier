@@ -11,9 +11,9 @@
 | $\Omega_m$ | secret | Flat(0.1, 0.9) | Matter Density Parameter |
 | $\Omega_b$ | secret | Flat(0.0x, 0.0x) | Baryon Density Parameter |
 | $H_0$ | secret | Flat(55, 90) |  Hubble Constant at present day |
-| $A_s$ | secret | Flat | Amplitude of Primordial Perturbations|
-| $n_s$ | secret | Flat | Scalar Spectral Index|
-| $m_\nu$ | secret | Flat | Sum? of Neutrino Masses|
+| $A_s$ | secret | Flat(0.5, 5) | Amplitude of Primordial Perturbations (scaled by factor of $10^-9$)|
+| $n_s$ | secret | Flat(0.87, 1.07) | Scalar Spectral Index|
+| $m_\nu$ | secret | Fixed = 0.06 | Sum? of Neutrino Masses|
 
 ### 2. Redshift Distribution
 
