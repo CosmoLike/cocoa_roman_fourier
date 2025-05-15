@@ -1,4 +1,4 @@
-# Roman Fourier Data Challenge 1
+# Roman Fourier $3\times2$pt Likelihood Analysis Package
 
 (Placeholder now, under construction...)
 
