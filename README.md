@@ -11,6 +11,9 @@
 | $\Omega_m$ | secret | Flat(0.1, 0.9) | - |
 | $\Omega_b$ | secret | Flat(0.0x, 0.0x) | - |
 | $H_0$ | secret | Flat(55, 90) |  - |
+| $A_s$ | secret | Flat
+| $n_s$ | secret | Flat
+| $m_\nu$ | secret | Flat
 
 ### 2. Redshift Distribution
 
@@ -28,4 +31,16 @@ Binning strategy
 - ggl:
 - clustering:
 
+### scales
+
+ell_min, ell_max, Nell
+
+### systematics
+
+- IA
+- galaxy bias
+- baryon
+- magnification bias
+- calibration: shear calibration, nz, multiplicative bias, additive bias
+- shape noise
 
