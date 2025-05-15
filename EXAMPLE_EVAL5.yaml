@@ -35,7 +35,7 @@ likelihood:
     which_baryonic_simulations_for_dv_contamination: TNG100
     ### Writing data vector
     print_datavector: False # set to True to write the data vector
-    print_datavector_file: "./projects/roman_fourier/data/example1.modelvector"
+    print_datavector_file: "./projects/roman_fourier/data/example5.modelvector"
     debug: True
 
 params:

@@ -39,7 +39,7 @@ likelihood:
 
     ### Writing data vector
     print_datavector: False # set to True to write the data vector
-    print_datavector_file: "./projects/roman_fourier/data/example1.modelvector"
+    print_datavector_file: "./projects/roman_fourier/data/example3.modelvector"
     debug: True
 
 params:
