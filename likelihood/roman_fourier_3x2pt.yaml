@@ -34,4 +34,8 @@ filename_baryon_pca: "./projects/roman_fourier/data/pca.txt"
 print_datavector: False
 print_datavector_file: "./projects/roman_fourier/chains/roman_fourier_theory.modelvector"
 
+# Whether use the same sample for lens and source galaxies
+lens_equal_source: False
+# If lens_equal_source = True, the default lens params file should be 
+# roman_fourier_params_lens_les
 params: !defaults [roman_fourier_params_lens, roman_fourier_params_source]
