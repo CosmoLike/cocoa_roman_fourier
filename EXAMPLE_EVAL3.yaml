@@ -6,7 +6,9 @@ stop_at_error: True
 
 likelihood:
   ### You can change the likelihood to cosmic shear, 2x2pt, etc.
-  roman_fourier.roman_fourier_3x2pt:
+  ### Baryonic feedback is mostly impacting cosmic shear. We only produce
+  ### PCs for cosmic shear in this example. 
+  roman_fourier.roman_fourier_cosmic_shear:
     ### Here you can overwrite options in roman_fourier_${probe}.yaml
     path: ./external_modules/data/roman_fourier
     data_file: roman_example.dataset
@@ -22,18 +24,19 @@ likelihood:
     IA_model: 0
     # 0 NO IA, 1 IA_NLA_LF, 2 IA_REDSHIFT_BINNING, 3 IA_REDSHIFT_EVOLUTION
     IA_redshift_evolution: 3
-    ### Galaxy bias redshift evolution [b1, b2, bs2, b3, bmag]
-    bias_model: [0,0,0,1,0]
     ### Exclude specific lens-source tomography bin pairs in ggl
     ggl_exclude: [[4,0],[5,0],[6,0],[6,1],[6,2],[7,0],[7,1],[7,2],[7,3]]
+
     ### Generate baryonic feedback PCA from predefined hydrosims
     ### Avaliable choices are 
     ### TNG100, HzAGN, mb2, illustris, eagle, owls_AGN_T80(owls_AGN-1), 
     ### owls_AGN_T85(owls_AGN-2), owls_AGN_T87(owls_AGN-3), BAHAMAS_T78(BAHAMAS-1), 
     ### BAHAMAS_T76(BAHAMAS-2), BAHAMAS_T87(BAHAMAS-3). 
+
     create_baryon_pca: True
     baryon_pca_sims: TNG100/HzAGN/mb2/owls_AGN_T80/owls_AGN_T85/BAHAMAS_T76/BAHAMAS_T78/BAHAMAS_T80
     filename_baryon_pca: "./projects/roman_fourier/data/example_pca.txt"
+
     ### Writing data vector
     print_datavector: False # set to True to write the data vector
     print_datavector_file: "./projects/roman_fourier/data/example1.modelvector"
@@ -227,22 +230,6 @@ sampler:
       w0pwa: -1.0
       w: -1.0
       ### Also overwrite nuisance parameters here
-      roman_DZ_L1: 0.0
-      roman_DZ_L2: 0.0
-      roman_DZ_L3: 0.0
-      roman_DZ_L4: 0.0
-      roman_DZ_L5: 0.0
-      roman_DZ_L6: 0.0
-      roman_DZ_L7: 0.0
-      roman_DZ_L8: 0.0
-      roman_B1_1: 1.4
-      roman_B1_2: 1.5
-      roman_B1_3: 1.6
-      roman_B1_4: 1.7
-      roman_B1_5: 1.8
-      roman_B1_6: 1.9
-      roman_B1_7: 2.0
-      roman_B1_8: 2.1
       roman_DZ_S1: 0.0
       roman_DZ_S2: 0.0
       roman_DZ_S3: 0.0
