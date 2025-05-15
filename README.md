@@ -17,13 +17,30 @@
 
 ### 2. Redshift Distribution
 
-Parametrization
+Parametrization: Smail type (add the expression)
 
-Number of bins: 8
+Redshift range (over which $N(z)$ is defined
+- start: 0
+- stop: 4
+- resolution: 500
 
-Mean, std
+| Sample | Parameter | Value | Notes |
+| --- | --- | --- | --- |
+| Lens | $\alpha$ |  | - |
+| Lens | $\beta$ |  | - |
+| Lens | $z_0$ |  | - |
+| Lens | number of bins |  | - |
+| Lens | shift |  | - |
+| Lens | stretch |  | - |
+| Lens | binning strategy |  | - |
+| Source | $\alpha$ |  | - |
+| Source | $\beta$ |  | - |
+| Source | $z_0$ |  | - |
+| Source | number of bins |  | - |
+| Source | shift |  | - |
+| Source | stretch |  | - |
+| Source | binning strategy |  | - |
 
-Binning strategy
 
 ### 3. Correlations
 
