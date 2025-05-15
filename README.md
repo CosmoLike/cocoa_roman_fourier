@@ -39,8 +39,8 @@ and
     
     export OMP_PROC_BIND=close; export OMP_NUM_THREADS=8
       
- **Step :three:**: The folder `projects/roman_real` contains examples. So, run the `cobaya-run` on the first example following the commands below.
+ **Step :three:**: The folder `projects/roman_fourier` contains examples. So, run the `cobaya-run` on the first example following the commands below.
 
 One model evaluation:
       
-       mpirun -n 1 --oversubscribe --mca pml ^ucx --mca btl vader,tcp,self --bind-to core:overload-allowed --rank-by slot --map-by numa:pe=${OMP_NUM_THREADS} cobaya-run ./projects/roman_real/EXAMPLE_EVAL1.yaml -f
+       mpirun -n 1 --oversubscribe --mca pml ^ucx --mca btl vader,tcp,self --bind-to core:overload-allowed --rank-by slot --map-by numa:pe=${OMP_NUM_THREADS} cobaya-run ./projects/roman_fourier/EXAMPLE_EVALUATE1.yaml -f
