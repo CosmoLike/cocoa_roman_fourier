@@ -44,3 +44,7 @@ and
 One model evaluation:
       
        mpirun -n 1 --oversubscribe --mca pml ^ucx --mca btl vader,tcp,self --bind-to core:overload-allowed --rank-by slot --map-by numa:pe=${OMP_NUM_THREADS} cobaya-run ./projects/roman_fourier/EXAMPLE_EVALUATE1.yaml -f
+ 
+MCMC:
+
+      mpirun -n 1 --oversubscribe --mca pml ^ucx --mca btl vader,tcp,self --bind-to core:overload-allowed --rank-by slot --map-by numa:pe=${OMP_NUM_THREADS} cobaya-run ./projects/roman_fourier/EXAMPLE_MCMC1.yaml -f
