@@ -1,15 +1,7 @@
-### EXAMPLE EVALUATION 1
-### This example illustrates the basic usage of the Roman Fourier repo
-### The baseline evaluation is
-###   - Nonlinear P(k) from CAMB/Halofit
-###   - No baryonic feedback
-###   - NLA IA model with redshift evolution
-###   - Photo-z parametrized by the central bias
-###   - Multiplicative shear calibration bias with Gaussian prior
-###   - Linear galaxy bias
-###   - No point-mass correction in galaxy-galaxy lensing
-###   - Zero magnification bias
-###   - Include RSD and non-Limber correction in galaxy clustering
+### EXAMPLE EVALUATION 5
+### This example illustrates how to use TATT
+### Different than example 4, example in this notebook not only require overwriting
+### default params, but also changing analysis option flags in the likelihood block.
 timing: True
 debug: True
 stop_at_error: True
@@ -29,7 +21,7 @@ likelihood:
     non_linear_emul: 2
     ### IA modeling
     # 0 NLA, 1 TATT
-    IA_model: 0
+    IA_model: 1
     # 0 NO IA, 1 IA_NLA_LF, 2 IA_REDSHIFT_BINNING, 3 IA_REDSHIFT_EVOLUTION
     IA_redshift_evolution: 3
     ### Galaxy bias redshift evolution [b1, b2, bs2, b3, bmag]
@@ -201,6 +193,37 @@ params:
       scale: 0.005
     proposal: 0.005
     latex: m_\mathrm{roman}^1
+  ### First open up the other IA parameters
+  roman_BTA_1:
+    prior:
+      min: 0.0
+      max: 2.0
+    ref:
+      dist: norm
+      loc: 1.0
+      scale: 0.15
+    proposal: 0.15
+    latex: A_\mathrm{BTA-IA,roman}^1
+  roman_A2_1:
+    prior:
+      min: -5.0
+      max: 5.0
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.3
+    proposal: 0.3
+    latex: A_\mathrm{2-IA,roman}^1
+  roman_A2_2:
+    prior:
+      min: -5.0
+      max: 5.0
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.3
+    proposal: 0.3
+    latex: A_\mathrm{2-IA,roman}^2
 
 theory:
   camb:
@@ -268,5 +291,9 @@ sampler:
       roman_M8: 0.0
       roman_A1_1: 0.6
       roman_A1_2: -1.5
+      ### We can set the other IA parameters used in TATT here
+      roman_BTA_1: 0.8
+      roman_A2_1: -1.2
+      roman_A2_2: -0.5
 
-output: ./projects/roman_fourier/chains/example1_eval
+output: ./projects/roman_fourier/chains/example5_eval

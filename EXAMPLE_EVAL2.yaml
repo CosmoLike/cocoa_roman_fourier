@@ -1,15 +1,5 @@
-### EXAMPLE EVALUATION 1
-### This example illustrates the basic usage of the Roman Fourier repo
-### The baseline evaluation is
-###   - Nonlinear P(k) from CAMB/Halofit
-###   - No baryonic feedback
-###   - NLA IA model with redshift evolution
-###   - Photo-z parametrized by the central bias
-###   - Multiplicative shear calibration bias with Gaussian prior
-###   - Linear galaxy bias
-###   - No point-mass correction in galaxy-galaxy lensing
-###   - Zero magnification bias
-###   - Include RSD and non-Limber correction in galaxy clustering
+### EXAMPLE EVALUATION 2
+### This example illustrates how to comtaminate data vector by baryonic feedback
 timing: True
 debug: True
 stop_at_error: True
@@ -39,7 +29,7 @@ likelihood:
     ### Contaminate the data vector by some hydrosim feedback scenario
     ### Avaliable choices are 
     ### TNG100, HzAGN, mb2, illustris, eagle, owls_AGN-1/2/3, BAHAMAS-1/2/3
-    use_baryonic_simulations_for_dv_contamination: False
+    use_baryonic_simulations_for_dv_contamination: True
     which_baryonic_simulations_for_dv_contamination: TNG100
     ### Writing data vector
     print_datavector: False # set to True to write the data vector
@@ -269,4 +259,4 @@ sampler:
       roman_A1_1: 0.6
       roman_A1_2: -1.5
 
-output: ./projects/roman_fourier/chains/example1_eval
+output: ./projects/roman_fourier/chains/example2_eval

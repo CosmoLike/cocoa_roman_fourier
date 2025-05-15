@@ -1,15 +1,5 @@
-### EXAMPLE EVALUATION 1
-### This example illustrates the basic usage of the Roman Fourier repo
-### The baseline evaluation is
-###   - Nonlinear P(k) from CAMB/Halofit
-###   - No baryonic feedback
-###   - NLA IA model with redshift evolution
-###   - Photo-z parametrized by the central bias
-###   - Multiplicative shear calibration bias with Gaussian prior
-###   - Linear galaxy bias
-###   - No point-mass correction in galaxy-galaxy lensing
-###   - Zero magnification bias
-###   - Include RSD and non-Limber correction in galaxy clustering
+### EXAMPLE EVALUATION 3
+### This example shows how to create baryonic feedback PCA
 timing: True
 debug: True
 stop_at_error: True
@@ -36,11 +26,14 @@ likelihood:
     bias_model: [0,0,0,1,0]
     ### Exclude specific lens-source tomography bin pairs in ggl
     ggl_exclude: [[4,0],[5,0],[6,0],[6,1],[6,2],[7,0],[7,1],[7,2],[7,3]]
-    ### Contaminate the data vector by some hydrosim feedback scenario
+    ### Generate baryonic feedback PCA from predefined hydrosims
     ### Avaliable choices are 
-    ### TNG100, HzAGN, mb2, illustris, eagle, owls_AGN-1/2/3, BAHAMAS-1/2/3
-    use_baryonic_simulations_for_dv_contamination: False
-    which_baryonic_simulations_for_dv_contamination: TNG100
+    ### TNG100, HzAGN, mb2, illustris, eagle, owls_AGN_T80(owls_AGN-1), 
+    ### owls_AGN_T85(owls_AGN-2), owls_AGN_T87(owls_AGN-3), BAHAMAS_T78(BAHAMAS-1), 
+    ### BAHAMAS_T76(BAHAMAS-2), BAHAMAS_T87(BAHAMAS-3). 
+    create_baryon_pca: True
+    baryon_pca_sims: TNG100/HzAGN/mb2/owls_AGN_T80/owls_AGN_T85/BAHAMAS_T76/BAHAMAS_T78/BAHAMAS_T80
+    filename_baryon_pca: "./projects/roman_fourier/data/example_pca.txt"
     ### Writing data vector
     print_datavector: False # set to True to write the data vector
     print_datavector_file: "./projects/roman_fourier/data/example1.modelvector"
@@ -269,4 +262,4 @@ sampler:
       roman_A1_1: 0.6
       roman_A1_2: -1.5
 
-output: ./projects/roman_fourier/chains/example1_eval
+output: ./projects/roman_fourier/chains/example3_eval

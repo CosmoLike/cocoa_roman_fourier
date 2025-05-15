@@ -1,15 +1,9 @@
-### EXAMPLE EVALUATION 1
-### This example illustrates the basic usage of the Roman Fourier repo
-### The baseline evaluation is
-###   - Nonlinear P(k) from CAMB/Halofit
-###   - No baryonic feedback
-###   - NLA IA model with redshift evolution
-###   - Photo-z parametrized by the central bias
-###   - Multiplicative shear calibration bias with Gaussian prior
-###   - Linear galaxy bias
-###   - No point-mass correction in galaxy-galaxy lensing
-###   - Zero magnification bias
-###   - Include RSD and non-Limber correction in galaxy clustering
+### EXAMPLE EVALUATION 4
+### This example illustrates how to set untrivial magnification bias, which is fixed 
+### to zeros by default. 
+### The method in this script can also be applied to, e.g. change point mass,
+### photo-z stretch, non-linear galaxy bias that are supported in cocoa but fixed to
+### trivial values in the default setting.
 timing: True
 debug: True
 stop_at_error: True
@@ -201,6 +195,89 @@ params:
       scale: 0.005
     proposal: 0.005
     latex: m_\mathrm{roman}^1
+  ### The default bmag are fixed to zeros, we first give them a prior here
+  ### to allow them to vary (settings under the params block here overwrite 
+  ### the default setting)
+  roman_BMAG_1:
+    prior:
+      min: -5.0
+      max: 5.0
+    ref: 
+      dist: norm
+      loc: 0.0
+      scale: 0.1
+    proposal: 0.1
+    latex: b_\mathrm{BMAG-roman}^1
+  roman_BMAG_2:
+    prior:
+      min: -5.0
+      max: 5.0
+    ref: 
+      dist: norm
+      loc: 0.0
+      scale: 0.1
+    proposal: 0.1
+    latex: b_\mathrm{BMAG-roman}^2
+  roman_BMAG_3:
+    prior:
+      min: -5.0
+      max: 5.0
+    ref: 
+      dist: norm
+      loc: 0.0
+      scale: 0.1
+    proposal: 0.1
+    latex: b_\mathrm{BMAG-roman}^3
+  roman_BMAG_4:
+    prior:
+      min: -5.0
+      max: 5.0
+    ref: 
+      dist: norm
+      loc: 0.0
+      scale: 0.1
+    proposal: 0.1
+    latex: b_\mathrm{BMAG-roman}^4
+  roman_BMAG_5:
+    prior:
+      min: -5.0
+      max: 5.0
+    ref: 
+      dist: norm
+      loc: 0.0
+      scale: 0.1
+    proposal: 0.1
+    latex: b_\mathrm{BMAG-roman}^5
+  roman_BMAG_6:
+    prior:
+      min: -5.0
+      max: 5.0
+    ref: 
+      dist: norm
+      loc: 0.0
+      scale: 0.1
+    proposal: 0.1
+    latex: b_\mathrm{BMAG-roman}^6
+  roman_BMAG_7:
+    prior:
+      min: -5.0
+      max: 5.0
+    ref: 
+      dist: norm
+      loc: 0.0
+      scale: 0.1
+    proposal: 0.1
+    latex: b_\mathrm{BMAG-roman}^7
+  roman_BMAG_8:
+    prior:
+      min: -5.0
+      max: 5.0
+    ref: 
+      dist: norm
+      loc: 0.0
+      scale: 0.1
+    proposal: 0.1
+    latex: b_\mathrm{BMAG-roman}^8
 
 theory:
   camb:
@@ -268,5 +345,14 @@ sampler:
       roman_M8: 0.0
       roman_A1_1: 0.6
       roman_A1_2: -1.5
+      ### Then we set the bmag to our favourite values here
+      roman_BMAG_1: 0.3
+      roman_BMAG_2: 0.4
+      roman_BMAG_3: 0.5
+      roman_BMAG_4: 0.6
+      roman_BMAG_5: 0.7
+      roman_BMAG_6: 0.8
+      roman_BMAG_7: 0.9
+      roman_BMAG_8: 1.0
 
-output: ./projects/roman_fourier/chains/example1_eval
+output: ./projects/roman_fourier/chains/example4_eval
