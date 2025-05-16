@@ -173,5 +173,5 @@ This will be filled in once we make a choice on the number of lens bins.
 
 | Parameter | Symbol | Value | Notes |
 |-----------|--------|--------|-------|
-| shape noise 1 | $\sigma_e^1$ |- | - |
-| shape noise 2 | $\sigma_e^2$ |- | - |
+| shape noise 1 | $\sigma_e^1$ | $0.39441348451/\sqrt{2}$ | CosmoLike only need two-component shape noise $\sigma_{e}^2 \equiv (\sigma_{e}^{1})^2+(\sigma_{e}^{2})^2$ |
+| shape noise 2 | $\sigma_e^2$ | $0.39441348451/\sqrt{2}$ | - |
