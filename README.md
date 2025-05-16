@@ -15,6 +15,8 @@
 | $n_s$ | secret | Flat
 | $m_\nu$ | secret | Flat
 
+Additional parameters: $w_a$, $w_0$
+
 ## 2. Redshift Distribution
 
 | Parameter         | Value / Description | Value / Description |
