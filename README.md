@@ -1,4 +1,4 @@
-# Roman Fourier $3\times2$pt Likelihood Analysis Package
+# Roman Fourier 3×2pt Likelihood Analysis Package
 
 (Placeholder now, under construction...)
 
@@ -17,42 +17,61 @@
 
 ### 2. Redshift Distribution
 
-Parametrization: Smail type (add the expression)
+| Parameter         | Value / Description |
+|------------------|---------------------|
+| parametrization  | Smail type *Note: the Smail parameter comes from the fit (Haley please explain)* |
+| expression   | $p (z) = \\left( \\frac{z}{z_0}  \\right) ^\\beta \\exp \\left[ - \\left( \\frac{z}{z_0}  \\right) ^\\alpha\\right] $ |
+| redshift range   | - start: 0 <br> - stop: 4 <br> - resolution: 500 |
 
-Redshift range (over which $N(z)$ is defined
-- start: 0
-- stop: 4
-- resolution: 500
 
-| Sample | Parameter | Value | Notes |
-| --- | --- | --- | --- |
-| Lens | $\alpha$ |  | - |
-| Lens | $\beta$ |  | - |
-| Lens | $z_0$ |  | - |
-| Lens | number of bins |  | - |
-| Lens | shift |  | - |
-| Lens | stretch |  | - |
-| Lens | binning strategy |  | - |
-| Source | $\alpha$ |  | - |
-| Source | $\beta$ |  | - |
-| Source | $z_0$ |  | - |
-| Source | number of bins |  | - |
-| Source | shift |  | - |
-| Source | stretch |  | - |
-| Source | binning strategy |  | - |
+| **Lens Sample** |
+|-----------------|
+
+| Parameter | Symbol | Value | Notes |
+|-----------|--------|--------|-------|
+| power law index 1 | $\alpha$ |        | the power law index of the prefactor in the Smail distribution |
+| power law index 2 | $\beta$  |        | the power law index of the exponenet in the Smail distribution |
+| pivot redshift | $z_0$    |        | pivot redshift in the Smail distribution |
+| number of bins | $n_{\mathrm{bin}}$ | | number of tomographic bins (TBD) |
+| binning strategy| - | equidistant in $z$ | (TBD) |
+| mean redshift | $\sigma_{\Delta z}$ | | mean redshift |
+| shift parameter | $\sigma_{z}$ |        | the error on the mean of the tomo bin |
+| stretch parameter | $\sigma_{\sigma_z}$ |        | the error on the std of the tomo bin |
+
+| **Source Sample** |
+|-----------------|
+
+| Parameter | Symbol | Value | Notes |
+|-----------|--------|--------|-------|
+| power law index 1 | $\alpha$ |        | the power law index of the prefactor in the Smail distribution |
+| power law index 2 | $\beta$  |        | the power law index of the exponenet in the Smail distribution |
+| pivot redshift | $z_0$    |        | pivot redshift in the Smail distribution |
+| number of bins | $n_{\mathrm{bin}}$ | | number of tomographic bins (TBD) |
+| binning strategy| - | equidistant in $z$ | (TBD) |
+| mean redshift | $\sigma_{\Delta z}$ | | mean redshift |
+| shift parameter | $\sigma_{z}$ |        | the error on the mean of the tomo bin |
+| stretch parameter | $\sigma_{\sigma_z}$ |        | the error on the std of the tomo bin |
 
 
 ### 3. Correlations
 
-- shear:
-- ggl:
-- clustering:
+| Probe | Value | Description |
+|------------|--------|---------------------|
+| Shear | TBD | all correlations, depends on num bins|
+| GGL | TBD | some correlations, depends on signal and num bins |
+| Clustering | TBD | autocorrelations, depends on signal and num bins |
+| 3×2pt | TBD | all together |
 
-### scales
 
-ell_min, ell_max, Nell
+### Scales
 
-### systematics
+| Space         | Quantity         | Unit      | Binning Strategy | Min  | Max  | Nbins | Scale Cuts (Min–Max) | Notes |
+|---------------|------------------|-----------|------------------|------|------|--------|------------------------|---------------------------------------------|
+| Real Space | $\theta$ | arcmin | TBD | TBD  | TBD  | TBD | TBD | Add a note if scales are cut on the cov mat level |
+| Fourier Space | $\ell$ | dimensionless | TBD | TBD  | TBD | TBD | TBD | Add a note if scales are cut on the cov mat level |
+
+
+### Systematics
 
 - IA
 - galaxy bias
