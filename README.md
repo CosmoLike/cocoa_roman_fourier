@@ -15,7 +15,11 @@
 | $n_s$ | secret | Flat
 | $m_\nu$ | secret | Flat
 
-Additional parameters: $w_a$, $w_0$
+Beyond $\Lambda$CDM parameters
+| Parameter | Fiducial Value | Prior | Notes |
+| --- | --- | --- | --- |
+| $w_0$ | secret | Flat
+| $w_a$ | secret | Flat
 
 ## 2. Redshift Distribution
 
