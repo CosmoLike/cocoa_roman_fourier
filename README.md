@@ -191,3 +191,6 @@ This will be filled in once we make a choice on the number of lens bins.
 | Area |  |  | - |
 
 
+# Reference
+- 1. [Roman Core Community Survey Report (v3, 1/26/2025)](https://asd.gsfc.nasa.gov/roman/comm_forum/forum_17/Core_Community_Survey_Reports-rev03-compressed.pdf)
+
