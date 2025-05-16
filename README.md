@@ -94,7 +94,7 @@
 
 | Parameter | Symbol | Value | Prior | Notes |
 |-----------|--------|--------|-------|-------|
-| amplitude | $A_{\mathrm{IA}}$ |        |        | tthe amplitude of the alignment |
+| amplitude | $A_{\mathrm{IA}}$ |        |        | the amplitude of the alignment |
 | power law index 1 | $\beta$ |        |        | tluminosity scaling factor |
 | power law index 2 | $\eta_{\mathrm{low}}^z$  |        |        | tcaling of the low redshift term |
 | power law index 3 | $z^{\mathrm{low}}_0$ |        |        | tscaling of the high redshift term |
@@ -105,11 +105,11 @@
 
 | Parameter | Symbol | Value | Prior | Notes |
 |-----------|--------|--------|-------|-------|
-| amplitude 1 | $A_1$ |        | - | the amplitude of the alignment |
-| amplitude 2 | $A_2$ |        |  | - |
-| scaling 1 | $\eta_1$ |        |  | - |
-| scaling| $\eta_2$ |        |  | - |
-| power law index 3 | $b_{\mathrm{TA}}$ |        |  | - |
+| amplitude 1 | $A_1$ |        | - | the amplitude of the linear term (TA) |
+| amplitude 2 | $A_2$ |        |  | the amplitude of the quadratic term (TT) |
+| scaling 1 | $\eta_1$ |        |  | redshift scaling of the linear term |
+| scaling| $\eta_2$ |        |  | redshift scaling of the quadratic term |
+| power law index 3 | $b_{\mathrm{TA}}$ |        |  | source weighting bias (density weighting term); $A_\delta = b_{\mathrm{TA}} A_1$ |
 
 
 ### Galaxy Bias
