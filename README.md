@@ -188,7 +188,7 @@ This will be filled in once we make a choice on the number of lens bins.
 | --- | --- | --- | --- |
 | Sky fraction | $f_{\mathrm{sky}}$ |  | - |
 | Depth |  |  | - |
-| Area | $\Omega_s$ | 5000 deg$^2$ | Used in the first data challenge |
+| Area | $\Omega_s$ | $5000 \mathrm{deg}^2$ | Used in the first data challenge |
 
 
 # Reference
