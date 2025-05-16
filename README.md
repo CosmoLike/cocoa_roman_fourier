@@ -184,7 +184,7 @@ This will be filled in once we make a choice on the number of lens bins.
 
 ## Survey Specs
 
-| Parameter | Symbol | Value| Notes |
+| Parameter | Symbol | Value (deg$^2$) | Notes |
 | --- | --- | --- | --- |
 | Sky fraction | $f_{\mathrm{sky}}$ |  | - |
 | Depth |  |  | - |
