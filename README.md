@@ -33,11 +33,13 @@
 | power law index 2 | $\beta$  |        |        | the power law index of the exponenet in the Smail distribution |
 | pivot redshift | $z_0$    |        |        | pivot redshift in the Smail distribution |
 | effective number density | $n_{\mathrm{gal}}$    |        |        | number of galaxies per $[\mathrm{arcmin}^2]$ |
+| X band limiting magnitude | $m_{\mathrm{lim}}^X$    |        |        | limiting magnitude in the X band |
 | number of bins | $n_{\mathrm{bin}}$ | |        | number of tomographic bins (TBD) |
 | binning strategy| - | equidistant in $z$ |        | (TBD) |
 | mean redshift | $\sigma_{\Delta z}$ | |        | mean redshift |
 | shift parameter | $\sigma_{z}$ |        |        | the error on the mean of the tomo bin |
 | stretch parameter | $\sigma_{\sigma_z}$ |        |        | the error on the std of the tomo bin |
+
 
 | **Source Sample** |
 |-----------------|
@@ -48,6 +50,7 @@
 | power law index 2 | $\beta$  |        |        |  the power law index of the exponenet in the Smail distribution |
 | pivot redshift | $z_0$    |        |        |  pivot redshift in the Smail distribution |
 | effective number density | $n_{\mathrm{gal}}$    |        |        | number of galaxies per $[\mathrm{arcmin}^2]$ |
+| X band limiting magnitude | $m_{\mathrm{lim}}^X$    |        |        | limiting magnitude in the X band |
 | number of bins | $n_{\mathrm{bin}}$ | |        |  number of tomographic bins (TBD) |
 | binning strategy| - | equidistant in $z$ |        |  (TBD) |
 | mean redshift | $\sigma_{\Delta z}$ | |        |  mean redshift |
