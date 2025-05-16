@@ -15,7 +15,7 @@
 | $n_s$ | secret | Flat
 | $m_\nu$ | secret | Flat
 
-Beyond $\Lambda$CDM parameters
+Beyond $\Lambda \rm CDM$
 | Parameter | Fiducial Value | Prior | Notes |
 | --- | --- | --- | --- |
 | $w_0$ | secret | Flat
