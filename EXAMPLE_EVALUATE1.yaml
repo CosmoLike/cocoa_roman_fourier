@@ -1,5 +1,5 @@
 timing: True
-debug: True
+debug: False
 stop_at_error: True
 
 likelihood:
@@ -16,8 +16,6 @@ likelihood:
     IA_model: 0
     # 0 NO IA, 1 IA_NLA_LF, 2 IA_REDSHIFT_BINNING, 3 IA_REDSHIFT_EVOLUTION
     IA_redshift_evolution: 3
-    print_datavector: True
-    print_datavector_file: "./projects/roman_fourier/data/example1.modelvector"
     debug: True
 
 params:

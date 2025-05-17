@@ -52,19 +52,36 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     # ------------------------------------------------------------------------
     
-    self.z_interp_1D = np.linspace(0,2.0,1000)
-    self.z_interp_1D = np.concatenate((self.z_interp_1D,
-      np.linspace(2.0,10.1,200)),axis=0)
-    self.z_interp_1D = np.concatenate((self.z_interp_1D,
-      np.linspace(1080,2000,20)),axis=0) #CMB 6x2pt g_CMB (possible in the future)
+    self.nz_interp_1d=int(500 + 250*self.accuracyboost)
+    
+    # EUCLID EMULATOR CAN ONLY HANDLE 100 Z's BELOW Z=10
+    max_nz_interp_2d=150
+    if self.non_linear_emul == 1:
+      max_nz_interp_2d=99
+    else: 
+      max_nz_interp_2d=150
+    self.nz_interp_2d=int(min(80 + 15*self.accuracyboost,150))
+    
+    self.nk_interp_2d=int(600 + 250*self.accuracyboost)
+    
+    # ------------------------------------------------------------------------
+    
+    self.z_interp_1D = np.linspace(0,3.0,max(100,int(0.80*self.nz_interp_2d)))
+    self.z_interp_1D = np.concatenate(
+      (self.z_interp_1D, np.linspace(3.0,10.1,max(100,int(0.20*self.nz_interp_2d)))),axis=0)
+    self.z_interp_1D = np.concatenate(
+      (self.z_interp_1D, np.linspace(1080,2000,20)),axis=0) #CMB 6x2pt g_CMB (possible in the future)
     self.z_interp_1D[0] = 0
-
-    self.z_interp_2D = np.linspace(0,2.0,120)
-    self.z_interp_2D = np.concatenate((self.z_interp_2D, np.linspace(2.01,10,30)),axis=0)
+    
+    self.z_interp_2D = np.linspace(0,3.0,max(10,int(0.85*self.nz_interp_2d)))
+    self.z_interp_2D = np.concatenate(
+      (self.z_interp_2D, 
+       np.linspace(3.01, 10, max(10,int(0.15*self.nz_interp_2d)))), 
+       axis=0)
     self.z_interp_2D[0] = 0
 
     self.len_z_interp_2D = len(self.z_interp_2D)
-    self.len_log10k_interp_2D = 1400
+    self.len_log10k_interp_2D = self.nk_interp_2d
     self.log10k_interp_2D = np.linspace(-4.2,2.0,self.len_log10k_interp_2D)
 
     # Cobaya wants k in 1/Mpc
@@ -72,7 +89,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     self.len_k_interp_2D = len(self.k_interp_2D)
     self.len_pkz_interp_2D = self.len_log10k_interp_2D*self.len_z_interp_2D
     self.extrap_kmax = 2.5e2 * self.accuracyboost
-
+    
     # ------------------------------------------------------------------------
 
     if self.debug:
@@ -89,7 +106,10 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     ci.init_probes(possible_probes=self.probe)
 
-    ci.init_binning(self.ncl, self.l_min, self.l_max, self.l_max_shear)
+    ci.init_binning(int(self.ncl), 
+                    int(self.l_min), 
+                    int(self.l_max), 
+                    int(self.l_max_shear))
 
     ci.init_ggl_exclude(np.array(self.ggl_exclude).flatten())
 
