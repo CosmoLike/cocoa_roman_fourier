@@ -8,12 +8,12 @@
 
 | Parameter | Fiducial Value | Prior | Notes |
 | --- | --- | --- | --- |
-| $\Omega_m$ | secret | Flat(0.1, 0.9) | - |
-| $\Omega_b$ | secret | Flat(0.0x, 0.0x) | - |
-| $H_0$ | secret | Flat(55, 90) |  - |
-| $A_s$ | secret | Flat
-| $n_s$ | secret | Flat
-| $m_\nu$ | secret | Flat
+| $\Omega_m$ | secret | Flat(0.1, 0.9) | Matter Density Parameter |
+| $\Omega_b$ | secret | Flat(0.0x, 0.0x) | Baryon Density Parameter |
+| $H_0$ | secret | Flat(55, 90) |  Hubble Constant at present day |
+| $A_s$ | secret | Flat(0.5, 5) | Amplitude of Primordial Perturbations (scaled by factor of $10^-9$)|
+| $n_s$ | secret | Flat(0.87, 1.07) | Scalar Spectral Index|
+| $m_\nu$ | secret | Fixed = 0.06 | Sum? of Neutrino Masses|
 
 Beyond $\Lambda \rm CDM$
 | Parameter | Fiducial Value | Prior | Notes |
