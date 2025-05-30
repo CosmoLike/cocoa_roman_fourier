@@ -12,7 +12,9 @@ from cobaya.likelihoods.base_classes import DataSetLikelihood
 from cobaya.log import LoggedError
 from getdist import IniFile
 
-import euclidemu2
+from scipy.interpolate import interp1d
+from scipy.interpolate import CubicSpline as _CubicSpline
+import euclidemu2 as ee2
 import math
 
 import cosmolike_roman_fourier_interface as ci
@@ -147,9 +149,9 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     self.npcs = 4
     self.baryon_pcs_qs = np.zeros(self.npcs)
-        
+
     if self.non_linear_emul == 1:
-      self.emulator = ee2=euclidemu2.PyEuclidEmulator()
+      self.emulator = ee2.PyEuclidEmulator()
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -191,30 +193,17 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
   def set_cosmo_related(self):
     h = self.provider.get_param("H0")/100.0
-
-    # Compute linear matter power spectrum
+    # Compute linear & non-linear matter power spectrum
     PKL = self.provider.get_Pk_interpolator(("delta_tot", "delta_tot"),
       nonlinear=False, extrap_kmax = self.extrap_kmax)
-
-    # Compute non-linear matter power spectrum
     PKNL = self.provider.get_Pk_interpolator(("delta_tot", "delta_tot"),
       nonlinear=True, extrap_kmax = self.extrap_kmax)
-
-    lnPL = np.empty(self.len_pkz_interp_2D)
-    lnPNL = np.empty(self.len_pkz_interp_2D)
-
-    t1 = PKNL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
-    t2 = PKL.logP(self.z_interp_2D, self.k_interp_2D).flatten()
-
-    # Cosmolike wants k in h/Mpc
-    log10k_interp_2D = self.log10k_interp_2D - np.log10(h)
-
-    for i in range(self.len_z_interp_2D):
-      lnPL[i::self.len_z_interp_2D] = t2[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]
-    lnPL  += np.log((h**3))
+  
+    log10k_interp_2D = self.log10k_interp_2D - np.log10(h) # Cosmolike wants k in h/Mpc
+    lnPL = PKL.logP(self.z_interp_2D,self.k_interp_2D).flatten(order='F')+np.log(h**3)
 
     if self.non_linear_emul == 1:
-
+    
       params = {
         'Omm'  : self.provider.get_param("omegam"),
         'As'   : self.provider.get_param("As"),
@@ -226,35 +215,33 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         'wa'   : 0.0
       }
 
-      kbt = np.power(10.0, np.linspace(-2.0589, 0.973, self.len_k_interp_2D))
-      kbt, tmp_bt = self.emulator.get_boost(params, self.z_interp_2D, kbt)
-      logkbt = np.log10(kbt)
+      nz = self.len_z_interp_2D
+      nk = self.len_k_interp_2D
+      kbt = 10**np.linspace(-2.0589, 0.973, nk)
+      #kbt, tmp_bt = ee2.get_boost(params, self.z_interp_2D, kbt)
+      kbt, tmp_bt = ee2.get_boost2(params, self.z_interp_2D, self.emulator, kbt)
+      bt = np.array([tmp_bt[i] for i in range(nz)])  
 
-      for i in range(self.len_z_interp_2D):    
-        interp = interp1d(logkbt, 
-            np.log(tmp_bt[i]), 
-            kind = 'linear', 
-            fill_value = 'extrapolate', 
-            assume_sorted = True
-          )
+      lnbt = interp1d(np.log10(kbt), 
+                      np.log(bt), 
+                      axis=1,
+                      kind='linear', 
+                      fill_value='extrapolate', 
+                      assume_sorted=True)(log10k_interp_2D)
+      lnbt[:,10**log10k_interp_2D < 8.73e-3] = 0.0
 
-        lnbt = interp(log10k_interp_2D)
-        lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
-    
-        lnPNL[i::self.len_z_interp_2D]  = lnPL[i::self.len_z_interp_2D] + lnbt
-      
+      lnPNL=(lnPL.reshape(nz,nk,order='F')+lnbt).ravel(order='F')
+
     elif self.non_linear_emul == 2:
-
-      for i in range(self.len_z_interp_2D):
-        lnPNL[i::self.len_z_interp_2D]  = t1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]  
-      lnPNL += np.log((h**3))      
-
+    
+      lnPNL = PKNL.logP(self.z_interp_2D,self.k_interp_2D).flatten(order='F')+np.log(h**3)   
+    
     else:
+    
       raise LoggedError(self.log, "non_linear_emul = %d is an invalid option", non_linear_emul)
 
-    G_growth = np.sqrt(PKL.P(self.z_interp_2D,0.0005)/PKL.P(0,0.0005))
-    G_growth = G_growth*(1 + self.z_interp_2D)    # do not merge these lines PI
-    G_growth = G_growth/G_growth[len(G_growth)-1] # do not merge these lines PII
+    G_growth = np.sqrt(PKL.P(self.z_interp_2D,0.0005)/PKL.P(0,0.0005))*(1+self.z_interp_2D)
+    G_growth /= G_growth[-1]
 
     ci.set_cosmology(
       omegam=self.provider.get_param("omegam"),
