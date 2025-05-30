@@ -53,17 +53,8 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     self.l_max_shear = ini.float("l_max_shear")
 
     # ------------------------------------------------------------------------
-    
     self.nz_interp_1d=int(500 + 250*self.accuracyboost)
-    
-    # EUCLID EMULATOR CAN ONLY HANDLE 100 Z's BELOW Z=10
-    max_nz_interp_2d=150
-    if self.non_linear_emul == 1:
-      max_nz_interp_2d=99
-    else: 
-      max_nz_interp_2d=150
     self.nz_interp_2d=int(min(80 + 15*self.accuracyboost,150))
-    
     self.nk_interp_2d=int(600 + 250*self.accuracyboost)
     
     # ------------------------------------------------------------------------
