@@ -37,14 +37,15 @@ OBJECTC =
 CPPSOURCES =
 OBJECTCPP =
 
-CFLAGS =  -std=c99 -I ${ROOTDIR}/.local/include/ -I ${ROOTDIR}/external_modules/code/
-CXXFLAGS = -std=c++17 -I ${ROOTDIR}/.local/include/ -I ${ROOTDIR}/external_modules/code/
+CFLAGS = -std=gnu99 -I ${ROOTDIR}/.local/include/ -I ${ROOTDIR}/external_modules/code/
+CXXFLAGS = -std=c++20 -I ${ROOTDIR}/.local/include/ -I ${ROOTDIR}/external_modules/code/
 LDFLAGS = -L ${ROOTDIR}/.local/lib
 
 ifdef COSMOLIKE_DEBUG_MODE
 	COMMON_FLAGS += -O0  -DDEBUG -W -Wall -Wextra -Wcomment -pedantic -g -fmax-errors=1 -Wno-unknown-pragmas
 else
-	COMMON_FLAGS += -O3 -fmax-errors=1 -ffast-math -fopenmp
+	COMMON_FLAGS += -O3 -march=native -fno-fast-math -fopenmp \
+	-fno-associative-math -fno-trapping-math -frounding-math -fsignaling-nans
 endif
 
 ifdef IGNORE_CPP_SPDLOG_INSTALLATION
