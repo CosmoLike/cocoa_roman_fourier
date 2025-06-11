@@ -9,7 +9,7 @@ likelihood:
     data_file: roman_example.dataset
     accuracyboost: 1.0
     integration_accuracy: 0
-    kmax_boltzmann: 20.0
+    kmax_boltzmann: 10.0
     # 1 EE2, 2 Halofit
     non_linear_emul: 2
     # 0 NLA, 1 TATT

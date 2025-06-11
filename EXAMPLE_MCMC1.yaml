@@ -10,23 +10,15 @@ likelihood:
     data_file: roman_example.dataset
     accuracyboost: 1.0
     integration_accuracy: 0
+    kmax_boltzmann: 10.0
     # 1 EE2, 2 Halofit
     non_linear_emul: 2
     # 0 NLA, 1 TATT
     IA_model: 0
     # 0 NO IA, 1 IA_NLA_LF, 2 IA_REDSHIFT_BINNING, 3 IA_REDSHIFT_EVOLUTION
     IA_redshift_evolution: 3
-    print_datavector: False
-    accuracyboost: 1.0
-    integration_accuracy: 0 
-    kmax_boltzmann: 20.0
-
-
 
 params:
-  # ----------------------------------------------------------------------------
-  # ------------------------------ COSMOLOGICAL PARAMETERS ---------------------
-  # ----------------------------------------------------------------------------
   As_1e9:
     prior:
       min: 0.5
@@ -80,6 +72,10 @@ params:
       scale: 0.015
     proposal: 0.015
     latex: \Omega_\mathrm{m}
+    drop: true
+  w0pwa:
+    value: -1.0
+    latex: w_{0,\mathrm{DE}}+w_{a,\mathrm{DE}}
     drop: true
   w:
     value: -1.0
@@ -212,7 +208,7 @@ sampler:
     # ---------------------------------------------------------------------
     measure_speeds: False
     drag: False
-    oversample_power: 0.3
+    oversample_power: 0.2
     oversample_thin: True
     blocking:
     - [1,
@@ -220,7 +216,7 @@ sampler:
           As_1e9, ns, H0, omegab, omegam, mnu,
         ]
       ]
-    - [6,
+    - [5,
         [
           roman_DZ_S1, roman_DZ_S2, roman_DZ_S3, roman_DZ_S4, 
           roman_DZ_S5, roman_DZ_S6, roman_DZ_S7, roman_DZ_S8,
