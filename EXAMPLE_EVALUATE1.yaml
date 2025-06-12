@@ -505,33 +505,6 @@ params:
       scale: 0.1
     proposal: 0.1
     latex: b_\mathrm{1-Roman}^8
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
-  # Point Mass parameters
-  roman_PM1:
-    value: 0.0
-    latex: PM_\mathrm{Roman}^1
-  roman_PM2:
-    value: 0.0
-    latex: PM_\mathrm{Roman}^2
-  roman_PM3:
-    value: 0.0
-    latex: PM_\mathrm{Roman}^3
-  roman_PM4:
-    value: 0.0
-    latex: PM_\mathrm{Roman}^4
-  roman_PM5:
-    value: 0.0
-    latex: PM_\mathrm{Roman}^5
-  roman_PM6:
-    value: 0.0
-    latex: PM_\mathrm{Roman}^6
-  roman_PM7:
-    value: 0.0
-    latex: PM_\mathrm{Roman}^7
-  roman_PM8:
-    value: 0.0
-    latex: PM_\mathrm{Roman}^8
 
 theory:
   camb:
