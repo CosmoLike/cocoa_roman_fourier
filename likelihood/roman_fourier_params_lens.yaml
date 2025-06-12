@@ -1,92 +1,30 @@
-# Lensing photo-z errors
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+# Lensing photo-z errors: implementing lens = source
 roman_DZ_L1:
-  prior:
-    dist: norm
-    loc: 0.0
-    scale: 0.005
-  ref:
-    dist: norm
-    loc: 0.0
-    scale: 0.005
-  proposal: 0.005
-  latex: \Delta z_\mathrm{l,roman}^1
+  value: 'lambda roman_DZ_S1: roman_DZ_S1'
+  latex: \Delta z_\mathrm{l,Roman}^1
 roman_DZ_L2:
-  prior:
-    dist: norm
-    loc: 0.0
-    scale: 0.005
-  ref:
-    dist: norm
-    loc: 0.0
-    scale: 0.005
-  proposal: 0.005
-  latex: \Delta z_\mathrm{l,roman}^2
+  value: 'lambda roman_DZ_S2: roman_DZ_S2'
+  latex: \Delta z_\mathrm{l,Roman}^1
 roman_DZ_L3:
-  prior:
-    dist: norm
-    loc: 0.0
-    scale: 0.005
-  ref:
-    dist: norm
-    loc: 0.0
-    scale: 0.005
-  proposal: 0.005
-  latex: \Delta z_\mathrm{l,roman}^3
+  value: 'lambda roman_DZ_S3: roman_DZ_S3'
+  latex: \Delta z_\mathrm{l,Roman}^1
 roman_DZ_L4:
-  prior:
-    dist: norm
-    loc: 0.0
-    scale: 0.005
-  ref:
-    dist: norm
-    loc: 0.0
-    scale: 0.005
-  proposal: 0.005
-  latex: \Delta z_\mathrm{l,roman}^4
+  value: 'lambda roman_DZ_S4: roman_DZ_S4'
+  latex: \Delta z_\mathrm{l,Roman}^1
 roman_DZ_L5:
-  prior:
-    dist: norm
-    loc: 0.0
-    scale: 0.005
-  ref:
-    dist: norm
-    loc: 0.0
-    scale: 0.005
-  proposal: 0.005
-  latex: \Delta z_\mathrm{l,roman}^5
+  value: 'lambda roman_DZ_S5: roman_DZ_S5'
+  latex: \Delta z_\mathrm{l,Roman}^1
 roman_DZ_L6:
-  prior:
-    dist: norm
-    loc: 0.0
-    scale: 0.005
-  ref:
-    dist: norm
-    loc: 0.0
-    scale: 0.005
-  proposal: 0.005
-  latex: \Delta z_\mathrm{l,roman}^6
+  value: 'lambda roman_DZ_S6: roman_DZ_S6'
+  latex: \Delta z_\mathrm{l,Roman}^1
 roman_DZ_L7:
-  prior:
-    dist: norm
-    loc: 0.0
-    scale: 0.005
-  ref:
-    dist: norm
-    loc: 0.0
-    scale: 0.005
-  proposal: 0.005
-  latex: \Delta z_\mathrm{l,roman}^7
+  value: 'lambda roman_DZ_S7: roman_DZ_S7'
+  latex: \Delta z_\mathrm{l,Roman}^1
 roman_DZ_L8:
-  prior:
-    dist: norm
-    loc: 0.0
-    scale: 0.005
-  ref:
-    dist: norm
-    loc: 0.0
-    scale: 0.005
-  proposal: 0.005
-  latex: \Delta z_\mathrm{l,roman}^8
+  value: 'lambda roman_DZ_S8: roman_DZ_S8'
+  latex: \Delta z_\mathrm{l,Roman}^1
 # ------------------------------------------------------------------------
 # ------------------------------------------------------------------------
 # ------------------------------------------------------------------------
