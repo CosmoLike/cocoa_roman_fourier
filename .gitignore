@@ -14,3 +14,8 @@ chains/
 ROMAN_*.yaml
 ROMAN_*.sbatch
 notebooks/*
+.ipynb_checkpoints/
+.ipynb_*
+*.sbatch
+scripts/.DS_Store
+data_challenge/
