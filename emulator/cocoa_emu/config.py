@@ -33,8 +33,8 @@ class Config:
         # save the likelihood section
         config_args_lkl = config_args['likelihood']
 
-        self.load_params(self.params)     
         self.load_lkl(config_args_lkl)
+        self.load_params(self.params)     
         self.load_emu(self.config_args_emu)
 
     def load_lkl(self, config_args_lkl):

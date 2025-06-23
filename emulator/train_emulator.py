@@ -3,12 +3,9 @@ import os
 from os.path import join as pjoin
 import numpy as np
 import torch
-from cocoa_emu import Config, get_lhs_params_list, get_params_list, CocoaModel
-from cocoa_emu.emulator import NNEmulator, GPEmulator
-from cocoa_emu.sampling import EmuSampler
-import emcee
+from cocoa_emu import Config
+from cocoa_emu.emulator import NNEmulator
 from argparse import ArgumentParser
-from multiprocessing import Pool
 
 parser = ArgumentParser()
 parser.add_argument('config', type=str, help='Configuration file')

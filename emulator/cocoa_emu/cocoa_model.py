@@ -3,16 +3,17 @@ import numpy as np
 from cobaya.yaml import yaml_load_file
 from cobaya.input import update_info
 from cobaya.model import Model
-from cobaya.conventions import kinds, _timing, _params, _prior, _packages_path
+#from cobaya.conventions import kinds, _timing, _params, _prior, _packages_path
+from cobaya.conventions import kinds
 
 def get_model(yaml_file, verbose=False):
     info  = yaml_load_file(yaml_file)
     if verbose:
         print(info)
     updated_info = update_info(info)
-    model =  Model(updated_info[_params], updated_info[kinds.likelihood],
-               updated_info.get(_prior), updated_info.get(kinds.theory),
-               packages_path=info.get(_packages_path), timing=updated_info.get(_timing),
+    model =  Model(updated_info["params"], updated_info[kinds.likelihood],
+               updated_info.get("prior"), updated_info.get(kinds.theory),
+               packages_path=info.get("packages_path"), timing=updated_info.get("timing"),
                allow_renames=False, stop_at_error=info.get("stop_at_error", False))
     return model
 
