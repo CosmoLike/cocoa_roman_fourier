@@ -27,12 +27,9 @@ else:
 
 if(rank==0):
     print("Initializing configuration space data vector dimension!")
-    print("N_xi_pm: %d"%(config.probe_size[0]))
-    print("N_ggl: %d"%(config.probe_size[1]))
-    print("N_w: %d"%(config.probe_size[2]))
-    print("N_gk: %d"%(config.probe_size[3]))
-    print("N_sk: %d"%(config.probe_size[4]))
-    print("N_kk: %d"%(config.probe_size[5]))
+    print("N_EE: %d"%(config.probe_size[0]))
+    print("N_gE: %d"%(config.probe_size[1]))
+    print("N_gg: %d"%(config.probe_size[2]))
     dump_dir = pjoin(config.traindir, 'dump')
     os.makedirs(dump_dir, exist_ok=True)
 

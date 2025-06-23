@@ -1,35 +1,32 @@
 ### Emulator training
 ### Motivation:
-###     Train NN emulator to evaluate 6x2pt
-###     - fiducial data vector: dmo
-###     - scale cut: 0.25' for 3x2pt and as much as possible for c2x2pt
+###     Train Neural Network emulator to evaluate Roman 3x2pt
+###     - fiducial data vector: dark matter only
+###     - scale cut: default mask
 ### -----------------------------------------------------------------
-### cosmology: baseline (omegam, As, ns, omegab, H0)
-### survey footprint: include the extended annulus around DES Y3
+### cosmology: baseline (omegam, As, ns, omegab, H0, mnu)
+### survey footprint: medium tier
 ### systematics: 
-###     - photo-z uncertainty: gaussian
+###     - photo-z uncertainty: Gaussian mean shift
 ###     - intrinsic alignment: NLA
-### analysis choice: 
-###     - shear-shear: drop points below 2.5 arcmin
-###     - Extended footprint
-###     - with cross-cov between Ckk bandpower and 5x2pt
-###     - using Planck DR4 map
-### external probes: None
-### data vector: simulated DMO
+###     - galaxy bias: linear
+###     - shear calibration bias: multiplicative
 
 timing: True
 debug: False
 stop_at_error: False
 
 likelihood:
-  desy1xplanck.desy3xplanck_6x2pt:
-    path: ./external_modules/data/desy1xplanck
-    #data_file: datasets/Y3xPlanckPR4_050_ILLUSTRIS.dataset
-    data_file: datasets/Y3xPlanckPR4_emu_DMO.dataset
+  roman_fourier.roman_fourier_3x2pt:
+    path: ./external_modules/data/roman_fourier
+    data_file: roman_fourier_challenge1_medium.dataset
+    accuracyboost: 1.0
     integration_accuracy: 0
-    accuracyboost: 2
-    subtract_mean: False
-    use_weights_for_scenarios: False
+    kmax_boltzmann: 20.0
+    non_linear_emul: 2
+    IA_model: 0
+    IA_redshift_evolution: 3
+    ggl_exclude: [[7,0], [7,1]]
     
     
 params:
@@ -91,7 +88,6 @@ params:
     latex: \Omega_\mathrm{m}
     drop: true
   mnu:
-    #value: 0.06
     prior:
       min: 0.0558
       max: 0.6
@@ -150,268 +146,344 @@ params:
     derived: 'lambda omegan2, H0: omegan2/((H0/100)**2)'
     latex: \Omega_\mathrm{\\nu}
   # ------------------------------------------------------------------
-  # DES-Y1 3x2 nuissance parameter begins
+  # roman 3x2 nuissance parameter begins
   # ------------------------------------------------------------------
 
   # intrinsic alignment: NLA
   # ========================
-  # same as default, DES_A1_1 [-5, 5]; DES_A1_2 [-5, 5]
+  # same as default, roman_A1_1 [-5, 5]; roman_A1_2 [-5, 5]
   # fiducial value: 0.6, -1.5
-  DES_A1_1:
+  roman_A1_1:
     prior:
      min: -5
      max:  5
     ref:
      dist: norm
      loc: -0.7
-     scale: 0.00005
-    proposal: 0.75
-    latex: A_\mathrm{1-IA,DES}^1
-  DES_A1_2:
+     scale: 0.5
+    proposal: 0.5
+    latex: A_\mathrm{1-IA,roman}^1
+  roman_A1_2:
     prior:
      min: -5
      max:  5
     ref:
      dist: norm
      loc: -1.7
-     scale: 0.00005
-    proposal: 0.75
-    latex: A_\mathrm{1-IA,DES}^2
+     scale: 0.5
+    proposal: 0.5
+    latex: A_\mathrm{1-IA,roman}^2
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # photo-z uncertainty: gaussian
   # =============================
   # Lens galaxies photo-z shift
-  DES_DZ_L1:
+  roman_DZ_L1:
     prior:
       dist: norm
-      loc: -0.009
-      scale: 0.007
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: -0.009
-      scale: 0.000007
-    proposal: 0.0035
-    latex: \Delta z_\mathrm{l,DES}^1
-  DES_DZ_L2:
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    latex: \Delta z_\mathrm{l,roman}^1
+  roman_DZ_L2:
     prior:
       dist: norm
-      loc: -0.035
-      scale: 0.011
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: -0.035
-      scale: 0.000011
-    proposal: 0.0055
-    latex: \Delta z_\mathrm{l,DES}^2
-  DES_DZ_L3:
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    latex: \Delta z_\mathrm{l,roman}^2
+  roman_DZ_L3:
     prior:
       dist: norm
-      loc: -0.005
-      scale: 0.006
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: -0.005
-      scale: 0.000006
-    proposal: 0.003
-    latex: \Delta z_\mathrm{l,DES}^3
-  DES_DZ_L4:
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    latex: \Delta z_\mathrm{l,roman}^3
+  roman_DZ_L4:
     prior:
       dist: norm
-      loc: -0.007
-      scale: 0.006
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: -0.007
-      scale: 0.000006
-    proposal: 0.003
-    latex: \Delta z_\mathrm{l,DES}^4
-  DES_DZ_L5:
-    value: 0.0
-    latex: \Delta z_\mathrm{l,DES}^5
-  DES_DZ_L6:
-    value: 0.0
-    latex: \Delta z_\mathrm{l,DES}^6
-  # =============================
-  # Lens galaxies photo-z stretch
-  DES_STRETCH_L1:
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    latex: \Delta z_\mathrm{l,roman}^4
+  roman_DZ_L5:
     prior:
       dist: norm
-      loc: 0.975
-      scale: 0.062
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: 0.975
-      scale: 0.00006
-    proposal: 0.03
-    latex: \sigma z_\mathrm{l,DES}^1
-  DES_STRETCH_L2:
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    latex: \Delta z_\mathrm{l,roman}^5
+  roman_DZ_L6:
     prior:
       dist: norm
-      loc: 1.306
-      scale: 0.093
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: 1.306
-      scale: 0.00009
-    proposal: 0.045
-    latex: \sigma z_\mathrm{l,DES}^2
-  DES_STRETCH_L3:
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    latex: \Delta z_\mathrm{l,roman}^6
+  roman_DZ_L7:
     prior:
       dist: norm
-      loc: 0.870
-      scale: 0.054
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: 0.870
-      scale: 0.00005
-    proposal: 0.025
-    latex: \sigma z_\mathrm{l,DES}^3
-  DES_STRETCH_L4:
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    latex: \Delta z_\mathrm{l,roman}^7
+  roman_DZ_L8:
     prior:
       dist: norm
-      loc: 0.918
-      scale: 0.051
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: 0.918
-      scale: 0.00005
-    proposal: 0.025
-    latex: \sigma z_\mathrm{l,DES}^4
-  DES_STRETCH_L5:
-    value: 1.0
-    latex: \sigma z_\mathrm{l,DES}^5
-  DES_STRETCH_L6:
-    value: 1.0
-    latex: \sigma z_\mathrm{l,DES}^6
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    latex: \Delta z_\mathrm{l,roman}^8
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # Source galaxies photo-z errors
-  DES_DZ_S1:
+  roman_DZ_S1:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.018
+      scale: 0.002
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.000018
-    proposal: 0.009
-    latex: \Delta z_\mathrm{s,DES}^1
-  DES_DZ_S2:
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^1
+  roman_DZ_S2:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.015
+      scale: 0.002
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.000015
-    proposal: 0.0075
-    latex: \Delta z_\mathrm{s,DES}^2
-  DES_DZ_S3:
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^2
+  roman_DZ_S3:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.011
+      scale: 0.002
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.000011
-    proposal: 0.0055
-    latex: \Delta z_\mathrm{s,DES}^3
-  DES_DZ_S4:
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^3
+  roman_DZ_S4:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.017
+      scale: 0.002
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.000017
-    proposal: 0.0085
-    latex: \Delta z_\mathrm{s,DES}^4
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^4
+  roman_DZ_S5:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^5
+  roman_DZ_S6:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^6
+  roman_DZ_S7:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^7
+  roman_DZ_S8:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^8
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # Higher-order IA
-  DES_A2_1: #TATT, not used for Y1
+  roman_A2_1: #TATT, not used for Y1
     value: 0.0
-    latex: A_\mathrm{2-IA,DES}^1 
-  DES_A2_2: #TATT, not used for Y1
+    latex: A_\mathrm{2-IA,roman}^1 
+  roman_A2_2: #TATT, not used for Y1
     value: 0.0
-    latex: A_\mathrm{2-IA,DES}^2
-  DES_BTA_1: #TATT, not used for Y1
+    latex: A_\mathrm{2-IA,roman}^2
+  roman_BTA_1: #TATT, not used for Y1
     value: 0.0
-    latex: A_\mathrm{BTA-IA,DES}^1
+    latex: A_\mathrm{BTA-IA,roman}^1
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # Linear galaxy bias
-  DES_B1_1:
+  roman_B1_1:
     prior:
       min: 0.8
-      max: 3.0
+      max: 4
     ref:
       dist: norm
-      loc: 1.5
-      scale: 0.1
+      loc: 1.24
+      scale: 0.15
     proposal: 0.1
-    latex: b_\mathrm{1-DES}^1
-  DES_B1_2:
+    latex: b_\mathrm{1-roman}^1
+  roman_B1_2:
     prior:
       min: 0.8
-      max: 3.0
+      max: 4
     ref:
       dist: norm
-      loc: 1.8
-      scale: 0.1
+      loc: 1.36
+      scale: 0.15
     proposal: 0.1
-    latex: b_\mathrm{1-DES}^2
-  DES_B1_3:
+    latex: b_\mathrm{1-roman}^2
+  roman_B1_3:
     prior:
       min: 0.8
-      max: 3.0
+      max: 4
     ref:
       dist: norm
-      loc: 1.8
-      scale: 0.1
+      loc: 1.47
+      scale: 0.15
     proposal: 0.1
-    latex: b_\mathrm{1-DES}^3
-  DES_B1_4:
+    latex: b_\mathrm{1-roman}^3
+  roman_B1_4:
     prior:
       min: 0.8
-      max: 3.0
+      max: 4
     ref:
       dist: norm
-      loc: 1.9
+      loc: 1.60
+      scale: 0.15
+    proposal: 0.1
+    latex: b_\mathrm{1-roman}^4
+  roman_B1_5:
+    prior:
+      min: 0.8
+      max: 4
+    ref:
+      dist: norm
+      loc: 1.76
       scale: 0.1
     proposal: 0.1
-    latex: b_\mathrm{1-DES}^4
-  DES_B1_5:
-    value: 2.3
-    latex: b_\mathrm{1-DES}^5
-  DES_B1_6:
-    value: 2.3
-    latex: b_\mathrm{1-DES}^6
+    latex: b_\mathrm{1-roman}^5
+  roman_B1_6:
+    prior:
+      min: 0.8
+      max: 4
+    ref:
+      dist: norm
+      loc: 1.76
+      scale: 0.1
+    proposal: 0.1
+    latex: b_\mathrm{1-roman}^6
+  roman_B1_7:
+    prior:
+      min: 0.8
+      max: 4
+    ref:
+      dist: norm
+      loc: 1.76
+      scale: 0.1
+    proposal: 0.1
+    latex: b_\mathrm{1-roman}^7
+  roman_B1_8:
+    prior:
+      min: 0.8
+      max: 4
+    ref:
+      dist: norm
+      loc: 1.76
+      scale: 0.1
+    proposal: 0.1
+    latex: b_\mathrm{1-roman}^8
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # shear calibration bias: multiplicative
-  DES_M1:
-    value: -0.0063
-    latex: m_\mathrm{DES}^1
-  DES_M2:
-    value: -0.0198
-    latex: m_\mathrm{DES}^2
-  DES_M3:
-    value: -0.0241
-    latex: m_\mathrm{DES}^3
-  DES_M4:
-    value: -0.0369
-    latex: m_\mathrm{DES}^4
+  roman_M1:
+    value: 0.0
+    latex: m_\mathrm{roman}^1
+  roman_M2:
+    value: 0.0
+    latex: m_\mathrm{roman}^2
+  roman_M3:
+    value: 0.0
+    latex: m_\mathrm{roman}^3
+  roman_M4:
+    value: 0.0
+    latex: m_\mathrm{roman}^4
+  roman_M5:
+    value: 0.0
+    latex: m_\mathrm{roman}^5
+  roman_M6:
+    value: 0.0
+    latex: m_\mathrm{roman}^6
+  roman_M7:
+    value: 0.0
+    latex: m_\mathrm{roman}^7
+  roman_M8:
+    value: 0.0
+    latex: m_\mathrm{roman}^8
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -420,15 +492,15 @@ params:
   # Q1 wide: [-6, 20]
   # Q2: [-4, 4] 
   # =================================
-  DES_BARYON_Q1:
+  roman_BARYON_Q1:
     value: 0.0
-    latex: Q_\mathrm{DES}^1
-  DES_BARYON_Q2:
+    latex: Q_\mathrm{roman}^1
+  roman_BARYON_Q2:
     value: 0.0
-    latex: Q_\mathrm{DES}^2
+    latex: Q_\mathrm{roman}^2
 
   # ------------------------------------------------------------------
-  # DES-Y1 3x2 nuissance parameter ends
+  # roman 3x2 nuissance parameter ends
   # ------------------------------------------------------------------
 prior:
   bbn_consistency: "lambda omegab, H0: 1.45 if 0.005<=omegab*(H0/100)**2<=0.04 else -np.inf"
@@ -448,30 +520,17 @@ theory:
       k_per_logint: 20
 
 emulator:
+  survey_name: "roman"
   io:
-    ###savedir: ./projects/desy1xplanck/emulator
-    savedir: /groups/timeifler/jiachuanxu/emulator_output_v2
+    savedir: /groups/timeifler/jiachuanxu/roman_fourier_emulator_output
     save_train_data: true
     save_intermediate_model: true
-    chainname: emu_testing_chain_nn6_vs_MCMC24
-  shear_calib:
-    mask: ./projects/desy1xplanck/data/emu_data/DESY3xPLKR4_Maglim_baseline_Ntheta30_shear_calib_mask.npy
-    prior_std: 0.0091,0.0078,0.0076,0.0076
-  baryons:
-    n_pcas_baryon: 1
-    #prior_Q1: -6.,20.
-    prior_Q1: 0.0, 7.0
-    #prior_Q2: -4.,4.
-  # galaxy_bias:
-  #   mask: ./projects/desy1xplanck/data/emu_data/DESY3xPLKR4_Maglim_baseline_Ntheta30_linear_gbias_mask.npy
-  #   bias_fid: 1.5,1.8,1.8,1.9,2.3,2.3
-  #   bias_prior: 0.8, 3.0
   init_sample:
     type: "gaussian" # "lhs" or "gaussian"
     # LHS section
     lhs_n: 18000 # Latin-Hyper Sample size
     # Gaussian section
-    gauss_cov: ./projects/desy1xplanck/yaml/proposal_covmats/DESY3xPLKR4_6x2pt_wideQ1.covmat
+    gauss_cov: ./projects/roman_fourier/fid_3x2_full.covmat
     gauss_temp_train: 128 # training dataset temperature
     n_train: 1000000
     #n_train: 10000
@@ -479,12 +538,11 @@ emulator:
      # omegam: 0.0
      # sigma8: 0.0
     gauss_temp_valid: 64  # validation dataset temperature
-    n_valid: 10000
+    n_valid: 200000
     gauss_shift_valid:
   training:
     emu_type: nn
     nn_model: 6
-    #dv_fid: ./projects/desy1xplanck/data/data_vectors/xi_DESY3xPLKR4_6x2pt_Maglim_baseline_Ntheta30_dmo.emufid
     chi_sq_cut: 1.0e+5
     n_train_iter: 1
     batch_size: 256
@@ -499,17 +557,10 @@ emulator:
     sigma8_fid: 0.827706
     sigma8_std: 0.01
   sampling:
-    ### This mask is different from the mask in the dataset file
-    ### Dataset mask: can short-cut model vector evaluation
-    ### This mask: can not short-cut mv calculation, applied in EmuSampler likelihood calc
-    ### BUT setting a different mask here would block the gradient back propagation, thus
-    ### the cutted scales are note learnt. 
-    #scalecut_mask: ./projects/desy1xplanck/data/masks/xi_DESY3xPLKR4_6x2pt_Maglim_baseline_Ntheta30_emucons.mask
+    ### MCMC settings for retrieving the training sample from tempered posterior
     n_mcmc: 1000000
     #n_mcmc: 10000
     n_emcee_walkers: 100
     n_burn_in: 500000
     #n_burn_in: 5000
     n_thin: 10
-    # temper0: 0.02
-    # temper_increment: 0.05

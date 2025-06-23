@@ -2,14 +2,14 @@ import numpy as np
 import os
 from os.path import join as pjoin
 from getdist import IniFile
-from cobaya.likelihoods._base_classes import _DataSetLikelihood
+from cobaya.likelihoods.base_classes import DataSetLikelihood
 import torch
 from cocoa_emu import Config
 from cocoa_emu.emulator import NNEmulator
 
-probe_fmts = ["xi_pm", "gammat", "wtheta", "wgk", "wsk", "Ckk"]
+probe_fmts = ["Cl_EE", "Cl_gE", "Cl_gg"]
 
-class _cosmolike_emu_prototype_base(_DataSetLikelihood):
+class _cosmolike_emu_prototype_base(DataSetLikelihood):
 	''' Attributes needed from the likelihood yaml file:
 	- train_config: filename of the training config file
 	'''
@@ -26,6 +26,7 @@ class _cosmolike_emu_prototype_base(_DataSetLikelihood):
 		assert config.emu_type.lower()=='nn', f'Only support NN emulator now!'
 		self.probe_mask        = config.probe_mask_choices[self.probe]
 		self.probe_size        = config.probe_size
+		self.survey_name       = config.survey_name
 
 		### Read dataset file: data vector, covariance, mask
 		self.log.info("Loading likelihood dataset...")
@@ -35,26 +36,14 @@ class _cosmolike_emu_prototype_base(_DataSetLikelihood):
 		try:
 			self.U_PMmarg_file = ini.relativeFileName('U_PMmarg')
 		except:
-			raise LoggedError(self.log, "Can not find Point-Mass analytical marginalization matrix, go without it.")
+			self.log.info("Skip point-mass marginalization.")
 			self.U_PMmarg_file = ""
-		self.mask_file = ini.relativeFileName('mask_file')
-		self.source_ntomo = ini.int("source_ntomo")
-		self.lens_ntomo = ini.int("lens_ntomo", default = -1)
-		self.ntheta = ini.int("n_theta")
-		self.nbp = ini.int("n_bp")
-		self.dv_size = self.ntheta*(self.source_ntomo*(self.source_ntomo+1)+\
-			self.source_ntomo*self.lens_ntomo + self.lens_ntomo+\
-			self.lens_ntomo + self.source_ntomo) + self.nbp
-		# CMB lensing covariance specs
-		self.is_cmbl_cov_sim = ini.int("is_cmb_kkkk_cov_from_sim", default = -1)
-		if(self.is_cmbl_cov_sim == 1):
-			Nvar = ini.float("Hartlap_Nvar")
-			self.alpha_Hartlap = (Nvar - self.nbp -2.0)/(Nvar - 1.0) # < 1
-		elif(self.is_cmbl_cov_sim==-1 or self.is_cmbl_cov_sim > 1):
-			raise LoggedError(self.log, "MUST SPECIFY is_cmb_kkkk_cov_from_sim (0 or 1) IN THE DATA FILE!")
-		else:
-			self.is_cmbl_cov_sim = 0
-			self.alpha_Hartlap = 1.0
+		self.mask_file    = ini.relativeFileName('mask_file')
+		self.source_ntomo = config.source_ntomo
+		self.lens_ntomo   = config.lens_ntomo
+		self.Nell         = config.Nell
+		self.dv_size      = config.probe_total_size
+		
 		self.init_data(config)
 
 		### Initialize baryon feedback PCs
@@ -64,13 +53,6 @@ class _cosmolike_emu_prototype_base(_DataSetLikelihood):
 			self.log.info('use_baryon_pca = True')
 			self.log.info('baryon_pca_file = %s loaded', baryon_pca_file)
 			self.use_baryon_pca = True
-			if self.subtract_mean:
-				mean_baryon_diff_file = ini.relativeFileName('mean_baryon_diff_file')
-				self.mean_baryon_diff = np.loadtxt(mean_baryon_diff_file)
-				self.log.info('subtract_mean = True')
-				self.log.info('mean_baryon_diff_file = %s loaded', mean_baryon_diff_file)
-			else:
-				self.log.info('subtract_mean = False')
 		else:
 			self.log.info('use_baryon_pca = False')
 			self.use_baryon_pca = False
@@ -79,7 +61,7 @@ class _cosmolike_emu_prototype_base(_DataSetLikelihood):
 		self.shear_calib_mask  = config.shear_calib_mask
 		self.n_pars_cosmo      = config.n_pars_cosmo
 		self.running_params    = config.running_params
-		self.m_shear_fid       = np.array([config.params["DES_M%d"%(i+1)]["value"] for i in range(self.source_ntomo)])
+		self.m_shear_fid       = config.m_shear_fid
 
 		### read emulators
 		# try include emu_list as object attribute. If not work, global variable
@@ -126,12 +108,10 @@ class _cosmolike_emu_prototype_base(_DataSetLikelihood):
 		Equivalent to `ci.init_data`
 		'''
 		### prepare data vector & mask
-		self.log.info(f'Load data vector from {self.data_vector_file}')
-		self.dv   = np.loadtxt(self.data_vector_file)[:,1]
-		self.log.info(f'Load mask from {self.mask_file}')
-		self.mask = np.loadtxt(self.mask_file)[:,1].astype(bool)
+		self.dv   = config.dv_lkl.copy()
+		self.mask = config.mask_lkl.copy()
 		# update the mask if some probes are not included
-		for i in range(6):
+		for i in range(3):
 			_l, _r = sum(config.probe_size[:i]), sum(config.probe_size[:i+1])
 			if self.probe_mask[i]==0:
 				self.mask[_l:_r] = 0.0
@@ -139,51 +119,7 @@ class _cosmolike_emu_prototype_base(_DataSetLikelihood):
 			else:
 				_Ndp = self.mask[_l:_r].sum()
 				self.log.info(f'Probe {probe_fmts[i]} has {_Ndp} elements after scale cut.')
-		self.log.info(f'Total data points: {sum(self.mask)}')
-		### prepare inverse covariance
-		self.log.info(f'Load covariance from {self.cov_file}')
-		invcov = self.get_full_cov(self.cov_file)
-		# Add Hartlap factor to CMB lensing covariance
-		self.log.info(f'Apply Hartlap factor {self.alpha_Hartlap}')
-		invcov[-self.nbp:,-self.nbp:] /= self.alpha_Hartlap
-		invcov = np.linalg.inv(invcov[self.mask][:,self.mask])
-		# Add PM marginalization
-		if self.U_PMmarg_file:
-			self.log.info(f'Load PM-marg template from {self.U_PMmarg_file}')
-			U_PMmarg = np.loadtxt(self.U_PMmarg_file)
-			U = np.zeros([self.mask.shape[0], self.lens_ntomo])
-			for line in U_PMmarg:
-				i, j = int(line[0]), int(line[1])
-				U[i,j] = float(line[2])
-			U = U[self.mask,:]
-			central_block = np.diag(np.ones(self.lens_ntomo)) + U.T@invcov@U
-			w, v = np.linalg.eig(central_block)
-			assert np.min(w)>=0, f'Central block not positive-definite!'
-			corr = invcov @ (U@np.linalg.inv(central_block)@U.T) @ invcov
-			invcov -= corr
-		self.masked_inv_cov = invcov
-		# test positive-definite
-		w, v = np.linalg.eig(self.masked_inv_cov)
-		assert np.min(w)>=0, f'Precision matrix not positive-definite!'
-
-	def get_full_cov(self, cov_file):
-		full_cov = np.loadtxt(cov_file)
-		cov = np.zeros((self.dv_size, self.dv_size))
-		cov_scenario = full_cov.shape[1]
-		
-		for line in full_cov:
-			i = int(line[0])
-			j = int(line[1])
-
-			if(cov_scenario==3):
-				cov_ij = line[2]
-			elif(cov_scenario==10):
-				cov_g_block  = line[8]
-				cov_ng_block = line[9]
-				cov_ij = cov_g_block + cov_ng_block
-			cov[i,j] = cov_ij
-			cov[j,i] = cov_ij
-		return cov
+		self.masked_inv_cov = config.masked_inv_cov.copy()
 
 	def emu_predict(self, theta):
 		''' Get the emulator prediction for slow parameters
@@ -216,7 +152,7 @@ class _cosmolike_emu_prototype_base(_DataSetLikelihood):
 		mv = self.emu_predict(theta)
 
 		# add shear calibration bias
-		m = np.array([params_values.get(f'DES_M{i+1}', 0.0) for i in range(self.source_ntomo)])
+		m = np.array([params_values.get(self.survey_name+f'_M{i+1}', 0.0) for i in range(self.source_ntomo)])
 		for i in range(self.source_ntomo):
 			factor = ((1+m[i])/(1+self.m_shear_fid[i]))**self.shear_calib_mask[i]
 			mv = factor * mv
@@ -230,14 +166,12 @@ class _cosmolike_emu_prototype_base(_DataSetLikelihood):
 		return mv
 
 	def set_baryon_related(self, **params_values):
-		self.baryon_pcs_qs[0] = params_values.get("DES_BARYON_Q1", 0.0)
-		self.baryon_pcs_qs[1] = params_values.get("DES_BARYON_Q2", 0.0)
-		self.baryon_pcs_qs[2] = params_values.get("DES_BARYON_Q3", 0.0)
-		self.baryon_pcs_qs[3] = params_values.get("DES_BARYON_Q4", 0.0)
+		self.baryon_pcs_qs[0] = params_values.get(self.survey_name+"_BARYON_Q1", 0.0)
+		self.baryon_pcs_qs[1] = params_values.get(self.survey_name+"_BARYON_Q2", 0.0)
+		self.baryon_pcs_qs[2] = params_values.get(self.survey_name+"_BARYON_Q3", 0.0)
+		self.baryon_pcs_qs[3] = params_values.get(self.survey_name+"_BARYON_Q4", 0.0)
 
 	def add_baryon_pcs_to_datavector(self, datavector):
-		if self.subtract_mean:
-			datavector[:] += self.mean_baryon_diff 
 		return datavector[:] + self.baryon_pcs_qs[0]*self.baryon_pcs[:,0] \
 		  + self.baryon_pcs_qs[1]*self.baryon_pcs[:,1] \
 		  + self.baryon_pcs_qs[2]*self.baryon_pcs[:,2] \
