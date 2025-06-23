@@ -1,18 +1,16 @@
 import numpy as np
-
 from cobaya.yaml import yaml_load_file
 from cobaya.input import update_info
 from cobaya.model import Model
-from cobaya.conventions import kinds, _timing, _params, _prior, _packages_path
 
 def get_model(yaml_file, verbose=False):
     info  = yaml_load_file(yaml_file)
     if verbose:
         print(info)
     updated_info = update_info(info)
-    model =  Model(updated_info[_params], updated_info[kinds.likelihood],
-               updated_info.get(_prior), updated_info.get(kinds.theory),
-               packages_path=info.get(_packages_path), timing=updated_info.get(_timing),
+    model =  Model(updated_info["params"], updated_info["likelihood"],
+               updated_info.get("prior"), updated_info.get("theory"),
+               packages_path=info.get("packages_path"), timing=updated_info.get("timing"),
                allow_renames=False, stop_at_error=info.get("stop_at_error", False))
     return model
 
@@ -21,7 +19,7 @@ class CocoaModel:
         self.model      = get_model(configfile)
         self.likelihood = likelihood
         self.derived = np.array(list(self.model.parameterization.derived_params()))
-        self.idx_s8 = np.where(self.derived=='sigma8')[0][0]
+        print("Derived parameters: ", self.derived)
         
     def calculate_data_vector(self, params_values, baryon_scenario=None, return_s8=False):
         likelihood   = self.model.likelihood[self.likelihood]
@@ -31,8 +29,8 @@ class CocoaModel:
                                                  self.model._params_of_dependencies):
             depend_list = [input_params[p] for p in param_dep]
             params = {p: input_params[p] for p in component.input_params}
-            compute_success = component.check_cache_and_compute(want_derived=False,
-                                         dependency_params=depend_list, cached=False, **params)
+            compute_success = component.check_cache_and_compute(params, want_derived=False,
+                                          dependency_params=depend_list, cached=False)
         if baryon_scenario is None:
             data_vector = likelihood.get_datavector(**input_params)
         else:
@@ -40,11 +38,12 @@ class CocoaModel:
         if not return_s8:
             return np.array(data_vector), None
         else:
-            _derived = self.model.logposterior(params_values, return_derived=True)[3]
-            if len(_derived)==len(self.derived):
-                return np.array(data_vector), _derived[self.idx_s8]
+            derived_vals = self.model.logposterior(params_values, return_derived=True).derived
+            if len(derived_vals) == len(self.derived):
+            	derived_dict = {k:v for k,v in zip(self.derived, derived_vals)}
+            	return np.array(data_vector), derived_dict["sigma8"]
             else:
-                print(f'Problematic derived {_derived} at {params_values}')
+                print(f'Problematic derived {derived_vals} at {params_values}')
                 return np.array(data_vector), np.nan
 
     def calculate_logpost(self, params_values):

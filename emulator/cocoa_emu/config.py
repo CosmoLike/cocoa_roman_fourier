@@ -2,8 +2,9 @@ import yaml
 import numpy as np
 import os
 from os.path import join as pjoin
+import re
 import copy
-from .utils import readDatasetFile
+from .utils import readDatasetFile, get_shear_multi_bias_bitmask
 
 class Config:
     ''' Emulator Configuration Class for Roman Fourier Project '''
@@ -34,7 +35,7 @@ class Config:
         config_args_lkl = config_args['likelihood']
 
         self.load_lkl(config_args_lkl)
-        self.load_params(self.params)
+        self.load_params(self.params)     
         self.load_emu(self.config_args_emu)
 
     def load_lkl(self, config_args_lkl):
@@ -65,7 +66,8 @@ class Config:
         print(f'Loading dataset {self.config_args_lkl["data_file"]}')
         dataset = readDatasetFile(self.config_args_lkl['data_file'], 
             root=self.config_args_lkl['path'])
-        dst = pjoin(self.config_args_lkl['path'], "datasets")
+        #dst = pjoin(self.config_args_lkl['path'], "datasets")
+        dst = self.config_args_lkl['path']
 
         # Read data vector & tomography dimension
         self.source_ntomo = int(dataset.get("source_ntomo", 0))
@@ -79,7 +81,7 @@ class Config:
             self.lens_ntomo*self.Nell,
         ]
         self.probe_total_size = np.sum(self.probe_size)
-        self.shear_calib_mask = utils.get_shear_multi_bias_bitmask(
+        self.shear_calib_mask = get_shear_multi_bias_bitmask(
             self.source_ntomo, self.lens_ntomo, self.ggl_exclude, self.Nell,
             type_2pcf = "fourier")
 

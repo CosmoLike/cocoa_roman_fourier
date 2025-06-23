@@ -3,11 +3,7 @@ import os
 from os.path import join as pjoin
 from mpi4py import MPI
 import numpy as np
-import torch
 from cocoa_emu import Config, get_lhs_samples, get_params_list, CocoaModel, get_gaussian_samples
-from cocoa_emu.emulator import NNEmulator, GPEmulator
-from cocoa_emu.sampling import EmuSampler
-import emcee
 
 comm = MPI.COMM_WORLD
 size = comm.Get_size()

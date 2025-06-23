@@ -522,7 +522,7 @@ theory:
 emulator:
   survey_name: "roman"
   io:
-    savedir: /groups/timeifler/jiachuanxu/roman_fourier_emulator_output
+    savedir: /xdisk/timeifler/jiachuanxu/roman_fourier_emulator_output
     save_train_data: true
     save_intermediate_model: true
   init_sample:
@@ -539,6 +539,7 @@ emulator:
      # sigma8: 0.0
     gauss_temp_valid: 64  # validation dataset temperature
     n_valid: 200000
+    #n_valid: 2000
     gauss_shift_valid:
   training:
     emu_type: nn
@@ -554,7 +555,7 @@ emulator:
     weight_decay: 1.0e-3
     reduce_lr: True
   derived:
-    sigma8_fid: 0.827706
+    sigma8_fid: 0.8255
     sigma8_std: 0.01
   sampling:
     ### MCMC settings for retrieving the training sample from tempered posterior
