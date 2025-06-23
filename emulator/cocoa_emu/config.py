@@ -98,7 +98,7 @@ class Config:
             print(f'Can not find baryonic feedback PCs, skip PCA...')
 
         # Read covariance and point-mass correction -> inv cov
-        print(f'Loading covariance matrix {dataset["baryon_pca_file"]}')
+        print(f'Loading covariance matrix {dataset["cov_file"]}')
         invcov = self.get_full_cov(pjoin(dst, dataset["cov_file"]))
         self.dv_std = np.sqrt(np.diagonal(invcov))
         invcov = np.linalg.inv(invcov[self.mask_lkl][:,self.mask_lkl])
