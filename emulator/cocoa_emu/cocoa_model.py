@@ -1,10 +1,7 @@
 import numpy as np
-
 from cobaya.yaml import yaml_load_file
 from cobaya.input import update_info
 from cobaya.model import Model
-#from cobaya.conventions import kinds, _timing, _params, _prior, _packages_path
-#from cobaya.conventions import kinds
 
 def get_model(yaml_file, verbose=False):
     info  = yaml_load_file(yaml_file)
@@ -22,6 +19,7 @@ class CocoaModel:
         self.model      = get_model(configfile)
         self.likelihood = likelihood
         self.derived = np.array(list(self.model.parameterization.derived_params()))
+        print("Derived parameters: ", self.derived)
         
     def calculate_data_vector(self, params_values, baryon_scenario=None, return_s8=False):
         likelihood   = self.model.likelihood[self.likelihood]
@@ -41,8 +39,12 @@ class CocoaModel:
             return np.array(data_vector), None
         else:
             derived_vals = self.model.logposterior(params_values, return_derived=True).derived
-            derived_dict = {k:v for k,v in zip(self.derived, derived_vals)}
-            return np.array(data_vector), derived_dict["sigma8"]
+            if len(derived_vals) == len(self.derived):
+            	derived_dict = {k:v for k,v in zip(self.derived, derived_vals)}
+            	return np.array(data_vector), derived_dict["sigma8"]
+            else:
+                print(f'Problematic derived {derived_vals} at {params_values}')
+                return np.array(data_vector), np.nan
 
     def calculate_logpost(self, params_values):
         likelihood   = self.model.likelihood[self.likelihood]

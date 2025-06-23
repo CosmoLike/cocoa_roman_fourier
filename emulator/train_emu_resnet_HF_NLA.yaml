@@ -532,14 +532,14 @@ emulator:
     # Gaussian section
     gauss_cov: ./projects/roman_fourier/fid_3x2_full.covmat
     gauss_temp_train: 128 # training dataset temperature
-    #n_train: 1000000
-    n_train: 10000
+    n_train: 1000000
+    #n_train: 10000
     gauss_shift_train: 
      # omegam: 0.0
      # sigma8: 0.0
     gauss_temp_valid: 64  # validation dataset temperature
-    #n_valid: 200000
-    n_valid: 2000
+    n_valid: 200000
+    #n_valid: 2000
     gauss_shift_valid:
   training:
     emu_type: nn
