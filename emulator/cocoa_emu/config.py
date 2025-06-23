@@ -2,8 +2,9 @@ import yaml
 import numpy as np
 import os
 from os.path import join as pjoin
+import re
 import copy
-from .utils import readDatasetFile
+from .utils import readDatasetFile, get_shear_multi_bias_bitmask
 
 class Config:
     ''' Emulator Configuration Class for Roman Fourier Project '''
@@ -65,7 +66,8 @@ class Config:
         print(f'Loading dataset {self.config_args_lkl["data_file"]}')
         dataset = readDatasetFile(self.config_args_lkl['data_file'], 
             root=self.config_args_lkl['path'])
-        dst = pjoin(self.config_args_lkl['path'], "datasets")
+        #dst = pjoin(self.config_args_lkl['path'], "datasets")
+        dst = self.config_args_lkl['path']
 
         # Read data vector & tomography dimension
         self.source_ntomo = int(dataset.get("source_ntomo", 0))
@@ -79,7 +81,7 @@ class Config:
             self.lens_ntomo*self.Nell,
         ]
         self.probe_total_size = np.sum(self.probe_size)
-        self.shear_calib_mask = utils.get_shear_multi_bias_bitmask(
+        self.shear_calib_mask = get_shear_multi_bias_bitmask(
             self.source_ntomo, self.lens_ntomo, self.ggl_exclude, self.Nell,
             type_2pcf = "fourier")
 
@@ -98,7 +100,7 @@ class Config:
             print(f'Can not find baryonic feedback PCs, skip PCA...')
 
         # Read covariance and point-mass correction -> inv cov
-        print(f'Loading covariance matrix {dataset["baryon_pca_file"]}')
+        print(f'Loading covariance matrix {dataset["cov_file"]}')
         invcov = self.get_full_cov(pjoin(dst, dataset["cov_file"]))
         self.dv_std = np.sqrt(np.diagonal(invcov))
         invcov = np.linalg.inv(invcov[self.mask_lkl][:,self.mask_lkl])
