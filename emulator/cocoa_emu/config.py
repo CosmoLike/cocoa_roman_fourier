@@ -9,14 +9,14 @@ class Config:
     ''' Emulator Configuration Class for Roman Fourier Project '''
     # multi-probe mask, in sequence of Cl_EE, Cl_gE, Cl_gg
     # valid probes:
-    # xi, Cl_gg, Cl_gE, 2x2pt, 3x2pt, EE_gE
+    # xi, 2x2pt, 3x2pt
     probe_mask_choices = {
         "xi":    [1, 0, 0,],
-        "Cl_gg":    [0, 0, 1,],
-        "Cl_gE":    [0, 1, 0,],
         "2x2pt":    [0, 1, 1,],
         "3x2pt":    [1, 1, 1,],
-        "EE_gE":    [1, 1, 0,],
+        # "Cl_gg":    [0, 0, 1,],
+        # "Cl_gE":    [0, 1, 0,],
+        # "EE_gE":    [1, 1, 0,],
     }
 
     def __init__(self, configfile):
@@ -53,7 +53,11 @@ class Config:
         assert len(config_args_lkl.keys())==1, f'Training config YAML must contain only one likelihood!'
         self.likelihood = list(config_args_lkl.keys())[0]
         # parse the probe in the training likelihood
-        self.probe = self.likelihood[self.likelihood.find('_')+1:]
+        project, project_probe = self.likelihood.split('.')
+        match = re.match(project+r'_(\S*)', project_probe)
+        self.probe = match.group(1)
+        if self.probe=='cosmic_shear':
+            self.probe = 'xi'
         print(f'Initializing with probe = {self.probe}')
         self.probe_mask = self.probe_mask_choices[self.probe]
         self.config_args_lkl = config_args_lkl[self.likelihood]
