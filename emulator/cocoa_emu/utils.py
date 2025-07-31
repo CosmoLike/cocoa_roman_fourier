@@ -2,6 +2,14 @@ from pyDOE import lhs
 import numpy as np
 import emcee
 from os.path import join as pjoin
+try:
+    from mpi4py import MPI
+    comm = MPI.COMM_WORLD
+    size = comm.Get_size()
+    rank = comm.Get_rank()
+except:
+    rank = 0
+    size = 1
 
 def get_params_from_sample(sample, labels):
     """
@@ -119,7 +127,7 @@ def get_gaussian_samples(param_fid, param_label, param_prior, N_sample,
                 _val[i] += shift[param]
                 gauss_cen, _ = sigma82As(_val, _lab)
             else:
-                print(f'Parameter {param} in shift can not be recognized!')
+                print(f'[{rank}/{size}] Parameter {param} in shift can not be recognized!')
                 exit(1)
 
     # setup likelihood
@@ -152,7 +160,7 @@ def get_gaussian_samples(param_fid, param_label, param_prior, N_sample,
             return -np.inf
 
     # start sampling
-    print(f'Retrieving samples...')
+    print(f'[{rank}/{size}] Retrieving samples...')
     N_mcmc = int(N_sample*100/Nwalker)
     # make sure the initial ball are within prior
     p0 = np.zeros([Nwalker, Ndim])
@@ -166,7 +174,7 @@ def get_gaussian_samples(param_fid, param_label, param_prior, N_sample,
     sampler.run_mcmc(p0, N_mcmc, progress=True)
     sample = sampler.get_chain(flat=True,thin=10,discard=int(N_mcmc*0.8))
     subset = np.random.choice(len(sample), size=N_sample, replace=False)
-    print(f'Retrieved {N_sample} parameters.')
+    print(f'[{rank}/{size}] Retrieved {N_sample} parameters.')
     return sample[subset,:]
 
 
@@ -194,7 +202,7 @@ def retrieveParamCov(param_cov, param_label, param_prior):
                     else:
                         std = prior["scale"]
                     cov_out[i,j] = std**2
-                print(f'{pi}-{pj} not found in Gaussian Cov, fill with prior.')
+                print(f'[{rank}/{size}] {pi}-{pj} not found in Gaussian Cov, fill with prior.')
             else:
                 cov_out[i,j] = cov[ii,jj]
     return cov_out
@@ -219,7 +227,7 @@ def readDatasetFile(filename, root=None):
                 if(len(split_line)==2):
                     dataset[split_line[0]] = split_line[1]
                 else:
-                    print(f'Can not read line: {line}')
+                    print(f'[{rank}/{size}] Can not read line: {line}')
                     exit(1)
         return dataset
 
@@ -284,7 +292,7 @@ def get_shear_multi_bias_bitmask(Ntomo_source, Ntomo_lens, ggl_exclude, Nbins,
     elif type_2pcf=="real":
         N2pcf_ss = int((Ntomo_source+1)*Ntomo_source)
     else:
-        print(f'Invalid value {type_2pcf} for type_2pcf')
+        print(f'[{rank}/{size}] Invalid value {type_2pcf} for type_2pcf')
         exit(-1)
     N2pcf_gs = Ntomo_source*Ntomo_lens - len(ggl_exclude)
     N2pcf_gg = Ntomo_lens

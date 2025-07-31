@@ -6,6 +6,15 @@ import re
 import copy
 from .utils import readDatasetFile, get_shear_multi_bias_bitmask
 
+try:
+    from mpi4py import MPI
+    comm = MPI.COMM_WORLD
+    size = comm.Get_size()
+    rank = comm.Get_rank()
+except:
+    rank = 0
+    size = 1
+
 class Config:
     ''' Emulator Configuration Class for Roman Fourier Project '''
     # multi-probe mask, in sequence of Cl_EE, Cl_gE, Cl_gg
@@ -24,7 +33,8 @@ class Config:
         ''' Initialize the Config object with an configuration YAML file '''
         with open(configfile, "r") as stream:
             config_args = yaml.safe_load(stream)
-        print(f'config.py: Initializing the emulator Config object...')
+        if rank==0:
+            print(f'config.py: Initializing the emulator Config object...')
         # save the emulator section
         self.config_args_emu = config_args['emulator']
         self.survey_name = self.config_args_emu["survey_name"]
@@ -50,7 +60,8 @@ class Config:
         ======
             - config_args_lkl: the `likelihood` section in the YAML file, dict
         '''
-        print(f'config.py: Loading likelihood dataset...')
+        if rank==0:
+            print(f'config.py: Loading likelihood dataset...')
         assert len(config_args_lkl.keys())==1, f'Training config YAML must contain only one likelihood!'
         self.likelihood = list(config_args_lkl.keys())[0]
         # parse the probe in the training likelihood
@@ -59,11 +70,13 @@ class Config:
         self.probe = match.group(1)
         if self.probe=='cosmic_shear':
             self.probe = 'xi'
-        print(f'Initializing with probe = {self.probe}')
+        if rank==0:
+            print(f'Initializing with probe = {self.probe}')
         self.probe_mask = self.probe_mask_choices[self.probe]
         self.config_args_lkl = config_args_lkl[self.likelihood]
-
-        print(f'Loading dataset {self.config_args_lkl["data_file"]}')
+        
+        if rank==0:
+            print(f'Loading dataset {self.config_args_lkl["data_file"]}')
         dataset = readDatasetFile(self.config_args_lkl['data_file'], 
             root=self.config_args_lkl['path'])
         #dst = pjoin(self.config_args_lkl['path'], "datasets")
@@ -86,7 +99,8 @@ class Config:
             type_2pcf = "fourier")
 
         # Read mask, data vector, and baryon feedback PCs
-        print(f'Loading scale cut mask from {dataset["mask_file"]}')
+        if rank==0:
+            print(f'Loading scale cut mask from {dataset["mask_file"]}')
         self.mask_lkl = np.loadtxt(pjoin(dst, dataset["mask_file"]))[:,1].astype(bool)
         print(f'Loading fiducial data vector from {dataset["data_file"]}')
         self.dv_lkl = np.loadtxt(pjoin(dst, dataset["data_file"]))[:,1]

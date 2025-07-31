@@ -14,7 +14,8 @@ config = Config(configfile)
 if config.init_sample_type == "lhs":
     # label_train = f'{config.init_sample_type}_{config.n_lhs}'
     # label_valid = label_train
-    print("We don't support LHS any more!")
+    if rank==0:
+      print("We don't support LHS any more!")
     exit(1)
 else:
     iss = f'{config.init_sample_type}'
