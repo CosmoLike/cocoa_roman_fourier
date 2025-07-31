@@ -36,24 +36,30 @@ if(rank==0):
     # The mean of the Gaussian is specified by config.running_params_fid
     # plus shift from config.gauss_shift.
     print(f'[process 0]: Retrieving training and validation sample...')
-    params_train = get_gaussian_samples(config.running_params_fid, 
-        config.running_params, config.params, config.gnsamp_t, 
-        config.gauss_cov, config.gtemp_t, config.gshift_t)
-    params_valid = get_gaussian_samples(config.running_params_fid, 
-        config.running_params, config.params, config.gnsamp_v, 
-        config.gauss_cov, config.gtemp_v, config.gshift_v)
+    train_sample_fn = pjoin(config.traindir,f'total_samples_{label_train}.npy')
+    valid_sample_fn = pjoin(config.traindir,f'total_samples_{label_valid}.npy')
+    if os.path.exists(train_sample_fn):
+        params_train = np.load(train_sample_fn)
+        print(f'[process 0]: Loading training sample from {train_sample_fn}')
+    else:
+        params_train = get_gaussian_samples(config.running_params_fid, 
+            config.running_params, config.params, config.gnsamp_t, 
+            config.gauss_cov, config.gtemp_t, config.gshift_t)
+        np.save(train_sample_fn, params_train)
+        print(f'[process 0]: Saving training sample to {train_sample_fn}')
+    if os.path.exists(valid_sample_fn):
+        params_valid = np.load(valid_sample_fn)
+        print(f'[process 0]: Loading validation sample from {valid_sample_fn}')
+    else:
+        params_valid = get_gaussian_samples(config.running_params_fid, 
+            config.running_params, config.params, config.gnsamp_v, 
+            config.gauss_cov, config.gtemp_v, config.gshift_v)
+        np.save(valid_sample_fn, params_valid)
+        print(f'[process 0]: Saving validation sample to {valid_sample_fn}')
 else:
     params_train, params_valid = None, None
 params_train = comm.bcast(params_train, root=0)
 params_valid = comm.bcast(params_valid, root=0)
-
-if(rank==0):
-    print(f'Saving training sample to ', 
-          pjoin(config.traindir,f'total_samples_{label_train}.npy'))
-    print(f'Saving validation sample to ', 
-          pjoin(config.traindir,f'total_samples_{label_valid}.npy'))
-np.save(pjoin(config.traindir,f'total_samples_{label_train}.npy'),params_train)
-np.save(pjoin(config.traindir,f'total_samples_{label_valid}.npy'),params_valid)
 
 # ================== Calculate data vectors ==========================
 
@@ -89,7 +95,13 @@ def get_local_data_vector_list(params_list, rank, label, return_s8=False):
             _p = params_list[i]
         params_arr  = np.array([_p[k] for k in config.running_params])
         # Here it calls cocoa to calculate data vectors at requested parameters
-        data_vector, _s8 = cocoa_model.calculate_data_vector(_p, return_s8=return_s8)
+        try:
+            data_vector, _s8 = cocoa_model.calculate_data_vector(_p, 
+                return_s8=return_s8)
+        except:
+            # In case the calculation fails
+            data_vector = np.zeros(config.probe_total_size)
+            _s8 = 0.0
         train_params_list.append(params_arr)
         train_data_vector_list.append(data_vector)
         if return_s8:
