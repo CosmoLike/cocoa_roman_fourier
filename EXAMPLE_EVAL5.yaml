@@ -193,6 +193,31 @@ params:
       scale: 0.005
     proposal: 0.005
     latex: m_\mathrm{roman}^1
+  ###### FORCE LENS=SOURCE IN PHOTO-Z
+  roman_DZ_L1:
+    value: 'lambda roman_DZ_S1: roman_DZ_S1'
+    latex: \Delta z_\mathrm{l,roman}^1
+  roman_DZ_L2:
+    value: 'lambda roman_DZ_S2: roman_DZ_S2'
+    latex: \Delta z_\mathrm{l,roman}^2
+  roman_DZ_L3:
+    value: 'lambda roman_DZ_S3: roman_DZ_S3'
+    latex: \Delta z_\mathrm{l,roman}^3
+  roman_DZ_L4:
+    value: 'lambda roman_DZ_S4: roman_DZ_S4'
+    latex: \Delta z_\mathrm{l,roman}^4
+  roman_DZ_L5:
+    value: 'lambda roman_DZ_S5: roman_DZ_S5'
+    latex: \Delta z_\mathrm{l,roman}^5
+  roman_DZ_L6:
+    value: 'lambda roman_DZ_S6: roman_DZ_S6'
+    latex: \Delta z_\mathrm{l,roman}^6
+  roman_DZ_L7:
+    value: 'lambda roman_DZ_S7: roman_DZ_S7'
+    latex: \Delta z_\mathrm{l,roman}^7
+  roman_DZ_L8:
+    value: 'lambda roman_DZ_S8: roman_DZ_S8'
+    latex: \Delta z_\mathrm{l,roman}^8
   ### First open up the other IA parameters
   roman_BTA_1:
     prior:
@@ -257,14 +282,6 @@ sampler:
       w0pwa: -1.0
       w: -1.0
       ### Also overwrite nuisance parameters here
-      roman_DZ_L1: 0.0
-      roman_DZ_L2: 0.0
-      roman_DZ_L3: 0.0
-      roman_DZ_L4: 0.0
-      roman_DZ_L5: 0.0
-      roman_DZ_L6: 0.0
-      roman_DZ_L7: 0.0
-      roman_DZ_L8: 0.0
       roman_B1_1: 1.4
       roman_B1_2: 1.5
       roman_B1_3: 1.6

@@ -40,8 +40,8 @@ class CocoaModel:
         else:
             derived_vals = self.model.logposterior(params_values, return_derived=True).derived
             if len(derived_vals) == len(self.derived):
-            	derived_dict = {k:v for k,v in zip(self.derived, derived_vals)}
-            	return np.array(data_vector), derived_dict["sigma8"]
+                derived_dict = {k:v for k,v in zip(self.derived, derived_vals)}
+                return np.array(data_vector), derived_dict["sigma8"]
             else:
                 print(f'Problematic derived {derived_vals} at {params_values}')
                 return np.array(data_vector), np.nan

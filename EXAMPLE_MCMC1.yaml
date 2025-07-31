@@ -159,6 +159,32 @@ params:
       scale: 0.005
     proposal: 0.005
     latex: m_\mathrm{roman}^1
+  ###### FORCE LENS=SOURCE IN PHOTO-Z
+  roman_DZ_L1:
+    value: 'lambda roman_DZ_S1: roman_DZ_S1'
+    latex: \Delta z_\mathrm{l,roman}^1
+  roman_DZ_L2:
+    value: 'lambda roman_DZ_S2: roman_DZ_S2'
+    latex: \Delta z_\mathrm{l,roman}^2
+  roman_DZ_L3:
+    value: 'lambda roman_DZ_S3: roman_DZ_S3'
+    latex: \Delta z_\mathrm{l,roman}^3
+  roman_DZ_L4:
+    value: 'lambda roman_DZ_S4: roman_DZ_S4'
+    latex: \Delta z_\mathrm{l,roman}^4
+  roman_DZ_L5:
+    value: 'lambda roman_DZ_S5: roman_DZ_S5'
+    latex: \Delta z_\mathrm{l,roman}^5
+  roman_DZ_L6:
+    value: 'lambda roman_DZ_S6: roman_DZ_S6'
+    latex: \Delta z_\mathrm{l,roman}^6
+  roman_DZ_L7:
+    value: 'lambda roman_DZ_S7: roman_DZ_S7'
+    latex: \Delta z_\mathrm{l,roman}^7
+  roman_DZ_L8:
+    value: 'lambda roman_DZ_S8: roman_DZ_S8'
+    latex: \Delta z_\mathrm{l,roman}^8
+
 
 theory:
   camb:
@@ -224,8 +250,6 @@ sampler:
         [
           roman_DZ_S1, roman_DZ_S2, roman_DZ_S3, roman_DZ_S4, 
           roman_DZ_S5, roman_DZ_S6, roman_DZ_S7, roman_DZ_S8,
-          roman_DZ_L1, roman_DZ_L2, roman_DZ_L3, roman_DZ_L4, 
-          roman_DZ_L5, roman_DZ_L6, roman_DZ_L7, roman_DZ_L8,
           roman_B1_1, roman_B1_2, roman_B1_3, roman_B1_4,
           roman_B1_5, roman_B1_6, roman_B1_7, roman_B1_8,
           roman_A1_1, roman_A1_2,
