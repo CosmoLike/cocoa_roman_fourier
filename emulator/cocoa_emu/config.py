@@ -15,6 +15,10 @@ except:
     rank = 0
     size = 1
 
+def mprint(*args, **kwargs):
+    if rank==0:
+        print(*args, **kwargs)
+
 class Config:
     ''' Emulator Configuration Class for Roman Fourier Project '''
     # multi-probe mask, in sequence of Cl_EE, Cl_gE, Cl_gg
@@ -33,8 +37,7 @@ class Config:
         ''' Initialize the Config object with an configuration YAML file '''
         with open(configfile, "r") as stream:
             config_args = yaml.safe_load(stream)
-        if rank==0:
-            print(f'config.py: Initializing the emulator Config object...')
+        mprint(f'config.py: Initializing the emulator Config object...')
         # save the emulator section
         self.config_args_emu = config_args['emulator']
         self.survey_name = self.config_args_emu["survey_name"]
@@ -60,8 +63,7 @@ class Config:
         ======
             - config_args_lkl: the `likelihood` section in the YAML file, dict
         '''
-        if rank==0:
-            print(f'config.py: Loading likelihood dataset...')
+        mprint(f'config.py: Loading likelihood dataset...')
         assert len(config_args_lkl.keys())==1, f'Training config YAML must contain only one likelihood!'
         self.likelihood = list(config_args_lkl.keys())[0]
         # parse the probe in the training likelihood
@@ -70,13 +72,11 @@ class Config:
         self.probe = match.group(1)
         if self.probe=='cosmic_shear':
             self.probe = 'xi'
-        if rank==0:
-            print(f'Initializing with probe = {self.probe}')
+        mprint(f'Initializing with probe = {self.probe}')
         self.probe_mask = self.probe_mask_choices[self.probe]
         self.config_args_lkl = config_args_lkl[self.likelihood]
         
-        if rank==0:
-            print(f'Loading dataset {self.config_args_lkl["data_file"]}')
+        mprint(f'Loading dataset {self.config_args_lkl["data_file"]}')
         dataset = readDatasetFile(self.config_args_lkl['data_file'], 
             root=self.config_args_lkl['path'])
         #dst = pjoin(self.config_args_lkl['path'], "datasets")
@@ -99,29 +99,28 @@ class Config:
             type_2pcf = "fourier")
 
         # Read mask, data vector, and baryon feedback PCs
-        if rank==0:
-            print(f'Loading scale cut mask from {dataset["mask_file"]}')
+        mprint(f'Loading scale cut mask from {dataset["mask_file"]}')
         self.mask_lkl = np.loadtxt(pjoin(dst, dataset["mask_file"]))[:,1].astype(bool)
-        print(f'Loading fiducial data vector from {dataset["data_file"]}')
+        mprint(f'Loading fiducial data vector from {dataset["data_file"]}')
         self.dv_lkl = np.loadtxt(pjoin(dst, dataset["data_file"]))[:,1]
         assert len(self.dv_lkl)==self.probe_total_size
-        print(f'Data vector dimension: {self.probe_total_size}')
+        mprint(f'Data vector dimension: {self.probe_total_size}')
         try:
             self.baryon_pcas = np.loadtxt(pjoin(dst,dataset["baryon_pca_file"]))
-            print(f'Loading baryonic feedback PCs from {dataset["baryon_pca_file"]}')
+            mprint(f'Loading baryonic feedback PCs from {dataset["baryon_pca_file"]}')
         except:
             self.baryon_pcas = None
-            print(f'Can not find baryonic feedback PCs, skip PCA...')
+            mprint(f'Can not find baryonic feedback PCs, skip PCA...')
 
         # Read covariance and point-mass correction -> inv cov
-        print(f'Loading covariance matrix {dataset["cov_file"]}')
+        mprint(f'Loading covariance matrix {dataset["cov_file"]}')
         invcov = self.get_full_cov(pjoin(dst, dataset["cov_file"]))
         self.dv_std = np.sqrt(np.diagonal(invcov))
         invcov = np.linalg.inv(invcov[self.mask_lkl][:,self.mask_lkl])
         # Add PM marginalization
         if "U_PMmarg" in dataset:
             U_PMmarg = np.loadtxt(pjoin(dst, dataset["U_PMmarg"]))
-            print(f'Loading point-mass marginalization template from {dataset["U_PMmarg"]}')
+            mprint(f'Loading point-mass marginalization template from {dataset["U_PMmarg"]}')
             U = np.zeros([self.probe_total_size, self.lens_ntomo])
             for line in U_PMmarg:
                 i, j = int(line[0]), int(line[1])
@@ -133,7 +132,7 @@ class Config:
             corr = invcov @ (U@np.linalg.inv(central_block)@U.T) @ invcov
             invcov -= corr
         else:
-            print(f'Can not find point-mass marginalization template, skip PMmarg...')
+            mprint(f'Can not find point-mass marginalization template, skip PMmarg...')
         self.masked_inv_cov = invcov
         # test positive-definite; compare accu between Python v.s. C++ PMmarg
         w, v = np.linalg.eig(self.masked_inv_cov)
@@ -144,11 +143,11 @@ class Config:
                 if (self.mask_lkl[i]>0) and (self.mask_lkl[j]>0):
                     i_reduce, j_reduce = int(self.mask_lkl[:i].sum()), int(self.mask_lkl[:j].sum())
                     self.inv_cov[i,j] = self.masked_inv_cov[i_reduce,j_reduce]
-        print(f'config.py: Likelihood dataset loaded.')
+        mprint(f'config.py: Likelihood dataset loaded.')
 
     def load_emu(self, config_args_emu):
         ''' Read emulator related data '''
-        print(f'config.py: Loading emulator training configuration...')
+        mprint(f'config.py: Loading emulator training configuration...')
         self.derived = 1
         self.sigma8_fid = np.array([config_args_emu['derived']['sigma8_fid']])
         self.sigma8_std = np.array([config_args_emu['derived']['sigma8_std']])
@@ -187,10 +186,10 @@ class Config:
             except:
                 self.nn_model  = 0
         elif(self.emu_type.lower()=='gp'):
-            print(f'Gaussian Process is not supported currently!')
+            mprint(f'Gaussian Process is not supported currently!')
             exit(-1)
         else:
-            print(f'Model {self.emu_type.lower()} is not supported!')
+            mprint(f'Model {self.emu_type.lower()} is not supported!')
             exit(-1)
 
         # Read training sample settings
@@ -209,7 +208,7 @@ class Config:
             self.gnsamp_v = _init_sample.get('n_valid')
             self.gauss_minmax = self.get_gaussian_minmax()
         else:
-            print(f'Can not recognize init sample type {self.init_sample_type}')
+            mprint(f'Can not recognize init sample type {self.init_sample_type}')
             exit(-1)
         self.n_train_iter = int(config_args_emu['training']['n_train_iter'])
 
@@ -254,14 +253,14 @@ class Config:
             self.test_sample_file = None
             self.test_output_file = None
 
-        print(f'config.py: Emulator training configuration loaded.')
+        mprint(f'config.py: Emulator training configuration loaded.')
 
     def load_params(self, param_args):
         ''' Initialize likelihood model parameter settings
         Note that shear calibration bias and baryonic feedback are fast params,
         not included in the running_params
         '''
-        print(f'config.py: Loading sampled parameter space...')
+        mprint(f'config.py: Loading sampled parameter space...')
         params_list = param_args.keys()
 
         self.running_params       = []
@@ -330,7 +329,7 @@ class Config:
                 elif match.group(1)=='B1':
                     self.running_params_type.append(3)
                 else:
-                    print(f'[config.py:Config.load_params]: Can not support param {param} now!')
+                    mprint(f'[config.py:Config.load_params]: Can not support param {param} now!')
                     exit(-1)
         self.n_dim = len(self.running_params) # total param emulated
         self.running_params_type = np.array(self.running_params_type)
@@ -341,7 +340,7 @@ class Config:
             (self.running_params_type==1)|(self.running_params_type==3)
         ]
 
-        print(f'config.py: Sampled parameter space loaded.')
+        mprint(f'config.py: Sampled parameter space loaded.')
         return
 
 

@@ -3,10 +3,23 @@ from cobaya.yaml import yaml_load_file
 from cobaya.input import update_info
 from cobaya.model import Model
 
+try:
+    from mpi4py import MPI
+    comm = MPI.COMM_WORLD
+    size = comm.Get_size()
+    rank = comm.Get_rank()
+except:
+    rank = 0
+    size = 1
+
+def mprint(*args, **kwargs):
+    if rank==0:
+        print(*args, **kwargs)
+
 def get_model(yaml_file, verbose=False):
     info  = yaml_load_file(yaml_file)
     if verbose:
-        print(info)
+        mprint(info)
     updated_info = update_info(info)
     model =  Model(updated_info["params"], updated_info["likelihood"],
                updated_info.get("prior"), updated_info.get("theory"),
@@ -19,7 +32,7 @@ class CocoaModel:
         self.model      = get_model(configfile)
         self.likelihood = likelihood
         self.derived = np.array(list(self.model.parameterization.derived_params()))
-        print("Derived parameters: ", self.derived)
+        mprint("Derived parameters: ", self.derived)
         
     def calculate_data_vector(self, params_values, baryon_scenario=None, return_s8=False):
         likelihood   = self.model.likelihood[self.likelihood]
