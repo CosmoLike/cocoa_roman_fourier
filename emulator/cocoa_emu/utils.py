@@ -101,7 +101,7 @@ def get_gaussian_samples(param_fid, param_label, param_prior, N_sample,
     '''
     gauss_cen = np.array(param_fid.copy())
     Ndim, Nwalker = len(gauss_cen), 4*len(gauss_cen)
-    cov = retrieveParamCov(param_cov, param_label)
+    cov = retrieveParamCov(param_cov, param_label, param_prior)
     param_std = np.diag(cov)**0.5
     invcov = np.linalg.inv(cov)
 
@@ -130,7 +130,7 @@ def get_gaussian_samples(param_fid, param_label, param_prior, N_sample,
             dist = prior.get("dist", "uniform")
             if dist == "uniform":
                 if param[i] < prior["min"] or param[i]>prior["max"]:
-                    ans += -np.inf
+                    return -np.inf
             elif dist == "norm":
                 # temp here?
                 ans += -(0.5)*((param[i]-prior["loc"])/prior["scale"])**2
@@ -139,27 +139,41 @@ def get_gaussian_samples(param_fid, param_label, param_prior, N_sample,
             _par_dict = {k:v for k,v in zip(param_label, param)}
             ombh2 = _par_dict["omegab"]*(_par_dict["H0"]/100)**2
             if ombh2<0.005 or ombh2 > 0.04:
-                ans += -np.inf
+                return -np.inf
         return ans
     def lnlkl(param):
         diff = param - gauss_cen
-        return (-0.5/temp) * (diff @ invcov @ np.transpose(diff))
+        return (-0.5) * (diff @ invcov @ np.transpose(diff))
     def lnpost(param):
-        return lnprior(param)+lnlkl(param)
+        lnpr = lnprior(param)
+        if np.isfinite(lnpr):
+            return (lnprior(param)+lnlkl(param))/temp
+        else:
+            return -np.inf
 
     # start sampling
     print(f'Retrieving samples...')
-    N_mcmc = int(N_sample*40/Nwalker)
-    p0 = gauss_cen[np.newaxis] + 0.3*param_std[np.newaxis]*np.random.normal(size=(Nwalker, Ndim))
+    N_mcmc = int(N_sample*100/Nwalker)
+    # make sure the initial ball are within prior
+    p0 = np.zeros([Nwalker, Ndim])
+    for i in range(Nwalker):
+        _p0 = gauss_cen + 0.01*param_std*np.random.normal(size=Ndim)
+        while not np.isfinite(lnprior(_p0)):
+            _p0 = gauss_cen + 0.01*param_std*np.random.normal(size=Ndim)
+        p0[i] = _p0
+    # p0 = gauss_cen[np.newaxis] + 0.01*param_std[np.newaxis]*np.random.normal(size=(Nwalker, Ndim))
     sampler = emcee.EnsembleSampler(Nwalker, Ndim, lnpost)
     sampler.run_mcmc(p0, N_mcmc, progress=True)
-    sample = sampler.get_chain(flat=True,thin=10,discard=N_mcmc//2)
+    sample = sampler.get_chain(flat=True,thin=10,discard=int(N_mcmc*0.8))
     subset = np.random.choice(len(sample), size=N_sample, replace=False)
     print(f'Retrieved {N_sample} parameters.')
     return sample[subset,:]
 
 
-def retrieveParamCov(param_cov, param_label):
+def retrieveParamCov(param_cov, param_label, param_prior):
+    # read in a covariance matrix, whose dimension may not equal param_label
+    # we will select param_label from param_cov
+    # if param_label is not included in param_cov, then fill from prior
     cov = np.genfromtxt(param_cov, names=True)
     N_in = len(cov); N_out = len(param_label)
     _map = {k:v for v,k in enumerate(cov.dtype.names)}
@@ -170,7 +184,16 @@ def retrieveParamCov(param_cov, param_label):
             ii = _map.get(pi, -1)
             jj = _map.get(pj, -1)
             if ii<0 or jj<0:
-                cov_out[i,j] = 0. if i!=j else 1.
+                if i!=j:
+                    cov_out[i,j] = 0.
+                else:
+                    prior = param_prior[pi]["prior"]
+                    dist = prior.get("dist", "uniform")
+                    if dist == "uniform":
+                        std = (prior["max"]-prior["min"])/6.0
+                    else:
+                        std = prior["scale"]
+                    cov_out[i,j] = std**2
                 print(f'Parameter {pi}/{pj} not found in Gaussian covariance!')
             else:
                 cov_out[i,j] = cov[ii,jj]
