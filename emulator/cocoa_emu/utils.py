@@ -133,7 +133,7 @@ def get_gaussian_samples(param_fid, param_label, param_prior, N_sample,
                     return -np.inf
             elif dist == "norm":
                 # temp here?
-                ans += -(0.5)*((param[i]-prior["loc"])/prior["scale"])**2
+                ans += -(0.5/temp/100)*((param[i]-prior["loc"])/prior["scale"])**2
         # BBN hard prior
         if "omegab" in param_label and "H0" in param_label:
             _par_dict = {k:v for k,v in zip(param_label, param)}
@@ -143,11 +143,11 @@ def get_gaussian_samples(param_fid, param_label, param_prior, N_sample,
         return ans
     def lnlkl(param):
         diff = param - gauss_cen
-        return (-0.5) * (diff @ invcov @ np.transpose(diff))
+        return (-0.5/temp) * (diff @ invcov @ np.transpose(diff))
     def lnpost(param):
         lnpr = lnprior(param)
         if np.isfinite(lnpr):
-            return (lnprior(param)+lnlkl(param))/temp
+            return lnprior(param)+lnlkl(param)
         else:
             return -np.inf
 
@@ -194,7 +194,7 @@ def retrieveParamCov(param_cov, param_label, param_prior):
                     else:
                         std = prior["scale"]
                     cov_out[i,j] = std**2
-                print(f'Parameter {pi}/{pj} not found in Gaussian covariance!')
+                print(f'{pi}-{pj} not found in Gaussian Cov, fill with prior.')
             else:
                 cov_out[i,j] = cov[ii,jj]
     return cov_out
