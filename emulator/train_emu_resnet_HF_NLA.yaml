@@ -89,7 +89,7 @@ params:
     drop: true
   mnu:
     prior:
-      min: 0.0558
+      min: 0.03
       max: 0.6
     ref:
       dist: norm
@@ -291,89 +291,89 @@ params:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.005
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.005
+    proposal: 0.005
     latex: \Delta z_\mathrm{s,roman}^1
   roman_DZ_S2:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.005
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.005
+    proposal: 0.005
     latex: \Delta z_\mathrm{s,roman}^2
   roman_DZ_S3:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.005
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.005
+    proposal: 0.005
     latex: \Delta z_\mathrm{s,roman}^3
   roman_DZ_S4:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.005
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.005
+    proposal: 0.005
     latex: \Delta z_\mathrm{s,roman}^4
   roman_DZ_S5:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.005
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.005
+    proposal: 0.005
     latex: \Delta z_\mathrm{s,roman}^5
   roman_DZ_S6:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.005
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.005
+    proposal: 0.005
     latex: \Delta z_\mathrm{s,roman}^6
   roman_DZ_S7:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.005
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.005
+    proposal: 0.005
     latex: \Delta z_\mathrm{s,roman}^7
   roman_DZ_S8:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.005
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.005
+    proposal: 0.005
     latex: \Delta z_\mathrm{s,roman}^8
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -547,14 +547,14 @@ emulator:
     lhs_n: 18000 # Latin-Hyper Sample size
     # Gaussian section
     gauss_cov: ./projects/roman_fourier/fid_3x2_full.covmat
-    gauss_temp_train: 128 # training dataset temperature
-    n_train: 1000000
+    gauss_temp_train: 512 # training dataset temperature, 128
+    n_train: 1000160
     #n_train: 10000
     gauss_shift_train: 
      # omegam: 0.0
      # sigma8: 0.0
-    gauss_temp_valid: 64  # validation dataset temperature
-    n_valid: 200000
+    gauss_temp_valid: 256  # validation dataset temperature, 64
+    n_valid: 200032
     #n_valid: 2000
     gauss_shift_valid:
   training:
