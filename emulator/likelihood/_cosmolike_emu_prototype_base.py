@@ -4,6 +4,13 @@ from os.path import join as pjoin
 from getdist import IniFile
 from cobaya.likelihoods.base_classes import DataSetLikelihood
 import torch
+### Import the emulator from relative path
+import sys
+from pathlib import Path
+# Get directory containing THIS script
+script_dir = Path(__file__).resolve().parent
+# Add desired relative path
+sys.path.append(str(script_dir.parent))
 from cocoa_emu import Config
 from cocoa_emu.emulator import NNEmulator
 
