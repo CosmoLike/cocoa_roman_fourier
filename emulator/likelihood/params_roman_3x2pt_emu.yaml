@@ -6,46 +6,90 @@
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.018
+      scale: 0.002
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.018
-    proposal: 0.009
+      scale: 0.002
+    proposal: 0.002
     latex: \Delta z_\mathrm{s,roman}^1
   roman_DZ_S2:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.015
+      scale: 0.002
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.015
-    proposal: 0.0075
+      scale: 0.002
+    proposal: 0.002
     latex: \Delta z_\mathrm{s,roman}^2
   roman_DZ_S3:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.011
+      scale: 0.002
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.011
-    proposal: 0.0055
+      scale: 0.002
+    proposal: 0.002
     latex: \Delta z_\mathrm{s,roman}^3
   roman_DZ_S4:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.017
+      scale: 0.002
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.017
-    proposal: 0.0085
+      scale: 0.002
+    proposal: 0.002
     latex: \Delta z_\mathrm{s,roman}^4
+  roman_DZ_S5:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^5
+  roman_DZ_S6:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^6
+  roman_DZ_S7:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^7
+  roman_DZ_S8:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^8
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -56,9 +100,9 @@
       max:  5
     ref:
       dist: norm
-      loc: 0.7
-      scale: 0.5
-    proposal: 0.75
+      loc: -0.7
+      scale: 0.02
+    proposal: 0.02
     latex: A_\mathrm{1-IA,roman}^1
   roman_A1_2:
     prior:
@@ -66,16 +110,10 @@
       max:  5
     ref:
       dist: norm
-      loc: -1.7
-      scale: 0.5
-    proposal: 0.75
+      loc: -1.5
+      scale: 0.12
+    proposal: 0.12
     latex: A_\mathrm{1-IA,roman}^2
-  roman_A1_3:
-    value: 0
-    latex: A_\mathrm{1-IA,roman}^3        
-  roman_A1_4:
-    value: 0
-    latex: A_\mathrm{1-IA,roman}^4  
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -85,111 +123,117 @@
   roman_A2_2:
     value: 0.0
     latex: A_\mathrm{2-IA,roman}^2
-  roman_A2_3:
-    value: 0.0
-    latex: A_\mathrm{2-IA,roman}^3
-  roman_A2_4:
-    value: 0.0
-    latex: A_\mathrm{2-IA,roman}^4
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   roman_BTA_1:
     value: 0
     latex: A_\mathrm{BTA-IA,roman}^1
-  roman_BTA_2:
-    value: 0
-    latex: A_\mathrm{BTA-IA,roman}^2
-  roman_BTA_3:
-    value: 0
-    latex: A_\mathrm{BTA-IA,roman}^3        
-  roman_BTA_4:
-    value: 0
-    latex: A_\mathrm{BTA-IA,roman}^4
- # ------------------------------------------------------------------------
- # ------------------------------------------------------------------------
- # ------------------------------------------------------------------------
- # Lensing photo-z errors
+  # ------------------------------------------------------------------------
+  # ------------------------------------------------------------------------
+  # ------------------------------------------------------------------------
+  # Lensing photo-z errors
   roman_DZ_L1:
     prior:
       dist: norm
-      loc: -0.009
-      scale: 0.007
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: -0.009
-      scale: 0.007
-    proposal: 0.0035
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
     latex: \Delta z_\mathrm{l,roman}^1
   roman_DZ_L2:
     prior:
       dist: norm
-      loc: -0.035
-      scale: 0.011
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: -0.035
-      scale: 0.011
-    proposal: 0.0055
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
     latex: \Delta z_\mathrm{l,roman}^2
   roman_DZ_L3:
     prior:
       dist: norm
-      loc: -0.005
-      scale: 0.006
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: -0.005
-      scale: 0.006
-    proposal: 0.003
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
     latex: \Delta z_\mathrm{l,roman}^3
   roman_DZ_L4:
     prior:
       dist: norm
-      loc: -0.007
-      scale: 0.006
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: -0.007
-      scale: 0.006
-    proposal: 0.003
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
     latex: \Delta z_\mathrm{l,roman}^4
   roman_DZ_L5:
     prior:
       dist: norm
-      loc: 0.002
-      scale: 0.007 
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: 0.002
-      scale: 0.007
-    proposal: 0.0035
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
     latex: \Delta z_\mathrm{l,roman}^5
   roman_DZ_L6:
     prior:
       dist: norm
-      loc: 0.002
-      scale: 0.008 
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: 0.002
-      scale: 0.008
-    proposal: 0.004
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
     latex: \Delta z_\mathrm{l,roman}^6
-
+  roman_DZ_L7:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{l,roman}^7
+  roman_DZ_L8:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{l,roman}^8
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
-  # Bin bias parameters
+  # Linear galaxy bias parameters
   roman_B1_1:
     prior:
       min: 0.8
       max: 3
     ref:
       dist: norm
-      loc: 1.5
-      scale: 0.1
-    proposal: 0.1
+      loc: 1.18
+      scale: 0.01
+    proposal: 0.01
     latex: b_\mathrm{1-roman}^1
   roman_B1_2:
     prior:
@@ -197,9 +241,9 @@
       max: 3
     ref:
       dist: norm
-      loc: 1.6
-      scale: 0.1
-    proposal: 0.1
+      loc: 1.40
+      scale: 0.01
+    proposal: 0.01
     latex: b_\mathrm{1-roman}^2
   roman_B1_3:
     prior:
@@ -207,9 +251,9 @@
       max: 3
     ref:
       dist: norm
-      loc: 1.7
-      scale: 0.1
-    proposal: 0.1
+      loc: 1.55
+      scale: 0.01
+    proposal: 0.01
     latex: b_\mathrm{1-roman}^3
   roman_B1_4:
     prior:
@@ -217,9 +261,9 @@
       max: 3
     ref:
       dist: norm
-      loc: 1.8
-      scale: 0.1
-    proposal: 0.1
+      loc: 1.71
+      scale: 0.01
+    proposal: 0.01
     latex: b_\mathrm{1-roman}^4
   roman_B1_5:
     prior:
@@ -227,9 +271,9 @@
       max: 3
     ref:
       dist: norm
-      loc: 2.0
-      scale: 0.1
-    proposal: 0.1
+      loc: 1.90
+      scale: 0.01
+    proposal: 0.01
     latex: b_\mathrm{1-roman}^5
   roman_B1_6:
     prior:
@@ -237,126 +281,48 @@
       max: 3
     ref:
       dist: norm
-      loc: 2.2
-      scale: 0.1
-    proposal: 0.1
+      loc: 2.15
+      scale: 0.01
+    proposal: 0.01
     latex: b_\mathrm{1-roman}^6
+  roman_B1_7:
+    prior:
+      min: 0.8
+      max: 3
+    ref:
+      dist: norm
+      loc: 2.52
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^7
+  roman_B1_8:
+    prior:
+      min: 0.8
+      max: 4
+    ref:
+      dist: norm
+      loc: 3.44
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^8
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
-  roman_B2_1:
-    value: 0.0
-    latex: b_\mathrm{2-roman}^1
-  roman_B2_2:
-    value: 0.0
-    latex: b_\mathrm{2-roman}^2
-  roman_B2_3:
-    value: 0.0
-    latex: b_\mathrm{2-roman}^3
-  roman_B2_4:
-    value: 0.0
-    latex: b_\mathrm{2-roman}^4
-  roman_B2_5:
-    value: 0.0
-    latex: b_\mathrm{2-roman}^5
-  roman_B2_6:
-    value: 0.0
-    latex: b_\mathrm{2-roman}^6
+  # Nonlinear Galaxy Bias
+  # Ignore
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
-  #
-  roman_BMAG_1:
-    value: 0.43
-    latex: b_\mathrm{BMAG-roman}^1
-  roman_BMAG_2:
-    value: 0.30
-    latex: b_\mathrm{BMAG-roman}^2
-  roman_BMAG_3:
-    value: 1.75
-    latex: b_\mathrm{BMAG-roman}^3
-  roman_BMAG_4:
-    value: 1.94
-    latex: b_\mathrm{BMAG-roman}^4
-  roman_BMAG_5:
-    value: 1.56
-    latex: b_\mathrm{BMAG-roman}^5
-  roman_BMAG_6:
-    value: 2.96
-    latex: b_\mathrm{BMAG-roman}^6
-
+  # Lens Sample Magnification Bias
+  # Ignore
+  
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # Lens galaxy photo-z stretch parameters
-  roman_STRETCH_L1:
-    prior:
-      dist: norm
-      loc: 0.975
-      scale: 0.062
-    ref:
-      dist: norm
-      loc: 0.975
-      scale: 0.062
-    proposal: 0.03
-    latex: \sigma z_\mathrm{l,roman}^1
-  roman_STRETCH_L2:
-    prior:
-      dist: norm
-      loc: 1.306
-      scale: 0.093
-    ref:
-      dist: norm
-      loc: 1.306
-      scale: 0.093
-    proposal: 0.045
-    latex: \sigma z_\mathrm{l,roman}^2
-  roman_STRETCH_L3:
-    prior:
-      dist: norm
-      loc: 0.87
-      scale: 0.054
-    ref:
-      dist: norm
-      loc: 0.87
-      scale: 0.054
-    proposal: 0.025
-    latex: \sigma z_\mathrm{l,roman}^3
-  roman_STRETCH_L4:
-    prior:
-      dist: norm
-      loc: 0.918
-      scale: 0.051
-    ref:
-      dist: norm
-      loc: 0.918
-      scale: 0.051
-    proposal: 0.025
-    latex: \sigma z_\mathrm{l,roman}^4
-  roman_STRETCH_L5:
-    prior:
-      dist: norm
-      loc: 1.08
-      scale: 0.067
-    ref:
-      dist: norm
-      loc: 1.08
-      scale: 0.067
-    proposal: 0.0335
-    latex: \sigma z_\mathrm{l,roman}^5
-  roman_STRETCH_L6:
-    prior:
-      dist: norm
-      loc: 0.845
-      scale: 0.073
-    ref:
-      dist: norm
-      loc: 0.845
-      scale: 0.073
-    proposal: 0.0365
-    latex: \sigma z_\mathrm{l,roman}^6
+  # Ignore
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -365,136 +331,96 @@
   roman_M1:
     prior:
       dist: norm
-      loc: -0.0063
-      scale: 0.0091
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: -0.0063
-      scale: 0.0091
-    proposal: 0.0045
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
     latex: m_\mathrm{roman}^1
   roman_M2:
     prior:
       dist: norm
-      loc: -0.0198
-      scale: 0.0078
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: -0.0198
-      scale: 0.0078
-    proposal: 0.004
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
     latex: m_\mathrm{roman}^2
   roman_M3:
     prior:
       dist: norm
-      loc: -0.0241
-      scale: 0.0076
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: -0.0241
-      scale: 0.0076
-    proposal: 0.004
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
     latex: m_\mathrm{roman}^3
   roman_M4:
     prior:
       dist: norm
-      loc: -0.0369
-      scale: 0.0076
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: -0.0369
-      scale: 0.0076
-    proposal: 0.004
-    latex: m_\mathrm{roman}^4 
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^4
+  roman_M5:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^5
+  roman_M6:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^6
+  roman_M7:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^7
+  roman_M8:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^8
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # Point Mass parameters
-  # Now we use analytical marg. fold into covariance matrix
-  # roman_PM1:
-  #   prior:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 10000
-  #   ref:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 10000
-  #   proposal: 5000
-  #   latex: PM_\mathrm{roman}^1
-  # roman_PM2:
-  #   prior:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 10000
-  #   ref:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 10000
-  #   proposal: 5000
-  #   latex: PM_\mathrm{roman}^2
-  # roman_PM3:
-  #   prior:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 10000
-  #   ref:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 10000
-  #   proposal: 5000
-  #   latex: PM_\mathrm{roman}^3
-  # roman_PM4:
-  #   prior:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 10000
-  #   ref:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 10000
-  #   proposal: 5000
-  #   latex: PM_\mathrm{roman}^4
-  # roman_PM5:
-  #   prior:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 10000
-  #   ref:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 10000
-  #   proposal: 5000
-  #   latex: PM_\mathrm{roman}^5
-  # roman_PM6:
-  #   prior:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 10000
-  #   ref:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 10000
-  #   proposal: 5000
-  #   latex: PM_\mathrm{roman}^6
-  roman_PM1:
-    value: 0.0
-    latex: PM_\mathrm{roman}^1
-  roman_PM2:
-    value: 0.0
-    latex: PM_\mathrm{roman}^2
-  roman_PM3:
-    value: 0.0
-    latex: PM_\mathrm{roman}^3
-  roman_PM4:
-    value: 0.0
-    latex: PM_\mathrm{roman}^4
-  roman_PM5:
-    value: 0.0
-    latex: PM_\mathrm{roman}^5
-  roman_PM6:
-    value: 0.0
-    latex: PM_\mathrm{roman}^6
+  # Ignore
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -569,11 +495,31 @@
     latex: \Omega_\mathrm{m}
   mnu:
     prior:
-      min: 0.0558
+      min: 0.0
       max: 0.6
     ref:
       dist: norm
       loc: 0.06
       scale: 0.001
     proposal: 0.01  
-    latex: \m_\\nu
+    latex: m_{\nu}
+  w:
+    prior:
+      min: -2.0
+      max: -0.01
+    ref:
+      dist: norm
+      loc: -1.0
+      scale: 0.1
+    proposal: 0.1 
+    latex: w_{0,\mathrm{DE}}
+  wa:
+    prior:
+      min: -2.5
+      max: 2.5
+    ref:
+      dist: norm
+      loc: -0.0
+      scale: 0.1
+    proposal: 0.1 
+    latex: w_{a,\mathrm{DE}}

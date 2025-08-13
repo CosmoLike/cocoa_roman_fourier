@@ -2,253 +2,196 @@
  # ------------------------------------------------------------------------
  # ------------------------------------------------------------------------
  # Lensing photo-z errors
-  DES_DZ_L1:
+  roman_DZ_L1:
     prior:
       dist: norm
-      loc: -0.009
-      scale: 0.007
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: -0.009
-      scale: 0.007
-    proposal: 0.0035
-    latex: \Delta z_\mathrm{l,DES}^1
-  DES_DZ_L2:
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{l,roman}^1
+  roman_DZ_L2:
     prior:
       dist: norm
-      loc: -0.035
-      scale: 0.011
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: -0.035
-      scale: 0.011
-    proposal: 0.0055
-    latex: \Delta z_\mathrm{l,DES}^2
-  DES_DZ_L3:
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{l,roman}^2
+  roman_DZ_L3:
     prior:
       dist: norm
-      loc: -0.005
-      scale: 0.006
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: -0.005
-      scale: 0.006
-    proposal: 0.003
-    latex: \Delta z_\mathrm{l,DES}^3
-  DES_DZ_L4:
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{l,roman}^3
+  roman_DZ_L4:
     prior:
       dist: norm
-      loc: -0.007
-      scale: 0.006
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: -0.007
-      scale: 0.006
-    proposal: 0.003
-    latex: \Delta z_\mathrm{l,DES}^4
-  DES_DZ_L5:
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{l,roman}^4
+  roman_DZ_L5:
     prior:
       dist: norm
-      loc: 0.002
-      scale: 0.007 
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: 0.002
-      scale: 0.007
-    proposal: 0.0035
-    latex: \Delta z_\mathrm{l,DES}^5
-  DES_DZ_L6:
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{l,roman}^5
+  roman_DZ_L6:
     prior:
       dist: norm
-      loc: 0.002
-      scale: 0.008 
+      loc: 0.0
+      scale: 0.005
     ref:
       dist: norm
-      loc: 0.002
-      scale: 0.008
-    proposal: 0.004
-    latex: \Delta z_\mathrm{l,DES}^6
-
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{l,roman}^6
+  roman_DZ_L7:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{l,roman}^7
+  roman_DZ_L8:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{l,roman}^8
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # Bin bias parameters
-  DES_B1_1:
+  roman_B1_1:
     prior:
       min: 0.8
       max: 3
     ref:
       dist: norm
-      loc: 1.5
-      scale: 0.1
-    proposal: 0.1
-    latex: b_\mathrm{1-DES}^1
-  DES_B1_2:
+      loc: 1.18
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^1
+  roman_B1_2:
     prior:
       min: 0.8
       max: 3
     ref:
       dist: norm
-      loc: 1.6
-      scale: 0.1
-    proposal: 0.1
-    latex: b_\mathrm{1-DES}^2
-  DES_B1_3:
+      loc: 1.40
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^2
+  roman_B1_3:
     prior:
       min: 0.8
       max: 3
     ref:
       dist: norm
-      loc: 1.7
-      scale: 0.1
-    proposal: 0.1
-    latex: b_\mathrm{1-DES}^3
-  DES_B1_4:
+      loc: 1.55
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^3
+  roman_B1_4:
     prior:
       min: 0.8
       max: 3
     ref:
       dist: norm
-      loc: 1.8
-      scale: 0.1
-    proposal: 0.1
-    latex: b_\mathrm{1-DES}^4
-  DES_B1_5:
+      loc: 1.71
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^4
+  roman_B1_5:
     prior:
       min: 0.8
       max: 3
     ref:
       dist: norm
-      loc: 2.0
-      scale: 0.1
-    proposal: 0.1
-    latex: b_\mathrm{1-DES}^5
-  DES_B1_6:
+      loc: 1.90
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^5
+  roman_B1_6:
     prior:
       min: 0.8
       max: 3
     ref:
       dist: norm
-      loc: 2.2
-      scale: 0.1
-    proposal: 0.1
-    latex: b_\mathrm{1-DES}^6
+      loc: 2.15
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^6
+  roman_B1_7:
+    prior:
+      min: 0.8
+      max: 3
+    ref:
+      dist: norm
+      loc: 2.52
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^7
+  roman_B1_8:
+    prior:
+      min: 0.8
+      max: 4
+    ref:
+      dist: norm
+      loc: 3.44
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^8
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
-  DES_B2_1:
-    value: 0.0
-    latex: b_\mathrm{2-DES}^1
-  DES_B2_2:
-    value: 0.0
-    latex: b_\mathrm{2-DES}^2
-  DES_B2_3:
-    value: 0.0
-    latex: b_\mathrm{2-DES}^3
-  DES_B2_4:
-    value: 0.0
-    latex: b_\mathrm{2-DES}^4
-  DES_B2_5:
-    value: 0.0
-    latex: b_\mathrm{2-DES}^5
-  DES_B2_6:
-    value: 0.0
-    latex: b_\mathrm{2-DES}^6
+  # Nonlinear Galaxy Bias
+  # Ignore
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
-  #
-  DES_BMAG_1:
-    value: 0.43
-    latex: b_\mathrm{BMAG-DES}^1
-  DES_BMAG_2:
-    value: 0.30
-    latex: b_\mathrm{BMAG-DES}^2
-  DES_BMAG_3:
-    value: 1.75
-    latex: b_\mathrm{BMAG-DES}^3
-  DES_BMAG_4:
-    value: 1.94
-    latex: b_\mathrm{BMAG-DES}^4
-  DES_BMAG_5:
-    value: 1.56
-    latex: b_\mathrm{BMAG-DES}^5
-  DES_BMAG_6:
-    value: 2.96
-    latex: b_\mathrm{BMAG-DES}^6
-
+  # Lens Sample Magnification Bias
+  # Ignore
+  
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # Lens galaxy photo-z stretch parameters
-  DES_STRETCH_L1:
-    prior:
-      dist: norm
-      loc: 0.975
-      scale: 0.062
-    ref:
-      dist: norm
-      loc: 0.975
-      scale: 0.062
-    proposal: 0.03
-    latex: \sigma z_\mathrm{l,DES}^1
-  DES_STRETCH_L2:
-    prior:
-      dist: norm
-      loc: 1.306
-      scale: 0.093
-    ref:
-      dist: norm
-      loc: 1.306
-      scale: 0.093
-    proposal: 0.045
-    latex: \sigma z_\mathrm{l,DES}^2
-  DES_STRETCH_L3:
-    prior:
-      dist: norm
-      loc: 0.87
-      scale: 0.054
-    ref:
-      dist: norm
-      loc: 0.87
-      scale: 0.054
-    proposal: 0.025
-    latex: \sigma z_\mathrm{l,DES}^3
-  DES_STRETCH_L4:
-    prior:
-      dist: norm
-      loc: 0.918
-      scale: 0.051
-    ref:
-      dist: norm
-      loc: 0.918
-      scale: 0.051
-    proposal: 0.025
-    latex: \sigma z_\mathrm{l,DES}^4
-  DES_STRETCH_L5:
-    prior:
-      dist: norm
-      loc: 1.08
-      scale: 0.067
-    ref:
-      dist: norm
-      loc: 1.08
-      scale: 0.067
-    proposal: 0.0335
-    latex: \sigma z_\mathrm{l,DES}^5
-  DES_STRETCH_L6:
-    prior:
-      dist: norm
-      loc: 0.845
-      scale: 0.073
-    ref:
-      dist: norm
-      loc: 0.845
-      scale: 0.073
-    proposal: 0.0365
-    latex: \sigma z_\mathrm{l,DES}^6
+  # Ignore
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -306,11 +249,31 @@
     latex: \Omega_\mathrm{m}
   mnu:
     prior:
-      min: 0.0558
+      min: 0.0
       max: 0.6
     ref:
       dist: norm
       loc: 0.06
       scale: 0.001
     proposal: 0.01  
-    latex: \m_\\nu
+    latex: m_{\nu}
+  w:
+    prior:
+      min: -2.0
+      max: -0.01
+    ref:
+      dist: norm
+      loc: -1.0
+      scale: 0.1
+    proposal: 0.1 
+    latex: w_{0,\mathrm{DE}}
+  wa:
+    prior:
+      min: -2.5
+      max: 2.5
+    ref:
+      dist: norm
+      loc: -0.0
+      scale: 0.1
+    proposal: 0.1 
+    latex: w_{a,\mathrm{DE}}
