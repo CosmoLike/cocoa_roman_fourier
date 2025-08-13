@@ -164,7 +164,7 @@ valid_samples, valid_data_vectors, valid_sigma8 = get_data_vectors(params_valid,
 # ============ Clean training data & save ====================
 if(rank==0):
     # ================== Chi_sq cut ==========================
-    def get_chi_sq_cut(train_data_vectors):
+    def get_chi_sq_cut(train_data_vectors, temperature):
         chi_sq_list = []
         for dv in train_data_vectors:
             delta_dv = (dv - config.dv_lkl)[config.mask_lkl]
@@ -172,17 +172,17 @@ if(rank==0):
             chi_sq_list.append(chi_sq)
         chi_sq_arr = np.array(chi_sq_list)
         print(f'chi2 difference [{np.nanmin(chi_sq_arr)}, {np.nanmax(chi_sq_arr)}]')
-        select_chi_sq = (chi_sq_arr < config.chi_sq_cut)
+        select_chi_sq = (chi_sq_arr < config.chi_sq_cut/temperature)
         return select_chi_sq
     # ===============================================
-    select_chi_sq_train = get_chi_sq_cut(train_data_vectors)
+    select_chi_sq_train = get_chi_sq_cut(train_data_vectors, config.gtemp_t)
     selected_obj_train = np.sum(select_chi_sq_train)
     total_obj_train    = len(train_data_vectors)
     print(f'[calculate_dv.py] Select {selected_obj_train} training sample out of {total_obj_train}!')
-    select_chi_sq_valid = get_chi_sq_cut(valid_data_vectors)
+    select_chi_sq_valid = get_chi_sq_cut(valid_data_vectors, config.gtemp_v)
     selected_obj_valid = np.sum(select_chi_sq_valid)
     total_obj_valid    = len(valid_data_vectors)
-    print(f'[calculate_dv.py] Select {selected_obj_valid} training sample out of {total_obj_valid}!')
+    print(f'[calculate_dv.py] Select {selected_obj_valid} validation sample out of {total_obj_valid}!')
     # ===============================================
     train_data_vectors = train_data_vectors[select_chi_sq_train]
     train_samples      = train_samples[select_chi_sq_train]
