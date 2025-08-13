@@ -1,0 +1,6 @@
+path: null
+data_file: roman_fourier_challenge1_medium.dataset
+train_config: "./projects/roman_fourier/emulator/train_emu_resmlp512_HF_NLA.yaml"
+derive_sigma8: True
+output_params: ["sigma8"]
+params: !defaults [params_roman_3x2pt_emu]
