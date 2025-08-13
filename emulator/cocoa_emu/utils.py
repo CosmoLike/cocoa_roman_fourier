@@ -148,16 +148,18 @@ def get_gaussian_samples(param_fid, param_label, param_prior, N_sample,
             ombh2 = _par_dict["omegab"]*(_par_dict["H0"]/100)**2
             if ombh2<0.005 or ombh2 > 0.04:
                 return -np.inf
+        if "w" in param_label and "wa" in param_label:
+            _par_dict = {k:v for k,v in zip(param_label, param)}
+            w0 = _par_dict["w"]
+            wa = _par_dict["wa"]
+            if w0>= -0.01 or wa+w0>-0.01:
+                return -np.inf
         return ans
     def lnlkl(param):
         diff = param - gauss_cen
         return (-0.5/temp) * (diff @ invcov @ np.transpose(diff))
     def lnpost(param):
-        lnpr = lnprior(param)
-        if np.isfinite(lnpr):
-            return lnprior(param)+lnlkl(param)
-        else:
-            return -np.inf
+        return lnprior(param)+lnlkl(param)
 
     # start sampling
     print(f'[{rank}/{size}] Retrieving samples...')
@@ -169,9 +171,11 @@ def get_gaussian_samples(param_fid, param_label, param_prior, N_sample,
         while not np.isfinite(lnprior(_p0)):
             _p0 = gauss_cen + 0.01*param_std*np.random.normal(size=Ndim)
         p0[i] = _p0
-    # p0 = gauss_cen[np.newaxis] + 0.01*param_std[np.newaxis]*np.random.normal(size=(Nwalker, Ndim))
     sampler = emcee.EnsembleSampler(Nwalker, Ndim, lnpost)
+    print(f'Example eval: {lnpost(p0[0])}')
+    print(f'[{rank}/{size}] Running MCMC to retrieve training data. {Nwalker} walkers, {Ndim} parameters, {N_mcmc} steps.')
     sampler.run_mcmc(p0, N_mcmc, progress=True)
+    print(f'MCMC done')
     sample = sampler.get_chain(flat=True,thin=10,discard=int(N_mcmc*0.8))
     subset = np.random.choice(len(sample), size=N_sample, replace=False)
     print(f'[{rank}/{size}] Retrieved {N_sample} parameters.')

@@ -172,7 +172,7 @@ if(rank==0):
             chi_sq_list.append(chi_sq)
         chi_sq_arr = np.array(chi_sq_list)
         print(f'chi2 difference [{np.nanmin(chi_sq_arr)}, {np.nanmax(chi_sq_arr)}]')
-        select_chi_sq = (chi_sq_arr < config.chi_sq_cut/temperature)
+        select_chi_sq = (chi_sq_arr < (config.chi_sq_cut * temperature))
         return select_chi_sq
     # ===============================================
     select_chi_sq_train = get_chi_sq_cut(train_data_vectors, config.gtemp_t)

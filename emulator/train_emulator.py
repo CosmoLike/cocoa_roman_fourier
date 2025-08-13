@@ -1,8 +1,10 @@
 import sys
 import os
+print("Current working directory: ", os.getcwd())
 from os.path import join as pjoin
 import numpy as np
 import torch
+import cobaya
 from cocoa_emu import Config
 from cocoa_emu.emulator import NNEmulator
 from argparse import ArgumentParser
@@ -75,6 +77,8 @@ for i in range(len(config.probe_mask)):
                 batch_size=config.batch_size, n_epochs=config.n_epochs, 
                 loss_type=config.loss_type)
         emu.save(emu_fn)
+    else:
+        print(f'Emulator files exist, load from {emu_fn}')
 # train sigma_8 emulator
 if (config.derived==1):
     print("============= Training sigma8 Emulator =================")
@@ -92,3 +96,5 @@ if (config.derived==1):
             batch_size=config.batch_size, n_epochs=config.n_epochs,
             loss_type=config.loss_type)
         emu_s8.save(emu_s8_fn)
+    else:
+      print(f'Emulator files exist, load from {emu_s8_fn}')

@@ -411,6 +411,17 @@ class NNEmulator:
                             nn.Linear(int_dim_res, OUTPUT_DIM_REDUCED),
                             Affine()
                         )
+        elif(model==7):
+            print("Using Evan's simplified ResNet model but larger...")
+            int_dim_res = 512
+            self.model = nn.Sequential(
+                            nn.Linear(self.N_DIM_REDUCED, int_dim_res),
+                            Better_ResBlock(int_dim_res, int_dim_res),
+                            Better_ResBlock(int_dim_res, int_dim_res),
+                            Better_ResBlock(int_dim_res, int_dim_res),
+                            nn.Linear(int_dim_res, OUTPUT_DIM_REDUCED),
+                            Affine()
+                        )
         else:
             print(f'Can not support model {model}!')
             exit(1)

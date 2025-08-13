@@ -2,7 +2,7 @@
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # WL photo-z errors
-  DES_DZ_S1:
+  roman_DZ_S1:
     prior:
       dist: norm
       loc: 0.0
@@ -12,8 +12,8 @@
       loc: 0.0
       scale: 0.018
     proposal: 0.009
-    latex: \Delta z_\mathrm{s,DES}^1
-  DES_DZ_S2:
+    latex: \Delta z_\mathrm{s,roman}^1
+  roman_DZ_S2:
     prior:
       dist: norm
       loc: 0.0
@@ -23,8 +23,8 @@
       loc: 0.0
       scale: 0.015
     proposal: 0.0075
-    latex: \Delta z_\mathrm{s,DES}^2
-  DES_DZ_S3:
+    latex: \Delta z_\mathrm{s,roman}^2
+  roman_DZ_S3:
     prior:
       dist: norm
       loc: 0.0
@@ -34,8 +34,8 @@
       loc: 0.0
       scale: 0.011
     proposal: 0.0055
-    latex: \Delta z_\mathrm{s,DES}^3
-  DES_DZ_S4:
+    latex: \Delta z_\mathrm{s,roman}^3
+  roman_DZ_S4:
     prior:
       dist: norm
       loc: 0.0
@@ -45,12 +45,12 @@
       loc: 0.0
       scale: 0.017
     proposal: 0.0085
-    latex: \Delta z_\mathrm{s,DES}^4
+    latex: \Delta z_\mathrm{s,roman}^4
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # Intrinsic alignment
-  DES_A1_1:
+  roman_A1_1:
     prior:
       min: -5
       max:  5
@@ -59,8 +59,8 @@
       loc: 0.7
       scale: 0.5
     proposal: 0.75
-    latex: A_\mathrm{1-IA,DES}^1
-  DES_A1_2:
+    latex: A_\mathrm{1-IA,roman}^1
+  roman_A1_2:
     prior:
       min: -5
       max:  5
@@ -69,48 +69,48 @@
       loc: -1.7
       scale: 0.5
     proposal: 0.75
-    latex: A_\mathrm{1-IA,DES}^2
-  DES_A1_3:
+    latex: A_\mathrm{1-IA,roman}^2
+  roman_A1_3:
     value: 0
-    latex: A_\mathrm{1-IA,DES}^3        
-  DES_A1_4:
+    latex: A_\mathrm{1-IA,roman}^3        
+  roman_A1_4:
     value: 0
-    latex: A_\mathrm{1-IA,DES}^4  
+    latex: A_\mathrm{1-IA,roman}^4  
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
-  DES_A2_1:
+  roman_A2_1:
     value: 0.0
-    latex: A_\mathrm{2-IA,DES}^1
-  DES_A2_2:
+    latex: A_\mathrm{2-IA,roman}^1
+  roman_A2_2:
     value: 0.0
-    latex: A_\mathrm{2-IA,DES}^2
-  DES_A2_3:
+    latex: A_\mathrm{2-IA,roman}^2
+  roman_A2_3:
     value: 0.0
-    latex: A_\mathrm{2-IA,DES}^3
-  DES_A2_4:
+    latex: A_\mathrm{2-IA,roman}^3
+  roman_A2_4:
     value: 0.0
-    latex: A_\mathrm{2-IA,DES}^4
+    latex: A_\mathrm{2-IA,roman}^4
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
-  DES_BTA_1:
+  roman_BTA_1:
     value: 0
-    latex: A_\mathrm{BTA-IA,DES}^1
-  DES_BTA_2:
+    latex: A_\mathrm{BTA-IA,roman}^1
+  roman_BTA_2:
     value: 0
-    latex: A_\mathrm{BTA-IA,DES}^2
-  DES_BTA_3:
+    latex: A_\mathrm{BTA-IA,roman}^2
+  roman_BTA_3:
     value: 0
-    latex: A_\mathrm{BTA-IA,DES}^3        
-  DES_BTA_4:
+    latex: A_\mathrm{BTA-IA,roman}^3        
+  roman_BTA_4:
     value: 0
-    latex: A_\mathrm{BTA-IA,DES}^4
+    latex: A_\mathrm{BTA-IA,roman}^4
  # ------------------------------------------------------------------------
  # ------------------------------------------------------------------------
  # ------------------------------------------------------------------------
  # Lensing photo-z errors
-  DES_DZ_L1:
+  roman_DZ_L1:
     prior:
       dist: norm
       loc: -0.009
@@ -120,8 +120,8 @@
       loc: -0.009
       scale: 0.007
     proposal: 0.0035
-    latex: \Delta z_\mathrm{l,DES}^1
-  DES_DZ_L2:
+    latex: \Delta z_\mathrm{l,roman}^1
+  roman_DZ_L2:
     prior:
       dist: norm
       loc: -0.035
@@ -131,8 +131,8 @@
       loc: -0.035
       scale: 0.011
     proposal: 0.0055
-    latex: \Delta z_\mathrm{l,DES}^2
-  DES_DZ_L3:
+    latex: \Delta z_\mathrm{l,roman}^2
+  roman_DZ_L3:
     prior:
       dist: norm
       loc: -0.005
@@ -142,8 +142,8 @@
       loc: -0.005
       scale: 0.006
     proposal: 0.003
-    latex: \Delta z_\mathrm{l,DES}^3
-  DES_DZ_L4:
+    latex: \Delta z_\mathrm{l,roman}^3
+  roman_DZ_L4:
     prior:
       dist: norm
       loc: -0.007
@@ -153,8 +153,8 @@
       loc: -0.007
       scale: 0.006
     proposal: 0.003
-    latex: \Delta z_\mathrm{l,DES}^4
-  DES_DZ_L5:
+    latex: \Delta z_\mathrm{l,roman}^4
+  roman_DZ_L5:
     prior:
       dist: norm
       loc: 0.002
@@ -164,8 +164,8 @@
       loc: 0.002
       scale: 0.007
     proposal: 0.0035
-    latex: \Delta z_\mathrm{l,DES}^5
-  DES_DZ_L6:
+    latex: \Delta z_\mathrm{l,roman}^5
+  roman_DZ_L6:
     prior:
       dist: norm
       loc: 0.002
@@ -175,13 +175,13 @@
       loc: 0.002
       scale: 0.008
     proposal: 0.004
-    latex: \Delta z_\mathrm{l,DES}^6
+    latex: \Delta z_\mathrm{l,roman}^6
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # Bin bias parameters
-  DES_B1_1:
+  roman_B1_1:
     prior:
       min: 0.8
       max: 3
@@ -190,8 +190,8 @@
       loc: 1.5
       scale: 0.1
     proposal: 0.1
-    latex: b_\mathrm{1-DES}^1
-  DES_B1_2:
+    latex: b_\mathrm{1-roman}^1
+  roman_B1_2:
     prior:
       min: 0.8
       max: 3
@@ -200,8 +200,8 @@
       loc: 1.6
       scale: 0.1
     proposal: 0.1
-    latex: b_\mathrm{1-DES}^2
-  DES_B1_3:
+    latex: b_\mathrm{1-roman}^2
+  roman_B1_3:
     prior:
       min: 0.8
       max: 3
@@ -210,8 +210,8 @@
       loc: 1.7
       scale: 0.1
     proposal: 0.1
-    latex: b_\mathrm{1-DES}^3
-  DES_B1_4:
+    latex: b_\mathrm{1-roman}^3
+  roman_B1_4:
     prior:
       min: 0.8
       max: 3
@@ -220,8 +220,8 @@
       loc: 1.8
       scale: 0.1
     proposal: 0.1
-    latex: b_\mathrm{1-DES}^4
-  DES_B1_5:
+    latex: b_\mathrm{1-roman}^4
+  roman_B1_5:
     prior:
       min: 0.8
       max: 3
@@ -230,8 +230,8 @@
       loc: 2.0
       scale: 0.1
     proposal: 0.1
-    latex: b_\mathrm{1-DES}^5
-  DES_B1_6:
+    latex: b_\mathrm{1-roman}^5
+  roman_B1_6:
     prior:
       min: 0.8
       max: 3
@@ -240,58 +240,58 @@
       loc: 2.2
       scale: 0.1
     proposal: 0.1
-    latex: b_\mathrm{1-DES}^6
+    latex: b_\mathrm{1-roman}^6
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
-  DES_B2_1:
+  roman_B2_1:
     value: 0.0
-    latex: b_\mathrm{2-DES}^1
-  DES_B2_2:
+    latex: b_\mathrm{2-roman}^1
+  roman_B2_2:
     value: 0.0
-    latex: b_\mathrm{2-DES}^2
-  DES_B2_3:
+    latex: b_\mathrm{2-roman}^2
+  roman_B2_3:
     value: 0.0
-    latex: b_\mathrm{2-DES}^3
-  DES_B2_4:
+    latex: b_\mathrm{2-roman}^3
+  roman_B2_4:
     value: 0.0
-    latex: b_\mathrm{2-DES}^4
-  DES_B2_5:
+    latex: b_\mathrm{2-roman}^4
+  roman_B2_5:
     value: 0.0
-    latex: b_\mathrm{2-DES}^5
-  DES_B2_6:
+    latex: b_\mathrm{2-roman}^5
+  roman_B2_6:
     value: 0.0
-    latex: b_\mathrm{2-DES}^6
+    latex: b_\mathrm{2-roman}^6
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   #
-  DES_BMAG_1:
+  roman_BMAG_1:
     value: 0.43
-    latex: b_\mathrm{BMAG-DES}^1
-  DES_BMAG_2:
+    latex: b_\mathrm{BMAG-roman}^1
+  roman_BMAG_2:
     value: 0.30
-    latex: b_\mathrm{BMAG-DES}^2
-  DES_BMAG_3:
+    latex: b_\mathrm{BMAG-roman}^2
+  roman_BMAG_3:
     value: 1.75
-    latex: b_\mathrm{BMAG-DES}^3
-  DES_BMAG_4:
+    latex: b_\mathrm{BMAG-roman}^3
+  roman_BMAG_4:
     value: 1.94
-    latex: b_\mathrm{BMAG-DES}^4
-  DES_BMAG_5:
+    latex: b_\mathrm{BMAG-roman}^4
+  roman_BMAG_5:
     value: 1.56
-    latex: b_\mathrm{BMAG-DES}^5
-  DES_BMAG_6:
+    latex: b_\mathrm{BMAG-roman}^5
+  roman_BMAG_6:
     value: 2.96
-    latex: b_\mathrm{BMAG-DES}^6
+    latex: b_\mathrm{BMAG-roman}^6
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # Lens galaxy photo-z stretch parameters
-  DES_STRETCH_L1:
+  roman_STRETCH_L1:
     prior:
       dist: norm
       loc: 0.975
@@ -301,8 +301,8 @@
       loc: 0.975
       scale: 0.062
     proposal: 0.03
-    latex: \sigma z_\mathrm{l,DES}^1
-  DES_STRETCH_L2:
+    latex: \sigma z_\mathrm{l,roman}^1
+  roman_STRETCH_L2:
     prior:
       dist: norm
       loc: 1.306
@@ -312,8 +312,8 @@
       loc: 1.306
       scale: 0.093
     proposal: 0.045
-    latex: \sigma z_\mathrm{l,DES}^2
-  DES_STRETCH_L3:
+    latex: \sigma z_\mathrm{l,roman}^2
+  roman_STRETCH_L3:
     prior:
       dist: norm
       loc: 0.87
@@ -323,8 +323,8 @@
       loc: 0.87
       scale: 0.054
     proposal: 0.025
-    latex: \sigma z_\mathrm{l,DES}^3
-  DES_STRETCH_L4:
+    latex: \sigma z_\mathrm{l,roman}^3
+  roman_STRETCH_L4:
     prior:
       dist: norm
       loc: 0.918
@@ -334,8 +334,8 @@
       loc: 0.918
       scale: 0.051
     proposal: 0.025
-    latex: \sigma z_\mathrm{l,DES}^4
-  DES_STRETCH_L5:
+    latex: \sigma z_\mathrm{l,roman}^4
+  roman_STRETCH_L5:
     prior:
       dist: norm
       loc: 1.08
@@ -345,8 +345,8 @@
       loc: 1.08
       scale: 0.067
     proposal: 0.0335
-    latex: \sigma z_\mathrm{l,DES}^5
-  DES_STRETCH_L6:
+    latex: \sigma z_\mathrm{l,roman}^5
+  roman_STRETCH_L6:
     prior:
       dist: norm
       loc: 0.845
@@ -356,13 +356,13 @@
       loc: 0.845
       scale: 0.073
     proposal: 0.0365
-    latex: \sigma z_\mathrm{l,DES}^6
+    latex: \sigma z_\mathrm{l,roman}^6
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # Shear calibration parameters
-  DES_M1:
+  roman_M1:
     prior:
       dist: norm
       loc: -0.0063
@@ -372,8 +372,8 @@
       loc: -0.0063
       scale: 0.0091
     proposal: 0.0045
-    latex: m_\mathrm{DES}^1
-  DES_M2:
+    latex: m_\mathrm{roman}^1
+  roman_M2:
     prior:
       dist: norm
       loc: -0.0198
@@ -383,8 +383,8 @@
       loc: -0.0198
       scale: 0.0078
     proposal: 0.004
-    latex: m_\mathrm{DES}^2
-  DES_M3:
+    latex: m_\mathrm{roman}^2
+  roman_M3:
     prior:
       dist: norm
       loc: -0.0241
@@ -394,8 +394,8 @@
       loc: -0.0241
       scale: 0.0076
     proposal: 0.004
-    latex: m_\mathrm{DES}^3
-  DES_M4:
+    latex: m_\mathrm{roman}^3
+  roman_M4:
     prior:
       dist: norm
       loc: -0.0369
@@ -405,13 +405,13 @@
       loc: -0.0369
       scale: 0.0076
     proposal: 0.004
-    latex: m_\mathrm{DES}^4 
+    latex: m_\mathrm{roman}^4 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # Point Mass parameters
   # Now we use analytical marg. fold into covariance matrix
-  # DES_PM1:
+  # roman_PM1:
   #   prior:
   #     dist: norm
   #     loc: 0.0
@@ -421,8 +421,8 @@
   #     loc: 0.0
   #     scale: 10000
   #   proposal: 5000
-  #   latex: PM_\mathrm{DES}^1
-  # DES_PM2:
+  #   latex: PM_\mathrm{roman}^1
+  # roman_PM2:
   #   prior:
   #     dist: norm
   #     loc: 0.0
@@ -432,8 +432,8 @@
   #     loc: 0.0
   #     scale: 10000
   #   proposal: 5000
-  #   latex: PM_\mathrm{DES}^2
-  # DES_PM3:
+  #   latex: PM_\mathrm{roman}^2
+  # roman_PM3:
   #   prior:
   #     dist: norm
   #     loc: 0.0
@@ -443,8 +443,8 @@
   #     loc: 0.0
   #     scale: 10000
   #   proposal: 5000
-  #   latex: PM_\mathrm{DES}^3
-  # DES_PM4:
+  #   latex: PM_\mathrm{roman}^3
+  # roman_PM4:
   #   prior:
   #     dist: norm
   #     loc: 0.0
@@ -454,8 +454,8 @@
   #     loc: 0.0
   #     scale: 10000
   #   proposal: 5000
-  #   latex: PM_\mathrm{DES}^4
-  # DES_PM5:
+  #   latex: PM_\mathrm{roman}^4
+  # roman_PM5:
   #   prior:
   #     dist: norm
   #     loc: 0.0
@@ -465,8 +465,8 @@
   #     loc: 0.0
   #     scale: 10000
   #   proposal: 5000
-  #   latex: PM_\mathrm{DES}^5
-  # DES_PM6:
+  #   latex: PM_\mathrm{roman}^5
+  # roman_PM6:
   #   prior:
   #     dist: norm
   #     loc: 0.0
@@ -476,42 +476,42 @@
   #     loc: 0.0
   #     scale: 10000
   #   proposal: 5000
-  #   latex: PM_\mathrm{DES}^6
-  DES_PM1:
+  #   latex: PM_\mathrm{roman}^6
+  roman_PM1:
     value: 0.0
-    latex: PM_\mathrm{DES}^1
-  DES_PM2:
+    latex: PM_\mathrm{roman}^1
+  roman_PM2:
     value: 0.0
-    latex: PM_\mathrm{DES}^2
-  DES_PM3:
+    latex: PM_\mathrm{roman}^2
+  roman_PM3:
     value: 0.0
-    latex: PM_\mathrm{DES}^3
-  DES_PM4:
+    latex: PM_\mathrm{roman}^3
+  roman_PM4:
     value: 0.0
-    latex: PM_\mathrm{DES}^4
-  DES_PM5:
+    latex: PM_\mathrm{roman}^4
+  roman_PM5:
     value: 0.0
-    latex: PM_\mathrm{DES}^5
-  DES_PM6:
+    latex: PM_\mathrm{roman}^5
+  roman_PM6:
     value: 0.0
-    latex: PM_\mathrm{DES}^6
+    latex: PM_\mathrm{roman}^6
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # Baryonic effects PCs amplitudes
-  DES_BARYON_Q1:
+  roman_BARYON_Q1:
     value: 0.0
-    latex: Q_\mathrm{DES}^1
-  DES_BARYON_Q2:
+    latex: Q_\mathrm{roman}^1
+  roman_BARYON_Q2:
     value: 0.0
-    latex: Q_\mathrm{DES}^2
-  DES_BARYON_Q3:
+    latex: Q_\mathrm{roman}^2
+  roman_BARYON_Q3:
     value: 0.0
-    latex: Q_\mathrm{DES}^3
-  DES_BARYON_Q4:
+    latex: Q_\mathrm{roman}^3
+  roman_BARYON_Q4:
     value: 0.0
-    latex: Q_\mathrm{DES}^4
+    latex: Q_\mathrm{roman}^4
 
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------

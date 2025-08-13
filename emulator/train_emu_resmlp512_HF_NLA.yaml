@@ -18,8 +18,8 @@ stop_at_error: False
 
 likelihood:
   roman_fourier.roman_fourier_3x2pt:
-    path: ./external_modules/data/roman_fourier
-    data_file: roman_fourier_challenge1_medium.dataset
+    path: /groups/timeifler/jiachuanxu/cocoa_v4/Cocoa/external_modules/data/roman_fourier
+    data_file: roman_fourier_challenge1_medium_emutrain.dataset
     accuracyboost: 1.0
     integration_accuracy: 0
     kmax_boltzmann: 20.0
@@ -89,7 +89,7 @@ params:
     drop: true
   mnu:
     prior:
-      min: 0.03
+      min: 0.0
       max: 0.6
     ref:
       dist: norm
@@ -538,7 +538,7 @@ theory:
 emulator:
   survey_name: "roman"
   io:
-    savedir: /xdisk/timeifler/jiachuanxu/roman_fourier_emulator_output
+    savedir: /xdisk/timeifler/jiachuanxu/roman_fourier_emulator_output_v2
     save_train_data: true
     save_intermediate_model: true
   init_sample:
@@ -559,7 +559,7 @@ emulator:
     gauss_shift_valid:
   training:
     emu_type: nn
-    nn_model: 6
+    nn_model: 7
     chi_sq_cut: 1.0e+5
     n_train_iter: 1
     batch_size: 256
