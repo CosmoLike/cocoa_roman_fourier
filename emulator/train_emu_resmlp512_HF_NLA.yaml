@@ -581,3 +581,11 @@ emulator:
     n_burn_in: 500000
     #n_burn_in: 5000
     n_thin: 10
+  ### OPTIONAL: prior setting of shear calibration bias
+  shear_calib:
+    # gaussian prior
+    prior_std: [0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005]
+  ### OPTIONAL: flat prior of baryonic feedback PCs
+  baryons:
+    # flat prior, [[Q1_min, Q1_max], [Q2_min, Q2_max], [Q3_min, Q3_max], ...]
+    prior: [[-20.0, 20.0], [-20.0, 20.0]]
