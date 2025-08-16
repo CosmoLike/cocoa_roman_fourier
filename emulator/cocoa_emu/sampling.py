@@ -121,11 +121,7 @@ class EmuSampler:
         self.m_shear_prior_parameters = np.array([self.m_shear_fid, self.m_shear_prior_std]).T
         ### Read baryonic feedback PCs prior
         if(self.n_pcas_baryon > 0):
-            baryon_priors = []
-            for i in range(self.n_pcas_baryon):
-                baryon_prior_i = self.config_args_baryons['prior_Q%d'%(i+1)].split(',')
-                baryon_priors.append([float(baryon_prior_i[0]), float(baryon_prior_i[-1])])
-            self.baryon_priors = np.array(baryon_priors)
+            self.baryon_priors = np.array(self.config_args_baryons['prior'])
             print("baryon_priors: "+str(self.baryon_priors))
 
     def get_starting_pos(self):
