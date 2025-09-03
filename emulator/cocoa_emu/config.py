@@ -4,7 +4,7 @@ import os
 from os.path import join as pjoin
 import re
 import copy
-from .utils import readDatasetFile, get_shear_multi_bias_bitmask
+from .utils import readDatasetFile, get_shear_multi_bias_bitmask, get_linear_gal_bias_bitmask
 
 try:
     from mpi4py import MPI
@@ -95,6 +95,9 @@ class Config:
         ]
         self.probe_total_size = np.sum(self.probe_size)
         self.shear_calib_mask = get_shear_multi_bias_bitmask(
+            self.source_ntomo, self.lens_ntomo, self.ggl_exclude, self.Nell,
+            type_2pcf = "fourier")
+        self.galaxy_bias_mask = get_linear_gal_bias_bitmask(
             self.source_ntomo, self.lens_ntomo, self.ggl_exclude, self.Nell,
             type_2pcf = "fourier")
 
@@ -272,12 +275,15 @@ class Config:
         self.n_pars_cosmo = 0
         self.n_fast_pars = 0
         self.m_shear_fid = np.zeros(self.source_ntomo)
+        self.gal_bias_fid= np.ones(self.lens_ntomo)
         self.n_pcas_baryon = 0
+        self.fast_linear_gal_bias = False
 
         for param in params_list:
             keys = param_args[param].keys()
             _args = param_args[param]
             # fast parameter: shear calibration bias
+            # must be fixed, only have value and latex
             match = re.match(self.survey_name+r'_M(\d)', param)
             if match:
                 i_src = int(match.group(1)) - 1
@@ -285,12 +291,29 @@ class Config:
                 self.m_shear_fid[i_src] = _args["value"]
                 continue
             # fast parameter: baryonic feedback
+            # must be fixed, only have value and latex
             match = re.match(self.survey_name+r'_BARYON_Q(\d)', param)
             if match:
                 i_PC = int(match.group(1)) - 1
                 self.n_fast_pars += 1
                 self.n_pcas_baryon += 1
                 continue
+            # fast parameter: linear galaxy bias
+            '''
+            Note that linear galaxy bias can be slow or fast params.
+            If we do not emulate linear galaxy bias, we fix them to 
+            fiducial values and read them here.
+            Otherwise, we leave it to slow parameter section below
+            '''
+            match = re.match(self.survey_name+r'_B1_(\d)', param)
+            if match and ("value" in keys):
+                i_lens = int(match.group(1)) - 1
+                self.gal_bias_fid[i_lens] = _args["value"]
+                self.n_fast_pars += 1
+                mprint(f'{param}={self.gal_bias_fid[i_lens]} is treated as fast param')
+                self.fast_linear_gal_bias = True
+                continue
+
             # slow parameters: skip if not being sampled directly
             if(('value' in keys) or ('derived' in keys) or (len(keys)<=1)):
                 continue
@@ -328,6 +351,7 @@ class Config:
                 # nuisance parameters: linear galaxy bias (lens sample)
                 elif match.group(1)=='B1':
                     self.running_params_type.append(3)
+                    self.fast_linear_gal_bias = False
                 else:
                     mprint(f'[config.py:Config.load_params]: Can not support param {param} now!')
                     exit(-1)

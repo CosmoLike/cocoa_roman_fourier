@@ -439,6 +439,12 @@ class NNEmulator:
         if self.reduce_lr:
             print('Reduce LR on plateau: ', self.reduce_lr)
             self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optim, 'min', patience=10)
+            '''
+            Haley:
+            Try patience=15, factor for LR decrease, etc.
+            Batch size 256, dimension of parameter space 17
+            Linear galaxy bias as fast parameter
+            '''
 
         ### JX: Initialize model weights
         for m in self.model.modules():

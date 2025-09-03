@@ -69,6 +69,10 @@ class _cosmolike_emu_prototype_base(DataSetLikelihood):
 		self.n_pars_cosmo      = config.n_pars_cosmo
 		self.running_params    = config.running_params
 		self.m_shear_fid       = config.m_shear_fid
+		# depending whether linear galaxy bias is fast params
+		self.fast_linear_gal_bias = config.fast_linear_gal_bias
+		self.gal_bias_fid = config.gal_bias_fid
+		self.galaxy_bias_mask = config.galaxy_bias_mask
 
 		### read emulators
 		# try include emu_list as object attribute. If not work, global variable
@@ -128,13 +132,13 @@ class _cosmolike_emu_prototype_base(DataSetLikelihood):
 				self.log.info(f'Probe {probe_fmts[i]} has {_Ndp} elements after scale cut.')
 		self.masked_inv_cov = config.masked_inv_cov.copy()
 
-	def emu_predict(self, theta):
+	def _emu_predict(self, theta):
 		''' Get the emulator prediction for slow parameters
 		'''
 		theta = torch.Tensor(theta)
 		# evaluate data vector using list of emulators
 		model_vectors = []
-		for i in range(6):
+		for i in range(3):
 			if self.probe_mask[i]==1:
 				_mv = self.emu_list[i].predict(theta)[0]
 			else:
@@ -152,18 +156,26 @@ class _cosmolike_emu_prototype_base(DataSetLikelihood):
 	def get_model_vector_emu(self, **params_values):
 		''' Evaluate model vector given parsed input sampled parameter array
 		Note that linear galaxy bias are slow parameters due to magnification
-		bias and RSD.
+		bias and RSD. For quick forecast, linear galaxy can be treated as fast
+		parameters
 		'''
 		# get model vector from emulated parameters
 		theta = np.array([params_values.get(p, 0.0) for p in self.running_params])
-		mv = self.emu_predict(theta)
+		mv = self._emu_predict(theta)
 
 		# add shear calibration bias
 		m = np.array([params_values.get(self.survey_name+f'_M{i+1}', 0.0) for i in range(self.source_ntomo)])
 		for i in range(self.source_ntomo):
 			factor = ((1+m[i])/(1+self.m_shear_fid[i]))**self.shear_calib_mask[i]
 			mv = factor * mv
-		
+
+		# add linear galaxy bias, if it is fast parameter
+		if self.fast_linear_gal_bias:
+			b1 = np.array([params_values.get(self.survey_name+f'_B1_{i+1}', 0.0) for i in range(self.lens_ntomo)])
+			for i in range(self.lens_ntomo):
+				factor = (b1[i]/self.gal_bias_fid[i])**self.galaxy_bias_mask[i]
+				mv = factor * mv
+
 		# add baryon feedback PCs
 		if self.use_baryon_pca:
 			# Warning: we assume the PCs were created with the same mask
