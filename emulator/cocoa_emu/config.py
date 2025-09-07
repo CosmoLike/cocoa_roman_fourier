@@ -87,6 +87,7 @@ class Config:
         self.lens_ntomo = int(dataset.get("lens_ntomo", 0))
         self.Nell = int(dataset.get("n_cl", 0))
         self.ggl_exclude = self.config_args_lkl["ggl_exclude"]
+        self.lens_eq_src = self.config_args_lkl["lens_equal_source"]
         self.N_ggl_exclude = len(self.ggl_exclude)
         self.probe_size = [
             int(self.source_ntomo*(self.source_ntomo+1)*self.Nell/2.0),
@@ -267,7 +268,8 @@ class Config:
         params_list = param_args.keys()
 
         self.running_params       = []
-        self.running_params_type  = [] # 1:cosmo 2:src nui 3:lens nui
+        # 1:cosmo 2:src nui 3:lens nui 4: nui shared by src and lens
+        self.running_params_type  = []
         self.running_params_latex = []
         self.running_params_fid   = []
         self.running_params_min   = []
@@ -341,11 +343,18 @@ class Config:
                     self.running_params_type.append(2)
                 # nuisance parameters: source photo-z (source sample)
                 elif match.group(1)=='DZ' and match.group(2)=='S':
-                    self.running_params_type.append(2)
+                    _nui_type_ = 4 if self.lens_eq_src else 2
+                    self.running_params_type.append(_nui_type_)
                 # nuisance parameters: lens photo-z (lens sample)
                 elif match.group(1)=='DZ' and match.group(2)=='L':
+                    if self.lens_eq_src:
+                        print(f'ERROR: Please use src photo-z for lens=src!')
+                        exit(-1)
                     self.running_params_type.append(3)
                 # nuisance parameters: lens photo-z stretch (lens sample)
+                # NOTE: so far the stretch is only implemented for lens sample
+                # For source sample or lens=src sample photo-z stretch, 
+                # implement later...
                 elif match.group(1)=='STRETCH':
                     self.running_params_type.append(3)
                 # nuisance parameters: linear galaxy bias (lens sample)
@@ -358,11 +367,18 @@ class Config:
         self.n_dim = len(self.running_params) # total param emulated
         self.running_params_type = np.array(self.running_params_type)
         # params mask for each probe in [cosmic shear, ggl, clustering]
-        self.probe_params_mask = [
-            (self.running_params_type==1)|(self.running_params_type==2),
-            (self.running_params_type==1)|(self.running_params_type==2)|(self.running_params_type==3),
-            (self.running_params_type==1)|(self.running_params_type==3)
-        ]
+        if not self.lens_eq_src:
+            self.probe_params_mask = [
+                (self.running_params_type==1)|(self.running_params_type==2),
+                (self.running_params_type==1)|(self.running_params_type==2)|(self.running_params_type==3),
+                (self.running_params_type==1)|(self.running_params_type==3)
+            ]
+        else:
+            self.probe_params_mask = [
+                (self.running_params_type==1)|(self.running_params_type==2)|(self.running_params_type==4),
+                (self.running_params_type==1)|(self.running_params_type==2)|(self.running_params_type==3)|(self.running_params_type==4),
+                (self.running_params_type==1)|(self.running_params_type==3)|(self.running_params_type==4),
+            ]
 
         mprint(f'config.py: Sampled parameter space loaded.')
         return
