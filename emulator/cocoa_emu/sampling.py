@@ -1,6 +1,7 @@
 import yaml
 import numpy as np
 import torch
+import ipdb
 
 def hard_prior(theta, params_prior):
     is_lower_than_min = bool(np.sum(theta < params_prior[:,0]))
@@ -250,6 +251,7 @@ class EmuSampler:
         # evaluate data vector using list of emulators
         model_vectors = []
         for i in range(3):
+            ipdb.set_trace()
             if self.probe_mask[i]==1:
                 _mv = self.emu_list[i].predict(theta)[0]
             else:
@@ -309,7 +311,6 @@ class EmuSampler:
         ### Slow parameters   
         flat_prior_theta     = theta[self.flat_prior_indices]
         gaussian_prior_theta = theta[self.gaussian_prior_indices]
-                                     self.n_sample_dims-self.n_pcas_baryon]
         if len(flat_prior_theta)>0:
             prior_flat    = hard_prior(flat_prior_theta, self.flat_prior_parameters)
         else:
@@ -323,7 +324,7 @@ class EmuSampler:
         prior_m_shear = 0.
         if self.probe !='wtheta':
             _l, _r = self.fast_shear_cal_bias_index
-            m_shear_theta = theta[_l:_r]:
+            m_shear_theta = theta[_l:_r]
             if not self.block_shear_calib:
                 prior_m_shear = gaussian_prior(m_shear_theta, self.m_shear_prior_parameters)
         # fast linear galaxy bias
