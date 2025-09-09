@@ -94,9 +94,19 @@ mv_list = []
 assert valid_samples.shape[1]==config.n_dim, f'Inconsistent param dimension'+\
 f'{valid_samples.shape[1]} v.s. {config.n_dim}'
 for theta, dv, sigma8 in tqdm(zip(valid_samples, valid_data_vectors, valid_sigma8), total=N_samples):
-    # pad fiducial values for n_fast
-    theta_padded = np.hstack([theta, emu_sampler.m_shear_fid, 
-        np.zeros(emu_sampler.n_pcas_baryon)])
+    ### Padding the fast parameters with fiducial values
+    theta_padded = [theta]
+    # ============== Add shear calibration bias ========================
+    if (emu_sampler.probe!='wtheta'):
+        theta_padded.append(emu_sampler.m_shear_fid)
+    # ============= Add fast linear galaxy bias ========================
+    if (emu_sampler.probe!='xi') and emu_sampler.fast_linear_gal_bias:
+        theta_padded.append(emu_sampler.gal_bias_fid)
+    # ======================== Add baryons =============================
+    if (emu_sampler.probe!='wtheta') and (emu_sampler.n_pcas_baryon > 0):
+        theta_padded.append(np.zeros(emu_sampler.n_pcas_baryon))
+    theta_padded = np.hstack(theta_padded)
+    assert theta_padded.shape[0]==emu_sampler.n_sample_dims, f'Inconsistent dimension between input parameter and emulator interface!'
     mv = emu_sampler.get_data_vector_emu(theta_padded, skip_fast=True)
     diff = (dv-mv)
     dchi2 = diff@config.inv_cov@diff
