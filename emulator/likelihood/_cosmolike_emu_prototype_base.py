@@ -119,8 +119,11 @@ class _cosmolike_emu_prototype_base(DataSetLikelihood):
 		Equivalent to `ci.init_data`
 		'''
 		### prepare data vector & mask
-		self.dv   = config.dv_lkl.copy()
-		self.mask = config.mask_lkl.copy()
+		self.log.info(f'Load data vector from {self.data_vector_file}')
+		self.dv = np.genfromtxt(self.data_vector_file)[:,1]
+		self.log.info(f'Load mask from {self.mask_file}')
+		self.mask = np.loadtxt(self.mask_file)[:,1].astype(bool)
+		#self.mask = config.mask_lkl.copy()
 		# update the mask if some probes are not included
 		for i in range(3):
 			_l, _r = sum(config.probe_size[:i]), sum(config.probe_size[:i+1])
@@ -182,6 +185,16 @@ class _cosmolike_emu_prototype_base(DataSetLikelihood):
 			# We have no way of testing user enforced that
 			self.set_baryon_related(**params_values)
 			mv = self.add_baryon_pcs_to_datavector(mv)
+
+		# write data vector
+		if self.print_datavector:
+			size = len(mv)
+			out = np.zeros(shape=(size, 2))
+			out[:,0] = np.arange(0, size)
+			out[:,1] = mv
+			fmt = '%d', '%1.8e'
+			np.savetxt(self.print_datavector_file, out, fmt = fmt)
+
 		return mv
 
 	def set_baryon_related(self, **params_values):
@@ -206,6 +219,8 @@ class _cosmolike_emu_prototype_base(DataSetLikelihood):
 		mv = self.get_model_vector_emu(**params_values)
 		delta_dv = (mv - self.dv)[self.mask]
 		log_p = -0.5 * delta_dv @ self.masked_inv_cov @ delta_dv
+		#print("\n\n\n log_p=", log_p, "\n\n\n")
+		#print(f'type of logp: {type(delta_dv[0])} / {type(mv[0])} / {type(self.dv[0])} / {delta_dv[0]}')
 
 		# derived parameters: sigma8
 		if self.derive_sigma8 and self.emu_s8:
