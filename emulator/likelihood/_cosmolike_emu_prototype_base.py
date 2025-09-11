@@ -123,7 +123,6 @@ class _cosmolike_emu_prototype_base(DataSetLikelihood):
 		self.dv = np.genfromtxt(self.data_vector_file)[:,1]
 		self.log.info(f'Load mask from {self.mask_file}')
 		self.mask = np.loadtxt(self.mask_file)[:,1].astype(bool)
-		#self.mask = config.mask_lkl.copy()
 		# update the mask if some probes are not included
 		for i in range(3):
 			_l, _r = sum(config.probe_size[:i]), sum(config.probe_size[:i+1])
@@ -133,7 +132,47 @@ class _cosmolike_emu_prototype_base(DataSetLikelihood):
 			else:
 				_Ndp = self.mask[_l:_r].sum()
 				self.log.info(f'Probe {probe_fmts[i]} has {_Ndp} elements after scale cut.')
-		self.masked_inv_cov = config.masked_inv_cov.copy()
+		### prepare inverse covariance
+		self.log.info(f'Load covariance from {self.cov_file}')
+		invcov = self.get_full_cov(self.cov_file)
+		invcov = np.linalg.inv(invcov[self.mask][:,self.mask])
+		# Add PM marginalization
+		if self.U_PMmarg_file:
+			self.log.info(f'Load PM-marg template from {self.U_PMmarg_file}')
+			U_PMmarg = np.loadtxt(self.U_PMmarg_file)
+			U = np.zeros([self.mask.shape[0], self.lens_ntomo])
+			for line in U_PMmarg:
+				i, j = int(line[0]), int(line[1])
+				U[i,j] = float(line[2])
+			U = U[self.mask,:]
+			central_block = np.diag(np.ones(self.lens_ntomo)) + U.T@invcov@U
+			w, v = np.linalg.eig(central_block)
+			assert np.min(w)>=0, f'Central block not positive-definite!'
+			corr = invcov @ (U@np.linalg.inv(central_block)@U.T) @ invcov
+			invcov -= corr
+		self.masked_inv_cov = invcov
+		# test positive-definite
+		w, v = np.linalg.eig(self.masked_inv_cov)
+		assert np.min(w)>=0, f'Precision matrix not positive-definite!'
+
+	def get_full_cov(self, cov_file):
+		full_cov = np.loadtxt(cov_file)
+		cov = np.zeros((self.dv_size, self.dv_size))
+		cov_scenario = full_cov.shape[1]
+		
+		for line in full_cov:
+			i = int(line[0])
+			j = int(line[1])
+
+			if(cov_scenario==3):
+				cov_ij = line[2]
+			elif(cov_scenario==10):
+				cov_g_block  = line[8]
+				cov_ng_block = line[9]
+				cov_ij = cov_g_block + cov_ng_block
+			cov[i,j] = cov_ij
+			cov[j,i] = cov_ij
+		return cov
 
 	def _emu_predict(self, theta):
 		''' Get the emulator prediction for slow parameters
