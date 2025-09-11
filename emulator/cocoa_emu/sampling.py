@@ -251,7 +251,7 @@ class EmuSampler:
         # evaluate data vector using list of emulators
         model_vectors = []
         for i in range(3):
-            ipdb.set_trace()
+            #ipdb.set_trace()
             if self.probe_mask[i]==1:
                 _mv = self.emu_list[i].predict(theta)[0]
             else:
