@@ -133,7 +133,7 @@ class DenseBlock(nn.Module):
         return o
 
 class Better_Attention(nn.Module):
-    def __init__(self, in_size ,n_partitions):
+    def __init__(self, in_size ,n_partitions, dropout=False):
         super(Better_Attention, self).__init__()
 
         self.embed_dim    = in_size//n_partitions
@@ -145,6 +145,12 @@ class Better_Attention(nn.Module):
         self.scale        = np.sqrt(self.embed_dim)
         self.n_partitions = n_partitions # n_partions or n_channels are synonyms 
         self.norm         = torch.nn.LayerNorm(in_size) # layer norm has geometric order (https://lessw.medium.com/what-layernorm-really-does-for-attention-in-transformers-4901ea6d890e)
+
+        self.dropout = dropout
+        if self.dropout:
+            self.drop = nn.Dropout(p=0.1)
+        else:
+            self.drop = nn.Identity()
 
     def forward(self, x):
         x_norm    = self.norm(x)
@@ -160,22 +166,24 @@ class Better_Attention(nn.Module):
         prod        = torch.bmm(normed_mat,V)
 
         #out = torch.cat(tuple([prod[:,i] for i in range(self.n_partitions)]),dim=1)+x
-        out = torch.reshape(prod,(batch_size,-1))+x # reshape back to vector
+        out = self.drop(torch.reshape(prod,(batch_size,-1)))+x # reshape back to vector
 
         return out
 
 class Better_Transformer(nn.Module):
-    def __init__(self, in_size, n_partitions):
+    def __init__(self, in_size, n_partitions, dropout=False):
         super(Better_Transformer, self).__init__()  
     
         # get/set up hyperparams
         self.int_dim      = in_size//n_partitions 
         self.n_partitions = n_partitions
-        self.act          = nn.Tanh() #activation_fcn(in_size)  #nn.Tanh()#nn.ReLU()#
+        self.act          = activation_fcn(in_size)
+        #self.act          = nn.Tanh() #nn.Tanh()#nn.ReLU()#
         self.norm         = torch.nn.BatchNorm1d(in_size)
         #self.act2         = nn.Tanh()#nn.ReLU()#
         #self.norm2        = torch.nn.BatchNorm1d(in_size)
-        self.act3         = nn.Tanh() #activation_fcn(in_size)  #nn.Tanh()
+        self.act3         = activation_fcn(in_size)
+        #self.act3         = nn.Tanh() #nn.Tanh()
         self.norm3        = torch.nn.BatchNorm1d(in_size)
 
         # set up weight matrices and bias vectors
@@ -201,16 +209,49 @@ class Better_Transformer(nn.Module):
         bound2 = 1 / np.sqrt(fan_in2) 
         nn.init.uniform_(self.bias2, -bound2, bound2)
 
+        self.dropout = dropout
+        if self.dropout:
+            self.drop = nn.Dropout(p=0.1)
+        else:
+            self.drop = nn.Identity()
+
+        #Cache for block diagonal matrices (computed once in eval mode)
+        self._cached_mat1 = None
+        self._cached_mat2 = None
+        self._cache_device = None
+
+    def _build_block_matrices(self, device):
+        if self._cached_mat1 is None or self._cache_device != device:
+            self._cached_mat1 = torch.block_diag(*self.weights1).to(device)
+            self._cached_mat2 = torch.block_diag(*self.weights2).to(device)
+            self._cache_device = device
+
     def forward(self,x):
-        mat1 = torch.block_diag(*self.weights1) # how can I do this on init rather than on each forward pass?
-        mat2 = torch.block_diag(*self.weights2)
+        #mat1 = torch.block_diag(*self.weights1) # how can I do this on init rather than on each forward pass?
+        #mat2 = torch.block_diag(*self.weights2)
+        #Build cached matrices if needed
+        if not self.training:
+            self._build_block_matrices(x.device)
+            mat1 = self._cached_mat1
+            mat2 = self._cached_mat2
+        else:
+            #In training mode need to build matrices each time for gradient computation
+            mat1 = torch.block_diag(*self.weights1)
+            mat2 = torch.block_diag(*self.weights2)
         #x_norm = self.norm(x)
         #_x = x_norm.reshape(x_norm.shape[0],self.n_partitions,self.int_dim) # reshape into channels
         #_x = x.reshape(x.shape[0],self.n_partitions,self.int_dim) # reshape into channels
-        o1 = self.act(self.norm(torch.matmul(x,mat1)+self.bias1))
-        o2 = torch.matmul(o1,mat2)+self.bias2  #self.act2(self.norm2(torch.matmul(o1,mat2)+self.bias2))
-        o3 = self.act3(self.norm3(o2+x))
-        return o3
+
+        #o1 = self.act(self.norm(torch.matmul(x,mat1)+self.bias1))
+        #o2 = torch.matmul(o1,mat2)+self.bias2  #self.act2(self.norm2(torch.matmul(o1,mat2)+self.bias2))
+        #o3 = self.act3(self.norm3(o2+x))
+
+        o1 = self.norm(torch.matmul(x,mat1)+self.bias1)
+        o2 = self.act(o1)
+        o3 = self.drop(torch.matmul(o1,mat2) + self.bias2) + x
+        o4 = self.act3(o3)
+
+        return o4
 
 class activation_fcn(nn.Module):
     def __init__(self, dim):
@@ -221,8 +262,10 @@ class activation_fcn(nn.Module):
         self.beta = nn.Parameter(torch.zeros((dim)))
 
     def forward(self,x):
-        exp = -1*torch.mul(self.beta,x)
-        inv = (1+torch.exp(exp)).pow_(-1)
+        #exp = -1*torch.mul(self.beta,x)
+        #inv = (1+torch.exp(exp)).pow_(-1)
+        exp = torch.mul(self.beta,x)
+        inv = torch.special.expit(exp)
         fac_2 = 1-self.gamma
         out = torch.mul(self.gamma + torch.mul(inv,fac_2), x)
         return out
@@ -422,6 +465,26 @@ class NNEmulator:
                             nn.Linear(int_dim_res, OUTPUT_DIM_REDUCED),
                             Affine()
                         )
+        elif(model==8):
+            print("Using Haley's larger ResTRF model...")
+            int_dim_res = 512
+            n_channels = 60
+            int_dim_trf = 3840
+            self.model = nn.Sequential(
+                            nn.Linear(self.N_DIM_REDUCED, int_dim_res),
+                            Better_ResBlock(int_dim_res, int_dim_res),
+                            Better_ResBlock(int_dim_res, int_dim_res),
+                            Better_ResBlock(int_dim_res, int_dim_res),
+                            nn.Linear(int_dim_res, int_dim_trf),
+                            Better_Attention(int_dim_trf, n_channels),
+                            Better_Transformer(int_dim_trf, n_channels),
+                            Better_Attention(int_dim_trf, n_channels),
+                            Better_Transformer(int_dim_trf, n_channels),
+                            Better_Attention(int_dim_trf, n_channels),
+                            Better_Transformer(int_dim_trf, n_channels),
+                            nn.Linear(int_dim_trf,OUTPUT_DIM_REDUCED),
+                            Affine()
+                        )
         else:
             print(f'Can not support model {model}!')
             exit(1)
@@ -438,13 +501,7 @@ class NNEmulator:
         # LR scheduler from Evan's emulator
         if self.reduce_lr:
             print('Reduce LR on plateau: ', self.reduce_lr)
-            self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optim, 'min', patience=10)
-            '''
-            Haley:
-            Try patience=15, factor for LR decrease, etc.
-            Batch size 256, dimension of parameter space 17
-            Linear galaxy bias as fast parameter
-            '''
+            self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optim, 'min', patience=15, factor=0.1)
 
         ### JX: Initialize model weights
         for m in self.model.modules():
