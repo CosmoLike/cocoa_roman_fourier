@@ -1,0 +1,424 @@
+#Example MCMC for cosmic shear data vector
+timing: True
+debug: False
+stop_at_error: False
+
+likelihood:
+  roman_fourier.roman_fourier_3x2pt_emu:
+    ### Here you can overwrite options in roman_fourier_${probe}.yaml
+    path: ./external_modules/data/roman_fourier
+    data_file: roman_fourier_challenge2_medium.dataset
+    #train_config: "./projects/roman_fourier/emulator/train_emu_resmlp512_HF_NLA_reduced.yaml"
+    train_config: "./projects/roman_fourier/emulator/train_emu_resmlp512_7_HF_NLA_minimal.yaml"
+
+params:
+  # ----------------------------------------------------------------------------
+  # ------------------------------ COSMOLOGICAL PARAMETERS ---------------------
+  # ----------------------------------------------------------------------------
+  As_1e9:
+    prior:
+      min: 0.5
+      max: 5
+    ref:
+      dist: norm
+      loc: 2.1
+      scale: 0.06
+    proposal: 0.06
+    latex: 10^9 A_\mathrm{s})
+  ns:
+    prior:
+      min: 0.87
+      max: 1.07
+    ref:
+      dist: norm
+      loc: 0.9645
+      scale: 0.006
+    proposal: 0.006
+    latex: n_\mathrm{s}
+  H0:
+    prior:
+      min: 55
+      max: 91
+    ref:
+      dist: norm
+      loc: 67.27
+      scale: 0.2
+    proposal: 0.2
+    latex: H_0
+  omegab:
+    prior:
+      min: 0.03
+      max: 0.07
+    ref:
+      dist: norm
+      loc: 0.0492
+      scale: 0.004
+    proposal: 0.004
+    latex: \Omega_\mathrm{b}
+  omegam:
+    prior:
+      min: 0.1
+      max: 0.9
+    ref:
+      dist: norm
+      loc: 0.3156
+      scale: 0.004
+    proposal: 0.004
+  w:
+    value: -1.0
+    latex: w_{0,\mathrm{DE}}
+  wa:
+    value: 0.0
+    latex: w_{a,\mathrm{DE}}
+  mnu:
+    value: 0.0
+    latex: m_{\nu}
+  # ----------------------------------------------------------------------------
+  # -------------------------------- DERIVED PARAMETERS ------------------------
+  # ----------------------------------------------------------------------------
+  # WARNING: DO NOT REMOVE omegabh2/omegach2/omegamh2/wa/As/ FROM DERIVED 
+  # PARAMETERS, SEE: github.com/CosmoLike/cocoa#warning-warning-warning-weak-lensing-yaml-files-in-cobaya-
+  # ----------------------------------------------------------------------------
+  sigma8:
+    latex: \sigma_8
+  # ----------------------------------------------------------------------------
+  # ----------------------------- SYSTEMATICS PARAMETERS -----------------------
+  # ----------------------------------------------------------------------------
+  # You can overwrite the default systematic parameters here
+  # See default settings in likelihood/roman_fourier_params_source/lens.yaml
+  # ----------------------------------------------------------------------------
+  # (this setting is the same as the default, just to show how to overwrite)
+  roman_B1_1:
+    prior:
+      min: 0.8
+      max: 3
+    ref:
+      dist: norm
+      loc: 1.18
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^1
+  roman_B1_2:
+    prior:
+      min: 0.8
+      max: 3
+    ref:
+      dist: norm
+      loc: 1.40
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^2
+  roman_B1_3:
+    prior:
+      min: 0.8
+      max: 3
+    ref:
+      dist: norm
+      loc: 1.55
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^3
+  roman_B1_4:
+    prior:
+      min: 0.8
+      max: 3
+    ref:
+      dist: norm
+      loc: 1.71
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^4
+  roman_B1_5:
+    prior:
+      min: 0.8
+      max: 3
+    ref:
+      dist: norm
+      loc: 1.90
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^5
+  roman_B1_6:
+    prior:
+      min: 0.8
+      max: 3
+    ref:
+      dist: norm
+      loc: 2.15
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^6
+  roman_B1_7:
+    prior:
+      min: 0.8
+      max: 3
+    ref:
+      dist: norm
+      loc: 2.52
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^7
+  roman_B1_8:
+    prior:
+      min: 0.8
+      max: 4
+    ref:
+      dist: norm
+      loc: 3.44
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^8
+  roman_DZ_S1:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.001414
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^1
+  roman_DZ_S2:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.004298
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^2
+  roman_DZ_S3:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: -0.002162
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^3
+  roman_DZ_S4:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.000047
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^4
+  roman_DZ_S5:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.003450
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^5
+  roman_DZ_S6:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.002860
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^6
+  roman_DZ_S7:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.002578
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^7
+  roman_DZ_S8:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: -0.001002
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^8
+  roman_A1_1:
+    prior:
+      min: -5
+      max:  5
+    ref:
+      dist: norm
+      loc: 0.606102
+      scale: 0.02
+    proposal: 0.02
+    latex: A_\mathrm{1-IA,roman}^1
+  roman_A1_2:
+    prior:
+      min: -5
+      max:  5
+    ref:
+      dist: norm
+      loc: -1.51541
+      scale: 0.12
+    proposal: 0.12
+    latex: A_\mathrm{1-IA,roman}^2
+  roman_M1:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.00203
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^1
+  roman_M2:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.00144
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^2
+  roman_M3:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.00660
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^3
+  roman_M4:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: -0.00774
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^4
+  roman_M5:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: -0.00101
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^5
+  roman_M6:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: -0.00328
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^6
+  roman_M7:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.00097
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^7
+  roman_M8:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.00278
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^8
+
+sampler:
+  mcmc:
+    # ---------------------------------------------------------------------
+    # File (w/ path) or matrix defining a covariance matrix for the proposal:
+    # - null (default): will be generated from params info (prior and proposal)
+    # - matrix: remember to set `covmat_params` to the parameters in the matrix
+    covmat: ./projects/roman_fourier/fid_3x2_full.covmat
+    covmat_params:
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    # Proposal covariance matrix learning
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    learn_proposal: True
+    # Don't learn if convergence better than...
+    learn_proposal_Rminus1_min: 0.03
+    # Don't learn if convergence is worse than...
+    learn_proposal_Rminus1_max: 100.
+    # (even earlier if a param is not in the given covariance matrix)
+    learn_proposal_Rminus1_max_early: 500.
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    # Convergence and stopping
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    # Maximum number of posterior evaluations
+    max_samples: .inf
+    Rminus1_stop: 0.02
+    Rminus1_cl_stop: 0.17
+    Rminus1_cl_level: 0.95
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    # Exploiting speed hierarchy
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    measure_speeds: False
+    drag: False
+    oversample_power: 0.3
+    oversample_thin: True
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    # Avoid chain getting suck forever
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    max_tries: 10000
+    burn_in: 0
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    # When no MPI used, number of fractions of the chain to compare
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    Rminus1_single_split: 4
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
+output: /xdisk/timeifler/jiachuanxu/RomanPIT/emuchains_fourier_dc1_minimal_model7/MCMC_DC2_medium_LES_LCDM_3x2pt
