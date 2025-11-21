@@ -248,6 +248,7 @@ class Better_Transformer(nn.Module):
 
         o1 = self.norm(torch.matmul(x,mat1)+self.bias1)
         o2 = self.act(o1)
+        #o3 = self.norm3(self.drop(torch.matmul(o1,mat2) + self.bias2) + x)
         o3 = self.drop(torch.matmul(o1,mat2) + self.bias2) + x
         o4 = self.act3(o3)
 
@@ -470,6 +471,7 @@ class NNEmulator:
             int_dim_res = 512
             n_channels = 60
             int_dim_trf = 3840
+            dropout = False
             self.model = nn.Sequential(
                             nn.Linear(self.N_DIM_REDUCED, int_dim_res),
                             Better_ResBlock(int_dim_res, int_dim_res),
@@ -477,12 +479,26 @@ class NNEmulator:
                             Better_ResBlock(int_dim_res, int_dim_res),
                             nn.Linear(int_dim_res, int_dim_trf),
                             Better_Attention(int_dim_trf, n_channels),
-                            Better_Transformer(int_dim_trf, n_channels),
+                            Better_Transformer(int_dim_trf, n_channels, dropout=dropout),
                             Better_Attention(int_dim_trf, n_channels),
-                            Better_Transformer(int_dim_trf, n_channels),
+                            Better_Transformer(int_dim_trf, n_channels, dropout=dropout),
                             Better_Attention(int_dim_trf, n_channels),
-                            Better_Transformer(int_dim_trf, n_channels),
+                            Better_Transformer(int_dim_trf, n_channels, dropout=dropout),
                             nn.Linear(int_dim_trf,OUTPUT_DIM_REDUCED),
+                            Affine()
+                        )
+        elif(model==9):
+            print("Using Evan's simplified ResNet model but larger...")
+            int_dim_res = 2048
+            self.model = nn.Sequential(
+                            nn.Linear(self.N_DIM_REDUCED, int_dim_res),
+                            Better_ResBlock(int_dim_res, int_dim_res),
+                            Better_ResBlock(int_dim_res, int_dim_res),
+                            Better_ResBlock(int_dim_res, int_dim_res),
+                            Better_ResBlock(int_dim_res, int_dim_res),
+                            Better_ResBlock(int_dim_res, int_dim_res),
+                            Better_ResBlock(int_dim_res, int_dim_res),
+                            nn.Linear(int_dim_res, OUTPUT_DIM_REDUCED),
                             Affine()
                         )
         else:
@@ -724,7 +740,7 @@ class NNEmulator:
         #else:
         #    torch.set_default_tensor_type('torch.FloatTensor')
         if state_dict==False:
-            self.model = torch.load(filename,map_location=device)
+            self.model = torch.load(filename,map_location=device, weights_only=False)
         else:
             print('Loading with "torch.load_state_dict(torch.load(file))"...')
             self.model.load_state_dict(torch.load(filename,map_location=device))
