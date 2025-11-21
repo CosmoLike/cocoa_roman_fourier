@@ -1,0 +1,366 @@
+debug: false
+likelihood:
+  roman_fourier.roman_fourier_3x2pt_emu:
+    data_file: roman_fourier_challenge4_medium_EEellmax1000_ggRmin3.dataset
+    path: ./external_modules/data/roman_fourier
+    train_config: ./projects/roman_fourier/emulator/train_emu_resmlp512_7_HF_NLA_minimal.yaml
+output: /xdisk/timeifler/jiachuanxu/RomanPIT/emuchains_fourier_dc1_minimal_model7/MCMC_DC4_medium_LES_LCDM_3x2pt_EEellmax1000_ggRmin3
+params:
+  As_1e9:
+    latex: 10^9 A_\mathrm{s})
+    prior:
+      max: 5
+      min: 0.5
+    proposal: 0.06
+    ref:
+      dist: norm
+      loc: 2.1
+      scale: 0.06
+  H0:
+    latex: H_0
+    prior:
+      max: 91
+      min: 55
+    proposal: 0.2
+    ref:
+      dist: norm
+      loc: 67.27
+      scale: 0.2
+  mnu:
+    latex: m_{\nu}
+    value: 0.0
+  ns:
+    latex: n_\mathrm{s}
+    prior:
+      max: 1.07
+      min: 0.87
+    proposal: 0.006
+    ref:
+      dist: norm
+      loc: 0.9645
+      scale: 0.006
+  omegab:
+    latex: \Omega_\mathrm{b}
+    prior:
+      max: 0.07
+      min: 0.03
+    proposal: 0.004
+    ref:
+      dist: norm
+      loc: 0.0492
+      scale: 0.004
+  omegam:
+    latex: \Omega_\mathrm{m}
+    prior:
+      max: 0.9
+      min: 0.1
+    proposal: 0.004
+    ref:
+      dist: norm
+      loc: 0.3156
+      scale: 0.004
+  roman_A1_1:
+    latex: A_\mathrm{1-IA,roman}^1
+    prior:
+      max: 5
+      min: -5
+    proposal: 0.02
+    ref:
+      dist: norm
+      loc: 0.606102
+      scale: 0.02
+  roman_A1_2:
+    latex: A_\mathrm{1-IA,roman}^2
+    prior:
+      max: 5
+      min: -5
+    proposal: 0.12
+    ref:
+      dist: norm
+      loc: -1.51541
+      scale: 0.12
+  roman_B1_1:
+    latex: b_\mathrm{1-roman}^1
+    prior:
+      max: 3
+      min: 0.8
+    proposal: 0.01
+    ref:
+      dist: norm
+      loc: 1.18
+      scale: 0.01
+  roman_B1_2:
+    latex: b_\mathrm{1-roman}^2
+    prior:
+      max: 3
+      min: 0.8
+    proposal: 0.01
+    ref:
+      dist: norm
+      loc: 1.4
+      scale: 0.01
+  roman_B1_3:
+    latex: b_\mathrm{1-roman}^3
+    prior:
+      max: 3
+      min: 0.8
+    proposal: 0.01
+    ref:
+      dist: norm
+      loc: 1.55
+      scale: 0.01
+  roman_B1_4:
+    latex: b_\mathrm{1-roman}^4
+    prior:
+      max: 3
+      min: 0.8
+    proposal: 0.01
+    ref:
+      dist: norm
+      loc: 1.71
+      scale: 0.01
+  roman_B1_5:
+    latex: b_\mathrm{1-roman}^5
+    prior:
+      max: 3
+      min: 0.8
+    proposal: 0.01
+    ref:
+      dist: norm
+      loc: 1.9
+      scale: 0.01
+  roman_B1_6:
+    latex: b_\mathrm{1-roman}^6
+    prior:
+      max: 3
+      min: 0.8
+    proposal: 0.01
+    ref:
+      dist: norm
+      loc: 2.15
+      scale: 0.01
+  roman_B1_7:
+    latex: b_\mathrm{1-roman}^7
+    prior:
+      max: 3
+      min: 0.8
+    proposal: 0.01
+    ref:
+      dist: norm
+      loc: 2.52
+      scale: 0.01
+  roman_B1_8:
+    latex: b_\mathrm{1-roman}^8
+    prior:
+      max: 4
+      min: 0.8
+    proposal: 0.01
+    ref:
+      dist: norm
+      loc: 3.44
+      scale: 0.01
+  roman_DZ_S1:
+    latex: \Delta z_\mathrm{s,roman}^1
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    ref:
+      dist: norm
+      loc: 0.001414
+      scale: 0.002
+  roman_DZ_S2:
+    latex: \Delta z_\mathrm{s,roman}^2
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    ref:
+      dist: norm
+      loc: 0.004298
+      scale: 0.002
+  roman_DZ_S3:
+    latex: \Delta z_\mathrm{s,roman}^3
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    ref:
+      dist: norm
+      loc: -0.002162
+      scale: 0.002
+  roman_DZ_S4:
+    latex: \Delta z_\mathrm{s,roman}^4
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    ref:
+      dist: norm
+      loc: 4.7e-05
+      scale: 0.002
+  roman_DZ_S5:
+    latex: \Delta z_\mathrm{s,roman}^5
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    ref:
+      dist: norm
+      loc: 0.00345
+      scale: 0.002
+  roman_DZ_S6:
+    latex: \Delta z_\mathrm{s,roman}^6
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    ref:
+      dist: norm
+      loc: 0.00286
+      scale: 0.002
+  roman_DZ_S7:
+    latex: \Delta z_\mathrm{s,roman}^7
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    ref:
+      dist: norm
+      loc: 0.002578
+      scale: 0.002
+  roman_DZ_S8:
+    latex: \Delta z_\mathrm{s,roman}^8
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    proposal: 0.002
+    ref:
+      dist: norm
+      loc: -0.001002
+      scale: 0.002
+  roman_M1:
+    latex: m_\mathrm{roman}^1
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    ref:
+      dist: norm
+      loc: 0.00203
+      scale: 0.005
+  roman_M2:
+    latex: m_\mathrm{roman}^2
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    ref:
+      dist: norm
+      loc: 0.00144
+      scale: 0.005
+  roman_M3:
+    latex: m_\mathrm{roman}^3
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    ref:
+      dist: norm
+      loc: 0.0066
+      scale: 0.005
+  roman_M4:
+    latex: m_\mathrm{roman}^4
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    ref:
+      dist: norm
+      loc: -0.00774
+      scale: 0.005
+  roman_M5:
+    latex: m_\mathrm{roman}^5
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    ref:
+      dist: norm
+      loc: -0.00101
+      scale: 0.005
+  roman_M6:
+    latex: m_\mathrm{roman}^6
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    ref:
+      dist: norm
+      loc: -0.00328
+      scale: 0.005
+  roman_M7:
+    latex: m_\mathrm{roman}^7
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    ref:
+      dist: norm
+      loc: 0.00097
+      scale: 0.005
+  roman_M8:
+    latex: m_\mathrm{roman}^8
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    proposal: 0.005
+    ref:
+      dist: norm
+      loc: 0.00278
+      scale: 0.005
+  sigma8:
+    latex: \sigma_8
+  w:
+    latex: w_{0,\mathrm{DE}}
+    value: -1.0
+  wa:
+    latex: w_{a,\mathrm{DE}}
+    value: 0.0
+sampler:
+  mcmc:
+    Rminus1_cl_level: 0.95
+    Rminus1_cl_stop: 0.17
+    Rminus1_single_split: 4
+    Rminus1_stop: 0.02
+    burn_in: 0
+    covmat: ./projects/roman_fourier/fid_3x2_full.covmat
+    covmat_params: null
+    drag: false
+    learn_proposal: true
+    learn_proposal_Rminus1_max: 100.0
+    learn_proposal_Rminus1_max_early: 500.0
+    learn_proposal_Rminus1_min: 0.03
+    max_samples: .inf
+    max_tries: 10000
+    measure_speeds: false
+    oversample_power: 0.3
+    oversample_thin: true
+stop_at_error: false
+timing: true
