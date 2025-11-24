@@ -1,0 +1,12 @@
+data_file = roman_fourier_challenge1_medium.modelvector
+cov_file = roman_fourier_challenge1_medium.cov
+mask_file = roman_fourier_challenge1_medium.mask
+nz_lens_file = roman_fourier_challenge1_medium.nz
+nz_source_file = roman_fourier_challenge1_medium.nz
+lens_ntomo = 8
+source_ntomo = 8
+n_cl = 15
+l_min= 30
+l_max = 4000
+l_max_shear = 4000
+baryon_pca_file = medium_pca.txt
