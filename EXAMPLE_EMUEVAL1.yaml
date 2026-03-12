@@ -1,0 +1,407 @@
+#Example MCMC for cosmic shear data vector
+timing: True
+debug: False
+stop_at_error: False
+
+likelihood:
+  roman_fourier.roman_fourier_3x2pt_emu:
+    ### Here you can overwrite options in roman_fourier_${probe}.yaml
+    path: ./external_modules/data/roman_fourier
+    #data_file: roman_fourier_challenge1_medium.dataset
+    data_file: roman_fourier_challenge1_medium_test.dataset
+    train_config: ./projects/roman_fourier/emulator/train_emu_resmlp512_7_HF_NLA_minimal.yaml
+    print_datavector: False
+    print_datavector_file: "./projects/roman_fourier/data/roman_fourier_challenge1_medium_test.emuvector"
+
+params:
+  # ----------------------------------------------------------------------------
+  # ------------------------------ COSMOLOGICAL PARAMETERS ---------------------
+  # ----------------------------------------------------------------------------
+  As_1e9:
+    prior:
+      min: 0.5
+      max: 5
+    ref:
+      dist: norm
+      loc: 2.1
+      scale: 0.06
+    proposal: 0.06
+    latex: 10^9 A_\mathrm{s})
+  ns:
+    prior:
+      min: 0.87
+      max: 1.07
+    ref:
+      dist: norm
+      loc: 0.9645
+      scale: 0.006
+    proposal: 0.006
+    latex: n_\mathrm{s}
+  H0:
+    prior:
+      min: 55
+      max: 91
+    ref:
+      dist: norm
+      loc: 67.27
+      scale: 0.2
+    proposal: 0.2
+    latex: H_0
+  omegab:
+    prior:
+      min: 0.03
+      max: 0.07
+    ref:
+      dist: norm
+      loc: 0.0492
+      scale: 0.004
+    proposal: 0.004
+    latex: \Omega_\mathrm{b}
+  omegam:
+    prior:
+      min: 0.1
+      max: 0.9
+    ref:
+      dist: norm
+      loc: 0.3156
+      scale: 0.004
+    proposal: 0.004
+    latex: \Omega_\mathrm{m}
+  mnu:
+    value: 0.0
+    latex: m_{\nu}
+  w:
+    value: -1.0
+    latex: w_{0,\mathrm{DE}}
+  wa:
+    value: 0.0
+    latex: w_{a,\mathrm{DE}}
+  # ----------------------------------------------------------------------------
+  # -------------------------------- DERIVED PARAMETERS ------------------------
+  # ----------------------------------------------------------------------------
+  # WARNING: DO NOT REMOVE omegabh2/omegach2/omegamh2/wa/As/ FROM DERIVED 
+  # PARAMETERS, SEE: github.com/CosmoLike/cocoa#warning-warning-warning-weak-lensing-yaml-files-in-cobaya-
+  # ----------------------------------------------------------------------------
+  sigma8:
+    latex: \sigma_8
+  # ----------------------------------------------------------------------------
+  # ----------------------------- SYSTEMATICS PARAMETERS -----------------------
+  # ----------------------------------------------------------------------------
+  # You can overwrite the default systematic parameters here
+  # See default settings in likelihood/roman_fourier_params_source/lens.yaml
+  # ----------------------------------------------------------------------------
+  # (this setting is the same as the default, just to show how to overwrite)
+  roman_B1_1:
+    prior:
+      min: 0.8
+      max: 3
+    ref:
+      dist: norm
+      loc: 1.18
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^1
+  roman_B1_2:
+    prior:
+      min: 0.8
+      max: 3
+    ref:
+      dist: norm
+      loc: 1.40
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^2
+  roman_B1_3:
+    prior:
+      min: 0.8
+      max: 3
+    ref:
+      dist: norm
+      loc: 1.55
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^3
+  roman_B1_4:
+    prior:
+      min: 0.8
+      max: 3
+    ref:
+      dist: norm
+      loc: 1.71
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^4
+  roman_B1_5:
+    prior:
+      min: 0.8
+      max: 3
+    ref:
+      dist: norm
+      loc: 1.90
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^5
+  roman_B1_6:
+    prior:
+      min: 0.8
+      max: 3
+    ref:
+      dist: norm
+      loc: 2.15
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^6
+  roman_B1_7:
+    prior:
+      min: 0.8
+      max: 3
+    ref:
+      dist: norm
+      loc: 2.52
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^7
+  roman_B1_8:
+    prior:
+      min: 0.8
+      max: 4
+    ref:
+      dist: norm
+      loc: 3.44
+      scale: 0.01
+    proposal: 0.01
+    latex: b_\mathrm{1-roman}^8
+  roman_DZ_S1:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.001414
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^1
+  roman_DZ_S2:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.004298
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^2
+  roman_DZ_S3:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: -0.002162
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^3
+  roman_DZ_S4:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.000047
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^4
+  roman_DZ_S5:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.003450
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^5
+  roman_DZ_S6:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.002860
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^6
+  roman_DZ_S7:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: 0.002578
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^7
+  roman_DZ_S8:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.002
+    ref:
+      dist: norm
+      loc: -0.001002
+      scale: 0.002
+    proposal: 0.002
+    latex: \Delta z_\mathrm{s,roman}^8
+  roman_A1_1:
+    prior:
+      min: -5
+      max:  5
+    ref:
+      dist: norm
+      loc: -0.706102
+      scale: 0.02
+    proposal: 0.02
+    latex: A_\mathrm{1-IA,roman}^1
+  roman_A1_2:
+    prior:
+      min: -5
+      max:  5
+    ref:
+      dist: norm
+      loc: -1.51541
+      scale: 0.12
+    proposal: 0.12
+    latex: A_\mathrm{1-IA,roman}^2
+  roman_M1:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.00203
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^1
+  roman_M2:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.00144
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^2
+  roman_M3:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.00660
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^3
+  roman_M4:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: -0.00774
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^4
+  roman_M5:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: -0.00101
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^5
+  roman_M6:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: -0.00328
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^6
+  roman_M7:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.00097
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^7
+  roman_M8:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.005
+    ref:
+      dist: norm
+      loc: 0.00278
+      scale: 0.005
+    proposal: 0.005
+    latex: m_\mathrm{roman}^8
+
+sampler:
+  evaluate:
+    N: 1
+    override:
+      As_1e9: 2.1
+      ns: 0.96605
+      H0: 67.32
+      omegab: 0.04
+      omegam: 0.30
+      roman_DZ_S1: 0.0
+      roman_DZ_S2: 0.0
+      roman_DZ_S3: 0.0
+      roman_DZ_S4: 0.0
+      roman_DZ_S5: 0.0
+      roman_DZ_S6: 0.0
+      roman_DZ_S7: 0.0
+      roman_DZ_S8: 0.0
+      roman_M1: 0.0
+      roman_M2: 0.0
+      roman_M3: 0.0
+      roman_M4: 0.0
+      roman_M5: 0.0
+      roman_M6: 0.0
+      roman_M7: 0.0
+      roman_M8: 0.0
+      roman_A1_1: 0.7
+      roman_A1_2: -1.7
+      roman_B1_1: 1.0
+      roman_B1_2: 1.0
+      roman_B1_3: 1.0
+      roman_B1_4: 1.0
+      roman_B1_5: 1.0
+      roman_B1_6: 1.0
+      roman_B1_7: 1.0
+      roman_B1_8: 1.0
+
+output: /xdisk/timeifler/jiachuanxu/RomanPIT/chains_fourier_dc1/EmuEVAL_DC1_medium

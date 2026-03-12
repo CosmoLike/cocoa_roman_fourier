@@ -7,3 +7,4 @@ chains/
 ROMAN_*.yaml
 ROMAN_*.sbatch
 notebooks/*
+emu_yaml/*
