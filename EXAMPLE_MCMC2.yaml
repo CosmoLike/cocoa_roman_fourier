@@ -12,11 +12,10 @@ likelihood:
     kmax_boltzmann: 10.0
     # 1 EE2, 2 Halofit
     non_linear_emul: 2
-    # 0 NLA, 1 TATT
-    IA_model: 0
-    # 0 NO IA, 1 IA_NLA_LF, 2 IA_REDSHIFT_BINNING, 3 IA_REDSHIFT_EVOLUTION
+    IA_model: 0 # NLA (0) or TATT (1)
+    IA_code: 0  # CFASTPT (0) or FASTPT (1) (only works if not NLA)
     IA_redshift_evolution: 3
-    debug: False
+    debug: false
 params:
   As_1e9:
     prior:
@@ -502,6 +501,12 @@ theory:
       dark_energy_model: ppf
       accurate_massive_neutrino_transfers: false
       k_per_logint: 20
+#  fastpt:
+#    path: ./external_modules/code/FAST-PT
+#    extra_args:
+#      accuracyboost: 5
+#      kmax_boltzmann: 7.5
+#      extrap_kmax: 250.0
 
 sampler:
   mcmc:

@@ -2,9 +2,11 @@ path: null
 data_file: roman_fourier_M1_GGL0.05.dataset
 accuracyboost: 1.0
 integration_accuracy: 0
-kmax_boltzmann: 10.0
+kmax_boltzmann: 7.5
 speed: 1
 non_linear_emul: 2
+external_nz_modeling: 0
+use_emulator: False
 debug: False
 # IA REDSHIFT EVOLUTION: 0 = NO_IA (AMPLITUDES SET TO ZERO), 
 #                        1 = IA_NLA_LF
@@ -13,14 +15,14 @@ debug: False
 IA_redshift_evolution: 3
 # IA_MODEL: 0 = NLA, 1 = TATT
 IA_model: 0 
-external_nz_modeling: 0
-use_emulator: False
+# IA_code: 0 = C FASTPT, 1 = Python PAST-PT
+IA_code: 0
 
-# exclude ggl nl-ns bin pairs
+# exclude ggl nl-ns bin pairs (need to set the dv size)
 ggl_exclude: [[4,0],[5,0],[6,0],[6,1],[6,2],[7,0],[7,1],[7,2],[7,3]]
 
-# BIAS REDSHIFT EVOLUTION [b1,b2,bs2,b3,bmag] (see bias.c)
-bias_model: [0,0,0,1,0]
+# BIAS REDSHIFT EVOLUTION [b1,b2,bs2,b3,bmag,bK] (see bias.c)
+bias_model: [0,0,0,1,0,0]
 
 add_baryons_on_dv: False
 which_bsims_add_on_dv: "antilles-2"
