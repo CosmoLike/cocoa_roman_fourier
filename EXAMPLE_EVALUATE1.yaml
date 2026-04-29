@@ -11,9 +11,8 @@ likelihood:
     kmax_boltzmann: 10.0
     # 1 EE2, 2 Halofit
     non_linear_emul: 2
-    # 0 NLA, 1 TATT
-    IA_model: 0
-    # 0 NO IA, 1 IA_NLA_LF, 2 IA_REDSHIFT_BINNING, 3 IA_REDSHIFT_EVOLUTION
+    IA_model: 0  # NLA (0) or TATT (1)
+    IA_code: 0    # CFASTPT (0) or FASTPT (1) (only works if not NLA)
     IA_redshift_evolution: 3
     debug: false
     create_baryon_pca: false
@@ -361,37 +360,34 @@ params:
       scale: 0.5
     proposal: 0.5
   roman_A2_1:
-    value: 0.0
-    #prior:
-    #  min: -5
-    #  max:  5
-    #ref:
-    #  dist: norm
-    #  loc: -1.36
-    #  scale: 0.5
-    #proposal: 0.5
+    prior:
+      min: -5
+      max:  5
+    ref:
+      dist: norm
+      loc: -1.36
+      scale: 0.5
+    proposal: 0.5
     latex: A_\mathrm{2-IA,Roman}^1
   roman_A2_2:
-    value: 0.0
-    #prior:
-    #  min: -5
-    #  max:  5
-    #ref:
-    #  dist: norm
-    #  loc: -2.5
-    #  scale: 0.5
-    #proposal: 0.5
+    prior:
+      min: -5
+      max:  5
+    ref:
+      dist: norm
+      loc: -2.5
+      scale: 0.5
+    proposal: 0.5
     latex: A_\mathrm{2-IA,Roman}^2
   roman_BTA_1:
-    value: 0.0
-    #prior:
-    #  min: 0
-    #  max: 2
-    #ref:
-    #  dist: norm
-    #  loc: 1
-    #  scale: 0.15
-    #proposal: 0.1
+    prior:
+      min: 0
+      max: 2
+    ref:
+      dist: norm
+      loc: 1
+      scale: 0.15
+    proposal: 0.1
     latex: A_\mathrm{BTA-IA,Roman}^1
 
 theory:
@@ -401,14 +397,18 @@ theory:
     use_renames: True
     extra_args:
       halofit_version: takahashi
-      AccuracyBoost: 1.0
+      AccuracyBoost: 1.05
       lens_potential_accuracy: 1.0
-      num_massive_neutrinos: 1
-      nnu: 3.046
       dark_energy_model: ppf
       accurate_massive_neutrino_transfers: false
-      k_per_logint: 10
-
+      k_per_logint: 15
+      kmax: 7.5
+#  fastpt:
+#    path: ./external_modules/code/FAST-PT
+#    extra_args:
+#      accuracyboost: 5
+#      kmax_boltzmann: 7.5
+#      extrap_kmax: 250.0
 sampler:
   evaluate:
     N: 1
@@ -419,6 +419,8 @@ sampler:
       omegab: 0.04
       omegam: 0.3
       mnu: 0.06
+      w0pwa: -1.0
+      w: -1.0
       roman_DZ_S1: 0.0
       roman_DZ_S2: 0.0
       roman_DZ_S3: 0.0
@@ -437,7 +439,11 @@ sampler:
       roman_M8: 0.0
       roman_A1_1: 0.6
       roman_A1_2: -1.5
-      w0pwa: -1.0
-      w: -1.0
-
+      # TATT PARAMETERS
+      roman_A2_1: 0.0
+      roman_BTA_1: 0.0
+      #roman_A2_1: 0.05
+      #roman_BTA_1: 0.001
+      #chi2 (CFASTPT) = 3.05664
+      roman_A2_2: -1.51541
 output: ./projects/roman_fourier/chains/EXAMPLE_EVALUATE2
