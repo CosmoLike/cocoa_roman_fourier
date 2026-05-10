@@ -560,10 +560,9 @@ sampler:
       roman_B1_7: 2.0
       roman_B1_8: 2.1
       # TATT PARAMETERS
-      #roman_A2_1: 0.0
-      #roman_BTA_1: 0.0
-      roman_A2_1: 0.05
-      roman_BTA_1: 0.05
-      # chi2 (CFASTPT) = 36.0015
+      roman_A2_1: 0.0
+      roman_BTA_1: 0.0
+      #roman_A2_1: 0.05
+      #roman_BTA_1: 0.05
       roman_A2_2: -1.51541
 output: ./projects/roman_fourier/chains/EXAMPLE_EVALUATE2

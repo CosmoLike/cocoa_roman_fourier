@@ -138,6 +138,33 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
   // --------------------------------------------------------------------
   // SET FUNCTIONS
   // --------------------------------------------------------------------
+  m.def("set_omp_threads",
+    [](int n) {
+  #ifdef _OPENMP
+      if (n > 0) { omp_set_num_threads(n); }
+  #else
+      (void) n;
+  #endif
+    },
+    pybind11::arg("n"),
+    "Set the OpenMP thread count for cosmolike's internal parallel regions. "
+    "Must be called before any compute_* function if you've set because some "
+    "Python libraries silently call omp_set_num_threads(1)");
+
+  m.def("set_distances",
+      [](arma::Col<double> z, 
+         arma::Col<double> chi)
+      {
+        spdlog::debug("\x1b[90m{}\x1b[0m: Begins", "set_distances");
+        using namespace cosmolike_interface;
+        set_distances(z, chi);
+        spdlog::debug("\x1b[90m{}\x1b[0m: Ends", "set_distances");
+      },
+      "Set Distance (Cosmology)",
+       py::arg("z").none(false),
+       py::arg("chi").none(false),
+       py::return_value_policy::move
+    );
 
   m.def("set_cosmology",
       [](const double omega_matter,
