@@ -1,3 +1,6 @@
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 #include <string>
 #include <vector>
 #include <numeric>
