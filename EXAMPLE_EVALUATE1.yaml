@@ -444,6 +444,5 @@ sampler:
       roman_BTA_1: 0.0
       #roman_A2_1: 0.05
       #roman_BTA_1: 0.001
-      #chi2 (CFASTPT) = 3.05664
       roman_A2_2: -1.51541
 output: ./projects/roman_fourier/chains/EXAMPLE_EVALUATE2
