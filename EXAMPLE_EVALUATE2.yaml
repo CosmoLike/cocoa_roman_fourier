@@ -4,6 +4,8 @@ stop_at_error: True
 
 likelihood:
   #roman_fourier.combo_2x2pt:
+  #roman_fourier.combo_xi_ggl:
+  #roman_fourier.combo_xi_gg:
   roman_fourier.combo_3x2pt:
     path: ./external_modules/data/roman_fourier
     data_file: roman_example.dataset # this assumes lens = source

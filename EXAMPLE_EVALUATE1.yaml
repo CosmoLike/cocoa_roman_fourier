@@ -4,8 +4,11 @@ stop_at_error: True
 
 likelihood:
   roman_fourier.cosmic_shear:
+    use_emulator: 0
     path: ./external_modules/data/roman_fourier
     data_file: roman_example.dataset # this assumes lens = source
+    print_datavector: False
+    print_datavector_file: "./projects/roman_real/chains/theory.modelvector"
     accuracyboost: 1.0
     integration_accuracy: 0
     kmax_boltzmann: 10.0
@@ -26,9 +29,9 @@ params:
     ref:
       dist: norm
       loc: 2.1
-      scale: 0.2
+      scale: 0.25
     proposal: 0.2
-    latex: 10^9 A_\mathrm{s})
+    latex: 10^9 A_\mathrm{s}
     drop: true
     renames: A
   ns:
