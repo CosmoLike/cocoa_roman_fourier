@@ -240,7 +240,7 @@ in its own worker subprocess, and every frozen file is checked against a
 SHA-256 manifest before any physics runs, so an edited frozen state fails
 loudly instead of producing a plausible $\chi^2$.
 
-Run the suite from the `Cocoa/` folder, with the cocoa conda environment
+Run the tests from the `Cocoa/` folder, with the cocoa conda environment
 active and `start_cocoa.sh` sourced:
 
     python -m pytest ./projects/roman_fourier/tests
