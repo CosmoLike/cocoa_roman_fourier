@@ -1,8 +1,9 @@
 path: null
 data_file: roman_fourier_M1_GGL0.05.dataset
-# chi2 responds non-monotonically to this knob on the frozen example2
-# 3x2pt test point (delta = +0.16, +0.03, -0.17, -0.12, -0.10 at boost
-# 1.25, 1.5, 2, 3, 5), so a raised value adds jitter, not convergence.
+# accuracyboost refines the redshift grid of the power-spectrum tables
+# dyadically (nested nodes; see likelihood/_cosmolike_prototype_base.py), so
+# raising it is a true refinement: the tests/ boost scan moves chi2 by
+# -0.28 at boost 1.25, and the refined grids agree to 0.05 through boost 5.
 accuracyboost: 1.0
 integration_accuracy: 0
 kmax_boltzmann: 7.5

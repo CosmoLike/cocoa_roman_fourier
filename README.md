@@ -261,7 +261,7 @@ point (NLA, chi2 = 0.680 at the defaults: cosmolike `accuracyboost` 1.0,
 
 | knob | raised to | delta chi2 |
 |---|---|---|
-| cosmolike `accuracyboost` | 1.25 / 1.5 / 2 / 3 / 5 | +0.161 / +0.026 / -0.170 / -0.117 / -0.099 |
+| cosmolike `accuracyboost` | 1.25 / 1.5 / 2 / 3 / 5 | -0.280 / -0.287 / -0.293 / -0.265 / -0.243 |
 | cosmolike `integration_accuracy` | 10 | -0.014 |
 | `kmax_boltzmann` + CAMB `kmax` | 40 + 50 | -0.003 |
 | CAMB `k_per_logint` | 25 / 50 / 100 | +0.0005 / +0.0005 / +0.0005 |
@@ -269,18 +269,22 @@ point (NLA, chi2 = 0.680 at the defaults: cosmolike `accuracyboost` 1.0,
 
 With every knob raised at once (the all-knobs set compares the default
 accuracyboost 1 against 3, the highest value that stays healthy in every
-project scanned), the six advisory checks report delta chi2 = +0.021
-(shear NLA), +0.007 (shear TATT), -0.195 (2x2pt NLA), +0.108 (2x2pt
-TATT), -0.106 (3x2pt NLA), +0.121 (3x2pt TATT): within the target, and
-carrying the accuracyboost jitter phase at boost 3 (the one-knob line
-above shows -0.117 from that knob alone).
+project scanned), the six advisory checks report delta chi2 = -0.003
+(shear NLA), +0.002 (shear TATT), -0.212 (2x2pt NLA), +0.509 (2x2pt
+TATT), -0.244 (3x2pt NLA), +0.513 (3x2pt TATT). The clustering deltas
+exceed the 0.2 target and are dominated by the accuracyboost z
+refinement (the one-knob line above shows -0.265 from that knob alone):
+the default grid carries that much z-resolution error on these
+synthetic points.
 
 No default changed. `k_per_logint` sits on its plateau already (25, 50, and
 100 agree to 0.0001), and CAMB `AccuracyBoost` at 2 moves the chi2 by +0.014,
-so the CAMB side is resolved. The cosmolike `accuracyboost` response is
-non-monotone (the sign flips between 1.5 and 2), so a raised value adds
-jitter, not convergence; the default stays at 1.0 and the likelihood yaml
-files carry this measurement as a comment.
+so the CAMB side is resolved. cosmolike `accuracyboost` now refines the
+z grid of the power-spectrum tables dyadically (nested nodes; see
+likelihood/_cosmolike_prototype_base.py), so raising it is a true
+refinement: the boost scan is smooth, with the refined grids agreeing to
+0.05 in chi2 through boost 5; the default stays at 1.0 and the
+likelihood yaml files carry this measurement as a comment.
 
 When a large accuracy delta appears, test the knobs in this order: cosmolike
 `accuracyboost` first (cheap), then CAMB `k_per_logint`, and only then CAMB
