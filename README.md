@@ -250,7 +250,7 @@ the script `start_cocoa.sh`
 
     python -m pytest ./projects/roman_fourier/tests
 
-# Minimum accuracy parameters <a name="roman_fourier_accuracy"></a>
+## Minimum accuracy parameters <a name="roman_fourier_accuracy"></a>
 
 The advisory checks in `tests/test_accuracy.py` measure the
 numerical error of the default accuracy settings: each setting is
