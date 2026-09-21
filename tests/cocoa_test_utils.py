@@ -167,7 +167,8 @@ import os
 # ---- paths ------------------------------------------------------------------
 
 # Everything the tests read or write lives relative to this folder, so
-# the suite works no matter which directory pytest is launched from.
+# the suite works no matter which directory pytest is launched from
+# (__file__ is this module's own path; dirname strips the file name).
 TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 FROZEN_DIR = os.path.join(TESTS_DIR, "frozen")
 MANIFEST_FILE = os.path.join(TESTS_DIR, "manifest_sha256.json")
@@ -176,7 +177,8 @@ REFERENCE_FILE = os.path.join(FROZEN_DIR, "reference_chi2.json")
 # ---- tolerances -------------------------------------------------------------
 
 # The race tests must run multi-threaded: with one thread there is no
-# thread scheduling, so an OpenMP race could never show up.
+# thread scheduling, so an OpenMP race could never show up. The value
+# is a string, not a number: environment variables only carry text.
 REQUIRED_OMP_THREADS = "4"
 
 # Tests 1, 3, 5, 7: |chi2(now) - chi2(frozen reference)| must stay
@@ -355,8 +357,12 @@ def assert_omp_threads():
     Raises:
       RuntimeError naming the observed value and the required one.
     """
+    # .get returns None when the variable is unset, so the error can
+    # show "None" rather than crash on a missing key
     observed = os.environ.get("OMP_NUM_THREADS")
     if observed != REQUIRED_OMP_THREADS:
+        # !r prints the value in its python literal form: None and
+        # the text '4' stay distinguishable in the message
         raise RuntimeError(
             f"OMP_NUM_THREADS={observed!r}; the race-condition tests require "
             f"OMP_NUM_THREADS={REQUIRED_OMP_THREADS} and it must be set "
@@ -379,7 +385,12 @@ def sha256_of(path):
       covariance never sits in memory at once.
     """
     hasher = hashlib.sha256()
+    # "rb" reads raw bytes (hashing is byte-level); the with block
+    # closes the file on every exit, an exception included
     with open(path, "rb") as f:
+        # the lambda is an unnamed one-line function wrapping f.read;
+        # two-argument iter calls it again and again until it returns
+        # b"" (end of file); 1 << 20 is 2**20 bytes = 1 MiB per read
         for block in iter(lambda: f.read(1 << 20), b""):
             hasher.update(block)
     return hasher.hexdigest()
@@ -399,7 +410,13 @@ def compute_manifest():
       manifest file is stable across platforms.
     """
     files = {}
+    # os.walk visits every folder under frozen/, handing back the
+    # folder path, its subfolder names, and its file names
     for base, dirs, names in os.walk(FROZEN_DIR):
+        # the comprehension keeps every subfolder name except
+        # __pycache__; assigning through dirs[:] rewrites os.walk's
+        # own list in place, which stops the walk from entering the
+        # dropped folders (a plain dirs = ... would not)
         dirs[:] = [d for d in dirs if d != "__pycache__"]
         for name in sorted(names):
             if name == ".DS_Store" or name.endswith(".pyc"):
@@ -407,6 +424,9 @@ def compute_manifest():
             full = os.path.join(base, name)
             rel = os.path.relpath(full, TESTS_DIR).replace(os.sep, "/")
             files[rel] = sha256_of(full)
+    # sorted(files.items()) orders the (path, digest) pairs by path;
+    # dict() rebuilds the table in that order, so the manifest json
+    # written from it never reshuffles between runs
     return dict(sorted(files.items()))
 
 
@@ -435,7 +455,8 @@ def verify_frozen():
             "test state."
         )
     # expected = the {relative path: sha256 digest} table written at
-    # freeze time; it is the definition of "untouched"
+    # freeze time; it is the definition of "untouched" (json.load
+    # parses the file into nested dictionaries and lists)
     with open(MANIFEST_FILE) as f:
         expected = json.load(f)["files"]
     # actual = the same table computed from the files on disk right now
@@ -444,6 +465,8 @@ def verify_frozen():
     # collect every discrepancy before raising: a report naming all
     # problem files at once beats failing on the first one
     problems = []
+    # .items() hands back each (path, digest) pair, and the loop
+    # unpacks the pair into the two names
     for rel, digest in expected.items():
         if rel not in actual:
             # the manifest lists it but the file is gone from disk
@@ -452,11 +475,14 @@ def verify_frozen():
             # the file exists but at least one byte differs
             problems.append(f"CHANGED  {rel}")
     # both directions matter: a file ADDED to frozen/ is as suspicious
-    # as an edited one, so the reverse scan runs too
+    # as an edited one, so the reverse scan runs too (iterating a
+    # dictionary yields its keys: here, the paths)
     for rel in actual:
         if rel not in expected:
             problems.append(f"EXTRA    {rel}")
     if problems:
+        # "\n  ".join(problems) glues the collected lines into one
+        # indented list, one problem file per line
         raise AssertionError(
             "Frozen test data does not match tests/manifest_sha256.json "
             "(someone edited the frozen copies; the tests refuse to run):\n  "
@@ -476,6 +502,8 @@ def load_reference():
       when and how the references were generated. The file sits inside
       frozen/, so verify_frozen() also protects it from editing.
     """
+    # json.load turns the file's json text back into the dictionary
+    # json.dump wrote; the with block closes the file either way
     with open(REFERENCE_FILE) as f:
         return json.load(f)
 
@@ -508,6 +536,9 @@ def _frozen_module(example):
     import importlib.util
 
     path = os.path.join(FROZEN_DIR, EXAMPLES[example]["frozen_module"])
+    # the importlib three-step: describe the file (spec), create an
+    # empty module object from the description, then run the file's
+    # code inside that object to fill in its attributes
     spec = importlib.util.spec_from_file_location(f"frozen_{example}", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -554,7 +585,9 @@ def load_frozen_info(example, tatt, high_accuracy=False,
     # every option and parameter written out at freeze time
     info = yaml_load(_frozen_module(example).yaml_string)
     # the tests drive the model directly, so a sampler or output block
-    # left in the info would only confuse cobaya
+    # left in the info would only confuse cobaya; pop's second
+    # argument makes the removal a no-op instead of an error when the
+    # key is absent
     info.pop("sampler", None)
     info.pop("output", None)
     # log level WARNING (30): component-loading chatter would bury the
@@ -570,19 +603,23 @@ def load_frozen_info(example, tatt, high_accuracy=False,
     # does not exist in a fresh clone (the TATT-vector generator
     # re-enables printing deliberately, into frozen/data)
     likelihood_block["print_datavector"] = False
-    # intrinsic-alignment model selection: 0 = NLA, 1 = TATT
+    # intrinsic-alignment model selection: 0 = NLA, 1 = TATT (the
+    # `1 if tatt else 0` form yields 1 when tatt is True, else 0)
     likelihood_block["IA_model"] = 1 if tatt else 0
     if tatt:
         # TATT evaluates against its own generated data vector so the
         # chi2 sits at a minimum (see the TATT_GENERATORS comment)
         likelihood_block["data_file"] = cfg["tatt_dataset"]
     if high_accuracy:
+        # dict.update merges the pushed settings into the block in
+        # place, overwriting any key both sides carry
         likelihood_block.update(HIGH_ACCURACY_LIKELIHOOD)
         info["theory"]["camb"]["extra_args"].update(
             HIGH_ACCURACY_CAMB_EXTRA_ARGS)
     if overrides is not None:
         # one knob at a time (an ACCURACY_KNOBS entry): the same
-        # mechanism as high_accuracy, restricted to a single setting
+        # mechanism as high_accuracy, restricted to a single setting;
+        # the overrides pair unpacks into its two dictionaries
         like_over, camb_over = overrides
         likelihood_block.update(like_over)
         info["theory"]["camb"]["extra_args"].update(camb_over)
@@ -593,6 +630,8 @@ def load_frozen_info(example, tatt, high_accuracy=False,
         # replaced here, before the model is built, because a fixed
         # parameter cannot change per evaluation)
         for name, value in TATT_POINT.items():
+            # .get returns None instead of raising when the name is
+            # missing, so the error below can name the parameter
             block = info["params"].get(name)
             if block is None:
                 raise ValueError(
@@ -629,6 +668,8 @@ def load_frozen_point(example):
       a fresh {parameter name: value} dictionary (copied, so a caller
       may modify it without affecting later calls).
     """
+    # dict(...) builds a COPY of the module's point table: the edits
+    # a caller makes stay in its copy, never in the module
     return dict(_frozen_module(example).point)
 
 
@@ -660,9 +701,14 @@ def build_point(model, example, tatt):
     # the exact {parameter: value} table the references were computed at
     point = load_frozen_point(example)
     # sampled = the parameters THIS model, built from today's code,
-    # expects to receive; the frozen point must cover them exactly
+    # expects to receive; the frozen point must cover them exactly.
+    # set() turns the name list into a set so the two sides can be
+    # compared and subtracted; set(point) takes the dictionary's KEYS
     sampled = set(model.parameterization.sampled_params())
     if sampled != set(point):
+        # sampled - set(point) = names only the model has; the
+        # reversed difference = names only the point has; sorted()
+        # fixes the order so the message is reproducible
         raise AssertionError(
             "sampled-parameter set differs from the frozen point (the "
             "likelihood/theory code changed its parameters):\n"
@@ -711,6 +757,8 @@ def evaluate_chi2(model, point):
     chi2 = -2.0 * posterior.loglikes[0]
     if not np.isfinite(chi2):
         raise AssertionError(f"non-finite chi2 at point {point}")
+    # float() converts the numpy scalar into a plain python float,
+    # which json can store and print cleanly
     return float(chi2)
 
 
@@ -738,12 +786,16 @@ def _single_model_chi2_impl(example, tatt, high_accuracy=False,
     Raises:
       ValueError when knob names no ACCURACY_KNOBS entry.
     """
+    # `"TATT" if tatt else "NLA"` picks the first name when tatt is
+    # True, the second otherwise
     ia_label = "TATT" if tatt else "NLA"
     if high_accuracy:
         ia_label += ", high accuracy"
     overrides = None
     if knob is not None:
-        # knob = a label from ACCURACY_KNOBS; look up its overrides
+        # knob = a label from ACCURACY_KNOBS; the comprehension keeps
+        # only the entries whose first field k[0] equals it, so
+        # matches is a list with one member (or none: unknown label)
         matches = [k for k in ACCURACY_KNOBS if k[0] == knob]
         if len(matches) != 1:
             raise ValueError(f"unknown accuracy knob {knob!r}")
@@ -787,6 +839,8 @@ def _ten_in_a_row_impl(example, tatt):
       (fresh, tenth): chi2 of the first fiducial evaluation and chi2
       of the fiducial as the 10th point of the row, both floats.
     """
+    # `"TATT" if tatt else "NLA"` picks the first name when tatt is
+    # True, the second otherwise
     ia_label = "TATT" if tatt else "NLA"
     print(f"  building model ({example}, {ia_label}) ...", flush=True)
     # one model instance for the whole sequence: sharing the instance
@@ -797,9 +851,18 @@ def _ten_in_a_row_impl(example, tatt):
     # the fresh value: the fiducial evaluated before anything else
     # touched this model instance
     fresh = evaluate_chi2(model, point)
+    # :.8f prints the value with a fixed eight decimals (:.4f below:
+    # four); :2d pads the row counter to a width of two
     print(f"  fresh model, fiducial point:  chi2 = {fresh:.8f}", flush=True)
+    # enumerate yields (counter, entry) pairs; start=1 makes the
+    # printed row numbers begin at 1 instead of 0
     for i, perturbation in enumerate(RACE_PERTURBATIONS, start=1):
+        # {**point, **perturbation} is a NEW dictionary: point's
+        # entries with the perturbation's written over them; point
+        # itself stays untouched for the final fiducial evaluation
         chi2 = evaluate_chi2(model, {**point, **perturbation})
+        # one "name=value" text per changed parameter, glued with
+        # ", " into the progress line
         changed = ", ".join(f"{k}={v}" for k, v in perturbation.items())
         print(f"  row {i:2d}/10 ({changed}):  chi2 = {chi2:.4f}", flush=True)
     tenth = evaluate_chi2(model, point)
@@ -810,8 +873,9 @@ def _ten_in_a_row_impl(example, tatt):
 # =============================================================================
 # SECTION 5: WORKER-SUBPROCESS ISOLATION
 # =============================================================================
-# The absolute path of this file: the worker driver imports the module
-# by path, so the child executes exactly the code the parent runs.
+# The absolute path of this file (__file__ is the module's own path):
+# the worker driver imports the module by path, so the child executes
+# exactly the code the parent runs.
 _THIS_FILE = os.path.abspath(__file__)
 
 # One flag separates the two roles: the parent process (pytest or the
@@ -822,7 +886,8 @@ _WORKER_FLAG = "COCOA_TESTS_WORKER"
 # The driver handed to `python -c` inside the worker: load this module
 # from its file path and call _worker with the six command-line
 # arguments (function name, example, two booleans, a reserved slot,
-# and the result path).
+# and the result path). The * in _worker(*sys.argv[2:8]) spreads the
+# six-element slice into six separate arguments.
 _WORKER_DRIVER = (
     "import importlib.util, sys\n"
     "spec = importlib.util.spec_from_file_location("
@@ -851,14 +916,21 @@ def _worker(function, example, tatt, high_accuracy, knob, result_path):
       nothing; the result lands in result_path.
     """
     require_cocoa_environment()
+    # the flags arrive as text (command-line arguments are strings);
+    # comparing against "1" turns them back into booleans
     tatt = tatt == "1"
     high_accuracy = high_accuracy == "1"
     if function == "single":
+        # `knob or None` turns the empty string (no knob) into None:
+        # `or` hands back its second operand when the first is empty
         value = _single_model_chi2_impl(example, tatt,
                                         high_accuracy=high_accuracy,
                                         knob=knob or None)
     else:
         value = list(_ten_in_a_row_impl(example, tatt))
+    # json.dump writes the value into the file as json text; the
+    # parent reads it back with json.load. The with block closes the
+    # file even when the dump fails
     with open(result_path, "w") as f:
         json.dump(value, f)
 
@@ -887,19 +959,31 @@ def _run_isolated(function, example, tatt, high_accuracy=False, knob=None):
     import sys
     import tempfile
 
+    # delete=False keeps the file when the with block closes it: only
+    # a fresh unique NAME is needed here; the worker writes the file
+    # and the finally below removes it
     with tempfile.NamedTemporaryFile("w", suffix=".json",
                                      delete=False) as tmp:
         result_path = tmp.name
+    # dict(os.environ) is a COPY of the environment: the edits below
+    # reach only the worker subprocess, never this process
     environment = dict(os.environ)
     environment[_WORKER_FLAG] = "1"
     # OpenMP reads this at library load inside the fresh worker, so
     # the requirement holds for every spawned evaluation
     environment["OMP_NUM_THREADS"] = REQUIRED_OMP_THREADS
+    # subprocess.run starts the worker and BLOCKS until it exits;
+    # env=environment hands the child the edited environment copy.
+    # The booleans travel as "1"/"0" text (command-line arguments are
+    # strings; _worker decodes them), and `knob or ""` turns None
+    # into the empty string the same way
     completed = subprocess.run(
         [sys.executable, "-c", _WORKER_DRIVER, _THIS_FILE, function,
          example, "1" if tatt else "0", "1" if high_accuracy else "0",
          knob or "", result_path],
         env=environment)
+    # the finally below runs on EVERY exit from the try, an exception
+    # included, so the temporary file never outlives this call
     try:
         if completed.returncode != 0:
             raise RuntimeError(
@@ -907,6 +991,8 @@ def _run_isolated(function, example, tatt, high_accuracy=False, knob=None):
                 f"exited with code {completed.returncode} before "
                 "writing a result; a cosmolike-level abort prints its "
                 "reason (e.g. IP::set_mask) just above")
+        # json.load parses the worker's file back into the value the
+        # worker json.dump-ed (a float, or a two-element list)
         with open(result_path) as f:
             return json.load(f)
     finally:
@@ -938,6 +1024,8 @@ def single_model_chi2(example, tatt, high_accuracy=False, knob=None):
     Returns:
       the chi2 as a float.
     """
+    # .get returns None when the variable is absent, so a normal
+    # (parent) process fails this test and spawns a worker instead
     if os.environ.get(_WORKER_FLAG) == "1":
         return _single_model_chi2_impl(example, tatt,
                                        high_accuracy=high_accuracy,
@@ -962,8 +1050,11 @@ def ten_in_a_row_chi2(example, tatt):
       (fresh, tenth): chi2 of the first fiducial evaluation and chi2
       of the fiducial as the 10th point of the row, both floats.
     """
+    # .get returns None when the variable is absent, so a normal
+    # (parent) process fails this test and spawns a worker instead
     if os.environ.get(_WORKER_FLAG) == "1":
         return _ten_in_a_row_impl(example, tatt)
+    # the worker's two-element json list unpacks into the two names
     fresh, tenth = _run_isolated("race", example, tatt)
     return float(fresh), float(tenth)
 
@@ -993,6 +1084,9 @@ def report_chi2_test(number, label, chi2, ref, tol):
       |chi2 - ref|, the printed difference.
     """
     delta = abs(chi2 - ref)
+    # one multi-line f-string: '-' * 66 repeats the dash 66 times (a
+    # rule), :.6f prints a fixed six decimals, and the a-if-else
+    # inside the last braces picks the verdict word
     print(f"""
 {'-' * 66}
 TEST {number}: {label}
@@ -1018,6 +1112,8 @@ def report_race_test(number, label, fresh, tenth, tol):
       |tenth - fresh|, the printed difference.
     """
     delta = abs(tenth - fresh)
+    # the same construct as report_chi2_test's block, at :.8f (a
+    # fixed eight decimals: the race limit is 1e-4)
     print(f"""
 {'-' * 66}
 TEST {number}: {label}
@@ -1048,6 +1144,8 @@ def report_accuracy(label, chi2_high, default_ref):
       chi2_high - default_ref, the printed difference.
     """
     delta = chi2_high - default_ref
+    # :+.6f = fixed six decimals with the sign ALWAYS printed, so an
+    # accuracy shift reads as +0.01 or -0.01 at a glance
     print(f"""
 {'-' * 66}
 ACCURACY: {label}
@@ -1070,6 +1168,8 @@ def report_knob(label, chi2, default_ref):
       chi2 - default_ref, the printed difference.
     """
     delta = chi2 - default_ref
+    # :30s pads the label to 30 characters so the columns line up;
+    # :12.6f = width 12 with six decimals; the + forces the sign
     print(f"  KNOB {label:30s} chi2 = {chi2:12.6f}  "
           f"delta = {delta:+12.6f}", flush=True)
     return delta
