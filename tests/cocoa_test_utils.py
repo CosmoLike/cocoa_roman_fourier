@@ -48,6 +48,56 @@ Every test first verifies the manifest and refuses to run when any
 frozen file changed. Refreshing the frozen state is a deliberate
 maintainer action: generate_frozen_reference.py --overwrite.
 
+Call flow, top to bottom (the MAP OF THIS FILE below the imports says
+where each definition lives):
+
+    test method (test_example1.py and the other test modules)
+      |
+      |  setUpClass, once per test class:
+      |    require_cocoa_environment()  chdir to ROOTDIR, or refuse
+      |    verify_frozen()              hash frozen/ against the manifest
+      |    load_reference()             read the frozen reference chi2
+      |
+      +-> single_model_chi2(example, tatt, ...)      tests 1, 3, 5, 7
+      |     +-> _run_isolated("single", ...)  spawn a fresh python
+      |           |  worker subprocess (COCOA_TESTS_WORKER=1):
+      |           +-> _worker -> _single_model_chi2_impl(...)
+      |                 +-> load_frozen_info(...)  yaml -> input dict
+      |                 +-> make_model(info)       dict -> Model
+      |                 +-> build_point(...)       drift-checked point
+      |                 +-> evaluate_chi2(...)     -> chi2 (-2 ln L)
+      |
+      +-> ten_in_a_row_chi2(example, tatt)           tests 2, 4, 6, 8
+      |     +-> _run_isolated("race", ...) -> _ten_in_a_row_impl(...)
+      |           the same four steps, with evaluate_chi2 run 11 times
+      |           on one shared model instance (the race check)
+      |
+      +-> report_*(...)   print the numbers; the test itself asserts
+
+Glossary:
+
+  frozen state   = the copy of configurations, data files, and points
+                   under tests/frozen/ that the tests read instead of
+                   the live project files.
+  manifest       = tests/manifest_sha256.json, the {path: SHA-256}
+                   table that defines "untouched" for every frozen
+                   file.
+  reference      = a chi2 recorded at freeze time in
+                   frozen/reference_chi2.json; each test compares its
+                   freshly computed chi2 against one reference.
+  variant        = one configuration under one intrinsic-alignment
+                   model, for example example1_nla or example2_tatt;
+                   the keys of the reference file name the variants.
+  knob           = one numerical-accuracy setting (an ACCURACY_KNOBS
+                   entry) pushed beyond its default to measure the
+                   numerical error the default carries.
+  fiducial point = the frozen sampled-parameter point the references
+                   were evaluated at; the TATT variants replace three
+                   of its values with TATT_POINT.
+  worker         = the fresh python subprocess _run_isolated spawns
+                   for one evaluation; it imports this module by path
+                   and runs the Section 4 pipeline in-process.
+
 To run the tests: activate the cocoa conda environment, source
 start_cocoa.sh from the Cocoa/ folder (this exports ROOTDIR), then
 
@@ -58,12 +108,71 @@ import hashlib
 import json
 import os
 
+# =============================================================================
+# MAP OF THIS FILE
+# =============================================================================
+# Section 1: CONSTANTS
+#   paths               TESTS_DIR, FROZEN_DIR, MANIFEST_FILE, REFERENCE_FILE
+#   tolerances          REQUIRED_OMP_THREADS, CHI2_TOLERANCE, RACE_TOLERANCE
+#   TATT                TATT_POINT, TATT_GENERATORS
+#   configurations      EXAMPLES
+#   race perturbations  RACE_PERTURBATIONS
+#   accuracy knobs      HIGH_ACCURACY_LIKELIHOOD,
+#                       HIGH_ACCURACY_CAMB_EXTRA_ARGS, ACCURACY_KNOBS
+#
+# Section 2: ENVIRONMENT CHECKS
+#   require_cocoa_environment  refuse to run outside a started Cocoa shell
+#   assert_omp_threads         refuse a race test that is not multi-threaded
+#
+# Section 3: FROZEN-STATE INTEGRITY
+#   sha256_of         fingerprint one file with SHA-256
+#   compute_manifest  hash every file currently under tests/frozen/
+#   verify_frozen     fail every test up front when the frozen state changed
+#   load_reference    read the frozen reference chi2 values
+#
+# Section 4: MODEL CONSTRUCTION AND EVALUATION (the chi2 pipeline)
+#   _frozen_module           load one frozen configuration module by file path
+#   load_frozen_info         frozen yaml string -> cobaya input dictionary
+#   make_model               cobaya input dictionary -> evaluable Model
+#   load_frozen_point        read the frozen evaluation point of one example
+#   build_point              frozen point, cross-checked against the model
+#   evaluate_chi2            one point on one model -> chi2 (-2 ln L)
+#   _single_model_chi2_impl  worker-side body of single_model_chi2
+#   _ten_in_a_row_impl       worker-side body of ten_in_a_row_chi2
+#
+# Section 5: WORKER-SUBPROCESS ISOLATION
+#   _THIS_FILE      absolute path of this file, for import-by-path
+#   _WORKER_FLAG    the environment variable that marks a worker process
+#   _WORKER_DRIVER  the python -c program every worker executes
+#   _worker         worker-side entry: evaluate, write the json result
+#   _run_isolated   spawn one worker subprocess and read back its result
+#
+# Section 6: TEST QUANTITIES (what the test methods call)
+#   single_model_chi2  chi2 of the fiducial point, in a fresh worker
+#   ten_in_a_row_chi2  fiducial fresh vs fiducial as 10th of 10 (race)
+#
+# Section 7: TERMINAL REPORTS (printers; the assertions live in the tests)
+#   report_chi2_test  pass/fail block for tests 1, 3, 5, 7
+#   report_race_test  pass/fail block for tests 2, 4, 6, 8
+#   report_accuracy   advisory block: default vs high-accuracy chi2
+#   report_knob       one line of the one-knob-at-a-time scan
+# =============================================================================
+
+
+# =============================================================================
+# SECTION 1: CONSTANTS
+# =============================================================================
+
+# ---- paths ------------------------------------------------------------------
+
 # Everything the tests read or write lives relative to this folder, so
 # the suite works no matter which directory pytest is launched from.
 TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 FROZEN_DIR = os.path.join(TESTS_DIR, "frozen")
 MANIFEST_FILE = os.path.join(TESTS_DIR, "manifest_sha256.json")
 REFERENCE_FILE = os.path.join(FROZEN_DIR, "reference_chi2.json")
+
+# ---- tolerances -------------------------------------------------------------
 
 # The race tests must run multi-threaded: with one thread there is no
 # thread scheduling, so an OpenMP race could never show up.
@@ -79,6 +188,8 @@ CHI2_TOLERANCE = 0.2
 # noise is allowed; a state leak produces a much larger shift.
 RACE_TOLERANCE = 1.0e-4
 
+# ---- TATT -------------------------------------------------------------------
+
 # The TATT (Tidal Alignment and Tidal Torquing, an intrinsic-alignment
 # model with tidal second-order terms) tests replace these values in
 # the frozen point. In the NLA reference point A2 and BTA are zero, so
@@ -90,9 +201,6 @@ TATT_POINT = {
     "roman_A2_2": -1.51541,
 }
 
-# The two frozen configurations. "likelihood" is the cobaya component
-# name, needed to reach that block inside the loaded info dictionary;
-# "provenance" names the human-readable snapshot (never loaded).
 # The TATT variants evaluate against a data vector GENERATED WITH
 # TATT at the fiducial point. Reason: against an NLA-based vector the
 # TATT chi2 sits away from its minimum, where it responds linearly
@@ -103,6 +211,55 @@ TATT_POINT = {
 TATT_GENERATORS = {
     "tatt_roman_fourier.dataset": "example2",
 }
+
+# ---- configurations ---------------------------------------------------------
+
+# The two frozen configurations. "likelihood" is the cobaya component
+# name, needed to reach that block inside the loaded info dictionary;
+# "provenance" names the human-readable snapshot (never loaded).
+EXAMPLES = {
+    "example1": {
+        "frozen_module": "frozen_config_example1.py",
+        "provenance": "EXAMPLE_EVALUATE1.yaml",
+        "likelihood": "roman_fourier.cosmic_shear",
+        "tatt_dataset": "tatt_roman_fourier.dataset",
+    },
+    "example2": {
+        "frozen_module": "frozen_config_example2.py",
+        "provenance": "EXAMPLE_EVALUATE2.yaml",
+        "likelihood": "roman_fourier.combo_3x2pt",
+        "tatt_dataset": "tatt_roman_fourier.dataset",
+    },
+    "example2_2x2pt": {
+        "frozen_module": "frozen_config_example2_2x2pt.py",
+        "provenance": "EXAMPLE_EVALUATE2.yaml",
+        "source_likelihood": "roman_fourier.combo_3x2pt",
+        "likelihood": "roman_fourier.combo_2x2pt",
+        "tatt_dataset": "tatt_roman_fourier.dataset",
+    },
+}
+
+# ---- race perturbations -----------------------------------------------------
+
+# The nine cosmologies evaluated before the fiducial point in a race
+# test. Each entry replaces the named parameters in the frozen point.
+# They stay inside the priors of the frozen configuration (an
+# out-of-prior point would evaluate to -inf and abort the test), and
+# they change the chi2 by orders of magnitude, so state leaked from
+# any of them would visibly move the final fiducial evaluation.
+RACE_PERTURBATIONS = [
+    {"As_1e9": 1.95},
+    {"As_1e9": 2.25},
+    {"omegam": 0.28},
+    {"omegam": 0.33},
+    {"H0": 64.0},
+    {"H0": 71.0},
+    {"ns": 0.95},
+    {"w": -1.1, "w0pwa": -1.1},
+    {"omegab": 0.052, "mnu": 0.15},
+]
+
+# ---- accuracy knobs ---------------------------------------------------------
 
 # High-accuracy settings for the accuracy advisory checks
 # (test_accuracy.py). This is a Fourier-space project: there is no
@@ -150,50 +307,10 @@ ACCURACY_KNOBS = [
     ("camb k_per_logint -> 50", {}, {"k_per_logint": 50}),
 ]
 
-EXAMPLES = {
-    "example1": {
-        "frozen_module": "frozen_config_example1.py",
-        "provenance": "EXAMPLE_EVALUATE1.yaml",
-        "likelihood": "roman_fourier.cosmic_shear",
-        "tatt_dataset": "tatt_roman_fourier.dataset",
-    },
-    "example2": {
-        "frozen_module": "frozen_config_example2.py",
-        "provenance": "EXAMPLE_EVALUATE2.yaml",
-        "likelihood": "roman_fourier.combo_3x2pt",
-        "tatt_dataset": "tatt_roman_fourier.dataset",
-    },
-    "example2_2x2pt": {
-        "frozen_module": "frozen_config_example2_2x2pt.py",
-        "provenance": "EXAMPLE_EVALUATE2.yaml",
-        "source_likelihood": "roman_fourier.combo_3x2pt",
-        "likelihood": "roman_fourier.combo_2x2pt",
-        "tatt_dataset": "tatt_roman_fourier.dataset",
-    },
-}
 
-# The nine cosmologies evaluated before the fiducial point in a race
-# test. Each entry replaces the named parameters in the frozen point.
-# They stay inside the priors of the frozen configuration (an
-# out-of-prior point would evaluate to -inf and abort the test), and
-# they change the chi2 by orders of magnitude, so state leaked from
-# any of them would visibly move the final fiducial evaluation.
-RACE_PERTURBATIONS = [
-    {"As_1e9": 1.95},
-    {"As_1e9": 2.25},
-    {"omegam": 0.28},
-    {"omegam": 0.33},
-    {"H0": 64.0},
-    {"H0": 71.0},
-    {"ns": 0.95},
-    {"w": -1.1, "w0pwa": -1.1},
-    {"omegab": 0.052, "mnu": 0.15},
-]
-
-
-# -----------------------------------------------------------------------------
-# Environment
-# -----------------------------------------------------------------------------
+# =============================================================================
+# SECTION 2: ENVIRONMENT CHECKS
+# =============================================================================
 def require_cocoa_environment():
     """Refuse to run outside a started Cocoa shell, then move to ROOTDIR.
 
@@ -245,9 +362,9 @@ def assert_omp_threads():
         )
 
 
-# -----------------------------------------------------------------------------
-# Frozen-state integrity
-# -----------------------------------------------------------------------------
+# =============================================================================
+# SECTION 3: FROZEN-STATE INTEGRITY
+# =============================================================================
 def sha256_of(path):
     """Fingerprint one file with SHA-256.
 
@@ -361,114 +478,9 @@ def load_reference():
         return json.load(f)
 
 
-# -----------------------------------------------------------------------------
-# Terminal reports
-# -----------------------------------------------------------------------------
-def report_chi2_test(number, label, chi2, ref, tol):
-    """Print one reference-comparison test as a readable block.
-
-    A bare pytest PASSED does not say what was compared, so each test
-    prints its own numbers: the freshly computed chi2, the frozen
-    reference, their absolute difference, and the limit the assertion
-    uses. flush=True makes the block appear immediately (pytest runs
-    with -s, so nothing buffers it).
-
-    Arguments:
-      number = the test number (1-8) shown in the header.
-      label  = one line naming the example, probe, and IA model.
-      chi2   = the chi2 computed in this run.
-      ref    = the frozen reference chi2.
-      tol    = the pass limit on |chi2 - ref| (CHI2_TOLERANCE).
-
-    Returns:
-      |chi2 - ref|, the printed difference.
-    """
-    delta = abs(chi2 - ref)
-    print(f"""
-{'-' * 66}
-TEST {number}: {label}
-  chi2 (this run)     = {chi2:.6f}
-  frozen reference    = {ref:.6f}
-  |delta chi2|        = {delta:.6f}   (limit: < {tol})
-  -> {'OK' if delta < tol else 'EXCEEDS LIMIT'}
-{'-' * 66}""", flush=True)
-    return delta
-
-
-def report_race_test(number, label, fresh, tenth, tol):
-    """Print one race-condition test as a readable block.
-
-    Arguments:
-      number = the test number (1-8) shown in the header.
-      label  = one line naming the example, probe, and IA model.
-      fresh  = chi2 of the fiducial point evaluated first on the model.
-      tenth  = chi2 of the same point evaluated as the 10th of a row.
-      tol    = the pass limit on |tenth - fresh| (RACE_TOLERANCE).
-
-    Returns:
-      |tenth - fresh|, the printed difference.
-    """
-    delta = abs(tenth - fresh)
-    print(f"""
-{'-' * 66}
-TEST {number}: {label}
-  fresh-model chi2    = {fresh:.8f}
-  10th of 10 in a row = {tenth:.8f}
-  |delta chi2|        = {delta:.8f}   (limit: < {tol})
-  OMP_NUM_THREADS     = {os.environ.get('OMP_NUM_THREADS')}
-  -> {'OK' if delta < tol else 'EXCEEDS LIMIT'}
-{'-' * 66}""", flush=True)
-    return delta
-
-
-def report_accuracy(label, chi2_high, default_ref):
-    """Print one default-vs-high-accuracy check. Advisory only.
-
-    The default-settings chi2 is the frozen reference (recorded at
-    freeze time); the high-accuracy chi2 is computed in this run. The
-    difference is the numerical error of the default settings at this
-    point: there is no pass/fail because how much numerical error an
-    analysis tolerates is a judgment call, not a fixed bound.
-
-    Arguments:
-      label       = one line naming the probe and IA model.
-      chi2_high   = chi2 with HIGH_ACCURACY settings, this run.
-      default_ref = the frozen default-settings reference chi2.
-
-    Returns:
-      chi2_high - default_ref, the printed difference.
-    """
-    delta = chi2_high - default_ref
-    print(f"""
-{'-' * 66}
-ACCURACY: {label}
-  chi2 (high accuracy)      = {chi2_high:.6f}
-  chi2 (default, frozen)    = {default_ref:.6f}
-  delta chi2 (high-default) = {delta:+.6f}
-{'-' * 66}""", flush=True)
-    return delta
-
-
-def report_knob(label, chi2, default_ref):
-    """Print one entry of the one-knob-at-a-time scan. Advisory only.
-
-    Arguments:
-      label       = the ACCURACY_KNOBS entry evaluated.
-      chi2        = chi2 with only that knob changed, this run.
-      default_ref = the frozen default-settings reference chi2.
-
-    Returns:
-      chi2 - default_ref, the printed difference.
-    """
-    delta = chi2 - default_ref
-    print(f"  KNOB {label:30s} chi2 = {chi2:12.6f}  "
-          f"delta = {delta:+12.6f}", flush=True)
-    return delta
-
-
-# -----------------------------------------------------------------------------
-# Model construction and evaluation
-# -----------------------------------------------------------------------------
+# =============================================================================
+# SECTION 4: MODEL CONSTRUCTION AND EVALUATION (the chi2 pipeline)
+# =============================================================================
 # cobaya and numpy are imported inside the functions below, not at the
 # top of this module. The reason is OpenMP: OMP_NUM_THREADS must be in
 # the environment before the compiled libraries load, and it is the
@@ -524,6 +536,10 @@ def load_frozen_info(example, tatt, high_accuracy=False,
       high_accuracy = True applies HIGH_ACCURACY_LIKELIHOOD and
                 HIGH_ACCURACY_CAMB_EXTRA_ARGS on top of the frozen
                 configuration (accuracy advisory checks only).
+      overrides = None, or a pair (likelihood overrides, camb
+                extra_args overrides) applied on top of the frozen
+                configuration; _single_model_chi2_impl builds this
+                pair from one ACCURACY_KNOBS entry.
 
     Returns:
       the input dictionary ready for cobaya's get_model.
@@ -702,16 +718,23 @@ def _single_model_chi2_impl(example, tatt, high_accuracy=False,
 
     Runs inside the worker subprocess only: building a model here,
     next to a model of different dimensions, would abort the process
-    (see the module docstring).
+    (see the module docstring). It chains the Section 4 pipeline:
+    load_frozen_info, make_model, build_point, evaluate_chi2.
 
     Arguments:
       example = a key of EXAMPLES.
       tatt    = True evaluates the TATT variant, False the NLA one.
       high_accuracy = True evaluates with the pushed numerical
                 settings (see load_frozen_info).
+      knob    = None, or the label of one ACCURACY_KNOBS entry; that
+                knob's overrides are applied alone (the one-at-a-time
+                scan of test_accuracy.py).
 
     Returns:
       the chi2 as a float.
+
+    Raises:
+      ValueError when knob names no ACCURACY_KNOBS entry.
     """
     ia_label = "TATT" if tatt else "NLA"
     if high_accuracy:
@@ -779,9 +802,9 @@ def _ten_in_a_row_impl(example, tatt):
     return fresh, tenth
 
 
-# -----------------------------------------------------------------------------
-# Worker-subprocess isolation
-# -----------------------------------------------------------------------------
+# =============================================================================
+# SECTION 5: WORKER-SUBPROCESS ISOLATION
+# =============================================================================
 # The absolute path of this file: the worker driver imports the module
 # by path, so the child executes exactly the code the parent runs.
 _THIS_FILE = os.path.abspath(__file__)
@@ -843,6 +866,8 @@ def _run_isolated(function, example, tatt, high_accuracy=False, knob=None):
       example       = a key of EXAMPLES.
       tatt          = True for the TATT variant.
       high_accuracy = True for the pushed numerical settings.
+      knob          = an ACCURACY_KNOBS label evaluated alone, or
+                      None.
 
     Returns:
       the json value the worker wrote: a float for "single", a
@@ -884,6 +909,9 @@ def _run_isolated(function, example, tatt, high_accuracy=False, knob=None):
             os.unlink(result_path)
 
 
+# =============================================================================
+# SECTION 6: TEST QUANTITIES (what the test methods call)
+# =============================================================================
 def single_model_chi2(example, tatt, high_accuracy=False, knob=None):
     """chi2 of the frozen fiducial point, evaluated in a fresh worker.
 
@@ -897,6 +925,10 @@ def single_model_chi2(example, tatt, high_accuracy=False, knob=None):
       tatt    = True evaluates the TATT variant, False the NLA one.
       high_accuracy = True evaluates with the pushed numerical
                 settings; expect minutes instead of seconds.
+      knob    = None, or the label of one ACCURACY_KNOBS entry;
+                forwarded to the worker, which applies that knob's
+                overrides alone (the one-at-a-time scan of
+                test_accuracy.py).
 
     Returns:
       the chi2 as a float.
@@ -929,3 +961,110 @@ def ten_in_a_row_chi2(example, tatt):
         return _ten_in_a_row_impl(example, tatt)
     fresh, tenth = _run_isolated("race", example, tatt)
     return float(fresh), float(tenth)
+
+
+# =============================================================================
+# SECTION 7: TERMINAL REPORTS
+# =============================================================================
+# Each printer returns the difference it printed; the assertion on
+# that difference lives in the calling test method, not here.
+def report_chi2_test(number, label, chi2, ref, tol):
+    """Print one reference-comparison test as a readable block.
+
+    A bare pytest PASSED does not say what was compared, so each test
+    prints its own numbers: the freshly computed chi2, the frozen
+    reference, their absolute difference, and the limit the assertion
+    uses. flush=True makes the block appear immediately (pytest runs
+    with -s, so nothing buffers it).
+
+    Arguments:
+      number = the test number (1-8) shown in the header.
+      label  = one line naming the example, probe, and IA model.
+      chi2   = the chi2 computed in this run.
+      ref    = the frozen reference chi2.
+      tol    = the pass limit on |chi2 - ref| (CHI2_TOLERANCE).
+
+    Returns:
+      |chi2 - ref|, the printed difference.
+    """
+    delta = abs(chi2 - ref)
+    print(f"""
+{'-' * 66}
+TEST {number}: {label}
+  chi2 (this run)     = {chi2:.6f}
+  frozen reference    = {ref:.6f}
+  |delta chi2|        = {delta:.6f}   (limit: < {tol})
+  -> {'OK' if delta < tol else 'EXCEEDS LIMIT'}
+{'-' * 66}""", flush=True)
+    return delta
+
+
+def report_race_test(number, label, fresh, tenth, tol):
+    """Print one race-condition test as a readable block.
+
+    Arguments:
+      number = the test number (1-8) shown in the header.
+      label  = one line naming the example, probe, and IA model.
+      fresh  = chi2 of the fiducial point evaluated first on the model.
+      tenth  = chi2 of the same point evaluated as the 10th of a row.
+      tol    = the pass limit on |tenth - fresh| (RACE_TOLERANCE).
+
+    Returns:
+      |tenth - fresh|, the printed difference.
+    """
+    delta = abs(tenth - fresh)
+    print(f"""
+{'-' * 66}
+TEST {number}: {label}
+  fresh-model chi2    = {fresh:.8f}
+  10th of 10 in a row = {tenth:.8f}
+  |delta chi2|        = {delta:.8f}   (limit: < {tol})
+  OMP_NUM_THREADS     = {os.environ.get('OMP_NUM_THREADS')}
+  -> {'OK' if delta < tol else 'EXCEEDS LIMIT'}
+{'-' * 66}""", flush=True)
+    return delta
+
+
+def report_accuracy(label, chi2_high, default_ref):
+    """Print one default-vs-high-accuracy check. Advisory only.
+
+    The default-settings chi2 is the frozen reference (recorded at
+    freeze time); the high-accuracy chi2 is computed in this run. The
+    difference is the numerical error of the default settings at this
+    point: there is no pass/fail because how much numerical error an
+    analysis tolerates is a judgment call, not a fixed bound.
+
+    Arguments:
+      label       = one line naming the probe and IA model.
+      chi2_high   = chi2 with HIGH_ACCURACY settings, this run.
+      default_ref = the frozen default-settings reference chi2.
+
+    Returns:
+      chi2_high - default_ref, the printed difference.
+    """
+    delta = chi2_high - default_ref
+    print(f"""
+{'-' * 66}
+ACCURACY: {label}
+  chi2 (high accuracy)      = {chi2_high:.6f}
+  chi2 (default, frozen)    = {default_ref:.6f}
+  delta chi2 (high-default) = {delta:+.6f}
+{'-' * 66}""", flush=True)
+    return delta
+
+
+def report_knob(label, chi2, default_ref):
+    """Print one entry of the one-knob-at-a-time scan. Advisory only.
+
+    Arguments:
+      label       = the ACCURACY_KNOBS entry evaluated.
+      chi2        = chi2 with only that knob changed, this run.
+      default_ref = the frozen default-settings reference chi2.
+
+    Returns:
+      chi2 - default_ref, the printed difference.
+    """
+    delta = chi2 - default_ref
+    print(f"  KNOB {label:30s} chi2 = {chi2:12.6f}  "
+          f"delta = {delta:+12.6f}", flush=True)
+    return delta
