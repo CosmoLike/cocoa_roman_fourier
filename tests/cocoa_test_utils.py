@@ -31,8 +31,9 @@ tests. The frozen state has three parts:
   - frozen/data/: the tests' own copy of the data vectors, covariance,
     n(z), and masks.
   - frozen/EXAMPLE_EVALUATE{1,2}.yaml: snapshots of the example yaml
-    files at freeze time, kept only so a human can diff how the live
-    examples drifted; no test reads them.
+    files at freeze time, kept only so a human can see what
+    changed in the live examples since the freeze; no test reads
+    them.
 
 Every model build runs in its own worker subprocess: the public
 single_model_chi2 and ten_in_a_row_chi2 spawn a fresh python that
@@ -64,7 +65,7 @@ where each definition lives):
       |           +-> _worker -> _single_model_chi2_impl(...)
       |                 +-> load_frozen_info(...)  yaml -> input dict
       |                 +-> make_model(info)       dict -> Model
-      |                 +-> build_point(...)       drift-checked point
+      |                 +-> build_point(...)       names-checked point
       |                 +-> evaluate_chi2(...)     -> chi2 (-2 ln L)
       |
       +-> ten_in_a_row_chi2(example, tatt)           tests 2, 4, 6, 8
@@ -204,8 +205,9 @@ TATT_POINT = {
 # The TATT variants evaluate against a data vector GENERATED WITH
 # TATT at the fiducial point. Reason: against an NLA-based vector the
 # TATT chi2 sits away from its minimum, where it responds linearly
-# (not quadratically) to tiny numerical changes, making drift bounds
-# twitchy. Both examples share one data set, so a single full-length
+# (not quadratically) to tiny numerical changes: harmless
+# rounding-level shifts would then eat much of the 0.2 chi2 band the
+# reference tests allow. Both examples share one data set, so a single full-length
 # vector generated from the example2 TATT model serves every
 # configuration (the other probes' masks select their sections).
 TATT_GENERATORS = {
@@ -631,7 +633,7 @@ def load_frozen_point(example):
 
 
 def build_point(model, example, tatt):
-    """Assemble the exact point a test evaluates, with a drift check.
+    """Assemble the exact point a test evaluates, with a safety check.
 
     The frozen point must cover the model's sampled parameters one to
     one. When likelihood or theory code changes its parameter set (a
@@ -754,8 +756,11 @@ def _single_model_chi2_impl(example, tatt, high_accuracy=False,
     info = load_frozen_info(example, tatt, high_accuracy=high_accuracy,
                             overrides=overrides)
     model = make_model(info)
-    # build_point returns the frozen evaluation point, cross-checked
-    # against the model's sampled-parameter set (drift fails loudly)
+    # build_point returns the frozen evaluation point after checking
+    # that the point and the model name the same sampled parameters:
+    # if the likelihood or theory code gained or lost a sampled
+    # parameter since the freeze, the mismatch is reported by name
+    # instead of failing deep inside cobaya
     point = build_point(model, example, tatt)
     print("  evaluating the fiducial point ...", flush=True)
     return evaluate_chi2(model, point)
