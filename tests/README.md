@@ -36,8 +36,12 @@ so run the command with nothing piped after it.
 
 The standard configurations get four tests each: a $\chi^2$ drift check
 and a race check, both in the NLA and in the TATT intrinsic-alignment
-model (TATT: `IA_model: 1` with `roman_A2_1=0.05`, `roman_BTA_1=0.05`,
-`roman_A2_2=-1.51541`).
+model. The TATT variants set
+
+    IA_model: 1
+    roman_A2_1: 0.05
+    roman_BTA_1: 0.05
+    roman_A2_2: -1.51541
 
 | check | pass limit                                        | a failure means                    |
 |-------|---------------------------------------------------|------------------------------------|
@@ -51,17 +55,29 @@ model (TATT: `IA_model: 1` with `roman_A2_1=0.05`, `roman_BTA_1=0.05`,
 | 11-14 | `test_example2_2x2pt.py` | 2x2pt (`roman_fourier.combo_2x2pt`: example2 reduced to galaxy clustering plus galaxy-galaxy lensing) |
 
 Accuracy checks (`test_accuracy.py`, A1-A6): the three probes with
-both IA models re-evaluated with the numerical settings pushed far
-beyond the defaults (cosmolike `accuracyboost: 2`, integration_accuracy
-10, `kmax_boltzmann: 40`; CAMB `AccuracyBoost: 2`, `k_per_logint: 50`, kmax
-50; no lmax here, the ell range lives in the dataset). Each check
-reports $\Delta\chi^2 = \chi^2(\text{high accuracy}) - \chi^2(\text{default})$, no
-pass/fail. Before A1-A6, a one-knob-at-a-time scan (the KNOB lines)
-evaluates each setting alone on example2 NLA, so a large all-knobs
-delta can be attributed to the knob causing it; the measured deltas
-are in the project README under "Minimum accuracy parameters".
-High-accuracy evaluations take minutes; skip the file with
-`--ignore ./projects/roman_fourier/tests/test_accuracy.py`.
+both IA models re-evaluated with every setting pushed far beyond the
+defaults at once. Before A1-A6, a one-knob-at-a-time scan (the KNOB
+lines) evaluates each setting alone on example2 NLA, so a large
+all-knobs delta can be attributed to the knob causing it; the
+measured deltas are in the project README under "Minimum accuracy
+parameters". The all-knobs settings:
+
+    # cosmolike likelihood settings
+    accuracyboost: 2
+    integration_accuracy: 10
+    # (no lmax here: the ell range lives in the dataset)
+    kmax_boltzmann: 40
+    # CAMB extra_args (kmax moves with kmax_boltzmann: one physical cutoff)
+    AccuracyBoost: 2
+    k_per_logint: 50
+    kmax: 50
+
+Each check reports $\Delta\chi^2 = \chi^2(\text{high accuracy}) -
+\chi^2(\text{default})$: the numerical error of the default
+settings. No pass/fail. High-accuracy evaluations take minutes; run
+the file on its own, or skip it with
+
+    python -m pytest ./projects/roman_fourier/tests --ignore ./projects/roman_fourier/tests/test_accuracy.py
 
 All TATT variants evaluate against `frozen/data/tatt_roman_fourier.dataset`,
 a data vector generated with TATT at the fiducial point during the
