@@ -229,24 +229,26 @@ Now, users must follow all the steps below.
 
 # Unit tests <a name="roman_fourier_unit_tests"></a>
 
-The folder `projects/roman_fourier/tests` contains 12 pass/fail tests covering
-the three likelihoods (cosmic shear, 3x2pt, 2x2pt) with both intrinsic-alignment
-models (NLA and TATT). For each combination, one test compares the $\chi^2$ at a
-fixed reference point against the value stored in
-`tests/frozen/reference_chi2.json` (pass limit 0.2), and one evaluates that
-point on its own and again after nine other cosmologies: leftover internal
-state or an OpenMP race breaks the agreement (limit $10^{-4}$). Every model builds
-in its own worker subprocess, and every file of the tests' snapshot is checked against a
-SHA-256 manifest before any physics runs, so an edited snapshot fails
-loudly instead of producing a plausible $\chi^2$.
+The `tests/` folder holds unit tests for the likelihoods of this
+project: they compare each likelihood against stored reference
+values, check for race conditions from OpenMP threading, and measure
+the numerical error of the default accuracy settings. The
+tests read nothing from the live project;
+[tests/README.md](tests/README.md) describes every test, the tests'
+own data snapshot, and how to refresh it.
 
-Run the tests from the `Cocoa/` folder, with the cocoa conda environment
-active and `start_cocoa.sh` sourced:
+We assume users are in the Conda cocoa environment from a previous
+`conda activate cocoa` command, that the shell is bash, and that the
+current folder is the cocoa main folder `cocoa/Cocoa`.
+
+**Step :one:**: activate the private Python environment by sourcing
+the script `start_cocoa.sh`
+
+    source start_cocoa.sh
+
+**Step :two:**: run the tests of this project
 
     python -m pytest ./projects/roman_fourier/tests
-
-`projects/roman_fourier/tests/README.md` describes each test, the snapshot,
-and how maintainers regenerate it.
 
 # Minimum accuracy parameters <a name="roman_fourier_accuracy"></a>
 
