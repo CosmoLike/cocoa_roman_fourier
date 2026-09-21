@@ -1,0 +1,21 @@
+{
+  "_comment": "SHA-256 of every file under tests/frozen/; verified by every test before evaluating anything.",
+  "files": {
+    "frozen/EXAMPLE_EVALUATE1.yaml": "226394268a4131c0a6cde77c0cdc8fb094673b4c11e17ef955fc743a5e6b3539",
+    "frozen/EXAMPLE_EVALUATE2.yaml": "1920a3c0b080be75904b88887d072a3e2557ae1d99d800d6c9ad8542510ed440",
+    "frozen/data/.gitattributes": "1aaababc177bbedf16dcacd25f588b4b736a20ac3a4643705d0a71d40bb60346",
+    "frozen/data/.gitignore": "16af9a7a80eb5ea2c9b649e7259cd32e093532dd3ccc3be91379c231c57930b2",
+    "frozen/data/README": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "frozen/data/baryons_logPkR.h5": "1ab5cc0604925089787dd775740b368db2a83a0d10c88af54f3b3f4bfa33570d",
+    "frozen/data/calculate_mask.py": "daaa60b7b9b3bff859131d662f9669a98d294dbb25eca6d6a344e8773d950f90",
+    "frozen/data/ones.mask": "929a72103ca195fe60e42ddaafe2557b56ad614a15781c1277b3e9cfdf9f86fd",
+    "frozen/data/roman_example.cov": "1e2e2b0f0f2927729bdecdd22e12d41d2494f8e11616e17e46ca69512a210ac4",
+    "frozen/data/roman_example.dataset": "8ef0e1ff80032da8e77c398818fac50539f67a140eaa5e970ade433b6db740ad",
+    "frozen/data/roman_example.datavector": "6cb3f705e0a6b2f9b1cdcb51bb4ce51b88d4a3fb9f2d65ec5c532094a05d28e2",
+    "frozen/data/roman_example.mask": "f8d8248a1ee493682a3df43cf4b124334895c4185a178762e270a1025325e149",
+    "frozen/data/roman_example.nz": "90a127b0f02c0fbfb4e41de39b6dc77f5b824a80a4a62dbf78fad856af4a41d9",
+    "frozen/frozen_config_example1.py": "4de44011e52f9c27fd9084699d57fb5f561ce1b017f5ca8f257420c26f976f9e",
+    "frozen/frozen_config_example2.py": "d14c96b37f77b09a5253cb2121ca4e3d84bd2ebedbc5882bde6bd27930cdb5b6",
+    "frozen/reference_chi2.json": "935fa5754652a41556459351ef3f1a9b4354c7cfcbb8be0c9e9980beb33b59e2"
+  }
+}
