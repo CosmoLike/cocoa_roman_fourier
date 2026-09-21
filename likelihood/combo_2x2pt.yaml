@@ -2,9 +2,11 @@ path: null
 data_file: roman_fourier_M1_GGL0.05.dataset
 # accuracyboost refines the redshift grid of the power-spectrum tables
 # dyadically (nested nodes; see likelihood/_cosmolike_prototype_base.py), so
-# raising it is a true refinement: the tests/ boost scan moves chi2 by
-# -0.28 at boost 1.25, and the refined grids agree to 0.05 through boost 5.
-accuracyboost: 1.0
+# raising it is a true refinement. The default is 2.0 because the unrefined
+# boost-1 grid carried about 0.28 of chi2 z-resolution error on the
+# synthetic test point; the nested boost-2 grid removes it, and the refined
+# grids agree to 0.05 through boost 5.
+accuracyboost: 2.0
 integration_accuracy: 0
 kmax_boltzmann: 7.5
 speed: 1

@@ -9,7 +9,7 @@ likelihood:
   roman_fourier.combo_3x2pt:
     path: ./external_modules/data/roman_fourier
     data_file: roman_example.dataset # this assumes lens = source
-    accuracyboost: 1.0
+    accuracyboost: 2.0
     integration_accuracy: 0
     kmax_boltzmann: 10.0
     # 1 EE2, 2 Halofit

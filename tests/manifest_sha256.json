@@ -1,8 +1,8 @@
 {
   "_comment": "SHA-256 of every file under tests/frozen/; verified by every test before evaluating anything.",
   "files": {
-    "frozen/EXAMPLE_EVALUATE1.yaml": "226394268a4131c0a6cde77c0cdc8fb094673b4c11e17ef955fc743a5e6b3539",
-    "frozen/EXAMPLE_EVALUATE2.yaml": "1920a3c0b080be75904b88887d072a3e2557ae1d99d800d6c9ad8542510ed440",
+    "frozen/EXAMPLE_EVALUATE1.yaml": "2b975b98363bc163799a068b2448b827e17f7246053fb5bd7d4f119a918f6016",
+    "frozen/EXAMPLE_EVALUATE2.yaml": "bd7d429bcc92d00985fe48d66bcce6644b51bd6b809b7b3719bb5164d83f5094",
     "frozen/data/.gitattributes": "1aaababc177bbedf16dcacd25f588b4b736a20ac3a4643705d0a71d40bb60346",
     "frozen/data/.gitignore": "16af9a7a80eb5ea2c9b649e7259cd32e093532dd3ccc3be91379c231c57930b2",
     "frozen/data/README": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -15,10 +15,10 @@
     "frozen/data/roman_example.mask": "f8d8248a1ee493682a3df43cf4b124334895c4185a178762e270a1025325e149",
     "frozen/data/roman_example.nz": "90a127b0f02c0fbfb4e41de39b6dc77f5b824a80a4a62dbf78fad856af4a41d9",
     "frozen/data/tatt_roman_fourier.dataset": "cb6c41b2d022adab51723bd47f3192e7527d67689b1ece706be7d24eae38d65b",
-    "frozen/data/tatt_roman_fourier.modelvector": "0002bc4f19aa3cfe128c3bd2ba6545a33253c12a9bbaa1ad0df5a1f95dba01ad",
-    "frozen/frozen_config_example1.py": "a33600cc5a1c6b16a8d8be2dc29fa0564349820c3168dfc9c7eb4699854cb538",
-    "frozen/frozen_config_example2.py": "5233f326203080c28d607d366c9951697210d07112dd5e34359fac9c169f458b",
-    "frozen/frozen_config_example2_2x2pt.py": "12af110a052bb4c1a8ac08874ab7d11463ecaa314e6821abee6d9c3fed5ea85d",
-    "frozen/reference_chi2.json": "a9c53a4a221c7b5409301f7fc9510501498ea16164887e3ad7bca1f154bc750a"
+    "frozen/data/tatt_roman_fourier.modelvector": "71ff5f04cb1e704330e6aeb0f6c8f3d01edfd5f751b54e6eb946854257f2eaa6",
+    "frozen/frozen_config_example1.py": "355a7a361311e01304312d92bde4121fe9c14b90e28299af38b02c8a3219adec",
+    "frozen/frozen_config_example2.py": "1046a4324665703a5a95a385df08d346faed0723aa578139548d7fece238e888",
+    "frozen/frozen_config_example2_2x2pt.py": "62917386dbebb130b3d975405f4e34a5dc756517379444fdeffda80af1ef9ebd",
+    "frozen/reference_chi2.json": "a68cf059d5cdd9cbbebd9acb4890b5086ff89cea13ea1ffd95eb7dcbec430b65"
   }
 }

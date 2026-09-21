@@ -261,21 +261,20 @@ point (NLA, chi2 = 0.680 at the defaults: cosmolike `accuracyboost` 1.0,
 
 | knob | raised to | delta chi2 |
 |---|---|---|
-| cosmolike `accuracyboost` | 1.25 / 1.5 / 2 / 3 / 5 | -0.280 / -0.287 / -0.293 / -0.265 / -0.243 |
+| cosmolike `accuracyboost` (default 2.0) | 3 / 5 | +0.027 / +0.049 |
 | cosmolike `integration_accuracy` | 10 | -0.014 |
 | `kmax_boltzmann` + CAMB `kmax` | 40 + 50 | -0.003 |
 | CAMB `k_per_logint` | 25 / 50 / 100 | +0.0005 / +0.0005 / +0.0005 |
 | CAMB `AccuracyBoost` (at `k_per_logint` 50) | 1.5 / 2 | +0.009 / +0.014 |
 
-With every knob raised at once (the all-knobs set compares the default
-accuracyboost 1 against 3, the highest value that stays healthy in every
-project scanned), the six advisory checks report delta chi2 = -0.003
-(shear NLA), +0.002 (shear TATT), -0.212 (2x2pt NLA), +0.509 (2x2pt
-TATT), -0.244 (3x2pt NLA), +0.513 (3x2pt TATT). The clustering deltas
-exceed the 0.2 target and are dominated by the accuracyboost z
-refinement (the one-knob line above shows -0.265 from that knob alone):
-the default grid carries that much z-resolution error on these
-synthetic points.
+With every knob raised at once (comparing the default accuracyboost
+2 against 3), the six advisory checks report delta chi2 = +0.002
+(shear NLA), +0.0004 (shear TATT), +0.048 (2x2pt NLA), +0.038 (2x2pt
+TATT), +0.048 (3x2pt NLA), +0.038 (3x2pt TATT): all far below the 0.2
+target. The default accuracyboost is 2.0: the boost-1 grid carried
+about 0.28 of chi2 z-resolution error on the synthetic test point,
+removed on the nested boost-2 grid (the frozen references were
+regenerated at the new default).
 
 No default changed. `k_per_logint` sits on its plateau already (25, 50, and
 100 agree to 0.0001), and CAMB `AccuracyBoost` at 2 moves the chi2 by +0.014,
