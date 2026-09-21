@@ -55,7 +55,9 @@ model. The TATT variants set
 | 5-8   | `test_example2.py` | 3x2pt (example2) |
 | 11-14 | `test_example2_2x2pt.py` | 2x2pt (`roman_fourier.combo_2x2pt`: example2 reduced to galaxy clustering plus galaxy-galaxy lensing) |
 
-Accuracy checks (`test_accuracy.py`, A1-A6): the three probes with
+### Accuracy checks (`test_accuracy.py`, A1-A6)
+
+The three probes with
 both IA models re-evaluated with every setting pushed far beyond the
 defaults at once. Before A1-A6, a one-knob-at-a-time scan (the KNOB
 lines) evaluates each setting alone on example2 NLA, so a large
@@ -80,12 +82,14 @@ the file on its own, or skip it with
 
     python -m pytest ./projects/roman_fourier/tests --ignore ./projects/roman_fourier/tests/test_accuracy.py
 
+### Synthetic data vectors
+
 All TATT variants evaluate against `frozen/data/tatt_roman_fourier.dataset`,
 a data vector generated with TATT at the fiducial point during the
 freeze: at its own minimum the TATT $\chi^2$ responds quadratically to
 numerical changes instead of linearly on the side of a hill.
 
-## Why the tests keep their own copy of everything
+## Tests keep their own copy of configurations and data
 
 The tests read nothing from the live project: not `../data`, not the
 `EXAMPLE_EVALUATE` yaml files, and not the likelihood default yaml
