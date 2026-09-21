@@ -250,45 +250,33 @@ and how maintainers regenerate it.
 
 # Minimum accuracy parameters <a name="roman_fourier_accuracy"></a>
 
-`tests/test_accuracy.py` measures the numerical error the default settings
-carry. It re-evaluates the snapshot configurations with the accuracy settings
-raised, one at a time and all at once, and reports
-$\Delta\chi^2 = \chi^2(\text{raised}) - \chi^2(\text{default})$. The target is $\lvert\Delta\chi^2\rvert$ below
-0.2, the pass limit of the reference tests. On the stored 3x2pt reference
-point (NLA, $\chi^2$ = 0.680 at the defaults: cosmolike `accuracyboost` 1.0,
-`integration_accuracy` 0, `kmax_boltzmann` 10; CAMB `AccuracyBoost` 1.1,
-`k_per_logint` 15, `kmax` 10), the one-setting $\Delta\chi^2$ values are:
+The advisory checks in `tests/test_accuracy.py` measure the
+numerical error of the default accuracy settings: each setting is
+raised one at a time on the 3x2pt configuration, so a large
+$\Delta\chi^2$ can be attributed to the setting causing it, and
+then every setting at once. Each check prints the $\Delta\chi^2$
+between the high-accuracy and the default evaluations. The measured
+values sit far below the 0.2 band the reference tests allow, so the
+shipped defaults are adequate. The values are not quoted here: rerun
+the checks to measure them on the current code, and see
+[tests/README.md](tests/README.md) for each check, the settings
+raised, and what each setting controls.
 
-| setting | raised to | $\Delta\chi^2$ |
-|---|---|---|
-| cosmolike `accuracyboost` (default 2.0) | 3 / 5 | +0.027 / +0.049 |
-| cosmolike `integration_accuracy` | 10 | -0.014 |
-| `kmax_boltzmann` + CAMB `kmax` | 40 + 50 | -0.003 |
-| CAMB `k_per_logint` | 25 / 50 / 100 | +0.0005 / +0.0005 / +0.0005 |
-| CAMB `AccuracyBoost` (at `k_per_logint` 50) | 1.5 / 2 | +0.009 / +0.014 |
+`accuracyboost` refines a nested z grid in the power-spectrum
+tables: every coarser grid's nodes are a subset of every finer
+grid's, so a higher boost tightens the same interpolation instead of
+moving the nodes (the construction is commented in
+`likelihood/_cosmolike_prototype_base.py`).
 
-With every setting raised at once (comparing the default accuracyboost
-2 against 3), the six advisory checks report $\Delta\chi^2$ = +0.002
-(shear NLA), +0.0004 (shear TATT), +0.048 (2x2pt NLA), +0.038 (2x2pt
-TATT), +0.048 (3x2pt NLA), +0.038 (3x2pt TATT): all far below the 0.2
-target. The default accuracyboost is 2.0: the boost-1 grid carried
-about 0.28 of $\chi^2$ z-resolution error on the synthetic test point,
-removed on the nested boost-2 grid (the stored references were
-regenerated at the new default).
+When several settings move the $\chi^2$, settle them in cost order:
+raise cosmolike `accuracyboost` first (cheap), then CAMB
+`k_per_logint`, and CAMB `AccuracyBoost` last (expensive at run
+time, and able to masquerade for the cheap settings).
+`kmax_boltzmann` and CAMB `kmax` are one physical cutoff seen from
+two sides; move them together.
 
-No default changed. `k_per_logint` sits on its plateau already (25, 50, and
-100 agree to 0.0001), and CAMB `AccuracyBoost` at 2 moves the $\chi^2$ by +0.014,
-so the CAMB side is resolved. cosmolike `accuracyboost` now refines the
-z grid of the power-spectrum tables dyadically (nested nodes; see
-likelihood/_cosmolike_prototype_base.py), so raising it is a true
-refinement: the boost scan is smooth, with the refined grids agreeing to
-0.05 in $\chi^2$ through boost 5; the default stays at 1.0 and the
-likelihood yaml files carry this measurement as a comment.
-
-When a large accuracy delta appears, test the settings in this order: cosmolike
-`accuracyboost` first (cheap), then CAMB `k_per_logint`, and only then CAMB
-`AccuracyBoost` (expensive at run time). An apparent `AccuracyBoost`
-sensitivity can stand in for an unresolved cheap setting: in the roman_kl
-project, an apparent +0.80 from `AccuracyBoost` collapsed to +0.002 once
-`k_per_logint` reached 50. `kmax_boltzmann` (cosmolike) and `kmax` (CAMB) are
-one physical cutoff seen from the two sides; move them together.
+The default is `accuracyboost: 2.0`: the boost-1 grid carried a
+measurable z-resolution error at the synthetic test point, removed
+on the nested boost-2 grid, and the stored references were
+regenerated at that default. The likelihood yaml files carry the
+measurement as a comment.
