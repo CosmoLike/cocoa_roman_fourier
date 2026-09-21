@@ -16,7 +16,7 @@ Contents:
 
 1. [Running the tests](#run_tests)
 2. [The tests](#the_tests)
-    1. [Accuracy checks](#accuracy_checks)
+    1. [Running Accuracy checks](#accuracy_checks)
     2. [Synthetic data vectors](#synthetic_vectors)
 3. [Tests keep their own copy of configurations and data](#frozen_copy)
 4. [Refreshing the frozen state (maintainers only)](#refreeze)
@@ -78,7 +78,7 @@ The test files and the configurations they cover:
 | 5-8   | `test_example2.py` | 3x2pt (example2) |
 | 11-14 | `test_example2_2x2pt.py` | 2x2pt (`roman_fourier.combo_2x2pt`: example2 reduced to galaxy clustering plus galaxy-galaxy lensing) |
 
-### Accuracy checks (`test_accuracy.py`, A1-A6) <a name="accuracy_checks"></a>
+### Running Accuracy checks (`test_accuracy.py`, A1-A6) <a name="accuracy_checks"></a>
 
 The three probes with
 both IA models re-evaluated with every setting pushed far beyond the
@@ -101,8 +101,14 @@ There is no `lmax` entry here: the ell range lives in the dataset.
 
 Each check reports $\Delta\chi^2 = \chi^2(\text{high accuracy}) -
 \chi^2(\text{default})$: the numerical error of the default
-settings. No pass/fail. High-accuracy evaluations take minutes; run
-the file on its own, or skip it with
+settings. No pass/fail; high-accuracy evaluations take minutes.
+
+**Step :one:**: with the environment of
+[Running the tests](#run_tests), run the accuracy checks on their own
+
+    python -m pytest ./projects/roman_fourier/tests/test_accuracy.py
+
+To run every other test while skipping these:
 
     python -m pytest ./projects/roman_fourier/tests --ignore ./projects/roman_fourier/tests/test_accuracy.py
 
