@@ -227,7 +227,7 @@ Now, users must follow all the steps below.
 > up the CPU, but its detection can be fooled. Adding `--mca mpi_yield_when_idle 1` forces
 > that behavior; it is harmless otherwise.
 
-## Unit tests <a name="roman_fourier_unit_tests"></a>
+# Unit tests <a name="roman_fourier_unit_tests"></a>
 
 The folder `projects/roman_fourier/tests` contains 12 pass/fail tests covering
 the three likelihoods (cosmic shear, 3x2pt, 2x2pt) with both intrinsic-alignment
@@ -248,7 +248,7 @@ active and `start_cocoa.sh` sourced:
 `projects/roman_fourier/tests/README.md` describes each test, the frozen
 state, and how maintainers regenerate it.
 
-## Minimum accuracy parameters <a name="roman_fourier_accuracy"></a>
+# Minimum accuracy parameters <a name="roman_fourier_accuracy"></a>
 
 `tests/test_accuracy.py` measures the numerical error the default settings
 carry. It re-evaluates the frozen configurations with the accuracy knobs
