@@ -18,8 +18,9 @@ Contents:
 2. [The tests](#the_tests)
     1. [Running Accuracy checks](#accuracy_checks)
     2. [Synthetic data vectors](#synthetic_vectors)
-3. [Tests keep their own copy of configurations and data](#frozen_copy)
-4. [Refreshing the frozen state (maintainers only)](#refreeze)
+3. [Appendix](#appendix)
+    1. [FAQ: Tests keep their own copy of configurations and data](#frozen_copy)
+    2. [FAQ: Refreshing the frozen state (maintainers only)](#refreeze)
 
 ## Running the tests <a name="run_tests"></a>
 
@@ -119,7 +120,9 @@ a data vector generated with TATT at the fiducial point during the
 freeze: at its own minimum the TATT $\chi^2$ responds quadratically to
 numerical changes instead of linearly on the side of a hill.
 
-## Tests keep their own copy of configurations and data <a name="frozen_copy"></a>
+# Appendix <a name="appendix"></a>
+
+## :interrobang: FAQ: Tests keep their own copy of configurations and data <a name="frozen_copy"></a>
 
 The tests read nothing from the live project: not `../data`, not the
 `EXAMPLE_EVALUATE` yaml files, and not the likelihood default yaml
@@ -144,7 +147,7 @@ edited, naming the file. The result: users may change the live data
 and examples freely, and nobody can quietly edit the frozen state
 either.
 
-## Refreshing the frozen state (maintainers only) <a name="refreeze"></a>
+## :interrobang: FAQ: Refreshing the frozen state (maintainers only) <a name="refreeze"></a>
 
 A deliberate change to the data vectors, n(z), covariance, examples,
 or likelihood defaults requires a re-freeze.
