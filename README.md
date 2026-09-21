@@ -234,10 +234,10 @@ the three likelihoods (cosmic shear, 3x2pt, 2x2pt) with both intrinsic-alignment
 models (NLA and TATT). For each combination, one test compares the $\chi^2$ at a
 fixed reference point against the value stored in
 `tests/frozen/reference_chi2.json` (pass limit 0.2), and one evaluates that
-point fresh and again as the 10th of 10 cosmologies in a row: leftover internal
+point on its own and again after nine other cosmologies: leftover internal
 state or an OpenMP race breaks the agreement (limit $10^{-4}$). Every model builds
-in its own worker subprocess, and every frozen file is checked against a
-SHA-256 manifest before any physics runs, so an edited frozen state fails
+in its own worker subprocess, and every file of the tests' snapshot is checked against a
+SHA-256 manifest before any physics runs, so an edited snapshot fails
 loudly instead of producing a plausible $\chi^2$.
 
 Run the tests from the `Cocoa/` folder, with the cocoa conda environment
@@ -245,21 +245,21 @@ active and `start_cocoa.sh` sourced:
 
     python -m pytest ./projects/roman_fourier/tests
 
-`projects/roman_fourier/tests/README.md` describes each test, the frozen
-state, and how maintainers regenerate it.
+`projects/roman_fourier/tests/README.md` describes each test, the snapshot,
+and how maintainers regenerate it.
 
 # Minimum accuracy parameters <a name="roman_fourier_accuracy"></a>
 
 `tests/test_accuracy.py` measures the numerical error the default settings
-carry. It re-evaluates the frozen configurations with the accuracy knobs
+carry. It re-evaluates the snapshot configurations with the accuracy settings
 raised, one at a time and all at once, and reports
 $\Delta\chi^2 = \chi^2(\text{raised}) - \chi^2(\text{default})$. The target is $\lvert\Delta\chi^2\rvert$ below
-0.2, the pass limit of the reference tests. On the frozen example2 3x2pt
+0.2, the pass limit of the reference tests. On the stored 3x2pt reference
 point (NLA, $\chi^2$ = 0.680 at the defaults: cosmolike `accuracyboost` 1.0,
 `integration_accuracy` 0, `kmax_boltzmann` 10; CAMB `AccuracyBoost` 1.1,
-`k_per_logint` 15, `kmax` 10), the one-knob deltas are:
+`k_per_logint` 15, `kmax` 10), the one-setting $\Delta\chi^2$ values are:
 
-| knob | raised to | $\Delta\chi^2$ |
+| setting | raised to | $\Delta\chi^2$ |
 |---|---|---|
 | cosmolike `accuracyboost` (default 2.0) | 3 / 5 | +0.027 / +0.049 |
 | cosmolike `integration_accuracy` | 10 | -0.014 |
@@ -267,13 +267,13 @@ point (NLA, $\chi^2$ = 0.680 at the defaults: cosmolike `accuracyboost` 1.0,
 | CAMB `k_per_logint` | 25 / 50 / 100 | +0.0005 / +0.0005 / +0.0005 |
 | CAMB `AccuracyBoost` (at `k_per_logint` 50) | 1.5 / 2 | +0.009 / +0.014 |
 
-With every knob raised at once (comparing the default accuracyboost
+With every setting raised at once (comparing the default accuracyboost
 2 against 3), the six advisory checks report $\Delta\chi^2$ = +0.002
 (shear NLA), +0.0004 (shear TATT), +0.048 (2x2pt NLA), +0.038 (2x2pt
 TATT), +0.048 (3x2pt NLA), +0.038 (3x2pt TATT): all far below the 0.2
 target. The default accuracyboost is 2.0: the boost-1 grid carried
 about 0.28 of $\chi^2$ z-resolution error on the synthetic test point,
-removed on the nested boost-2 grid (the frozen references were
+removed on the nested boost-2 grid (the stored references were
 regenerated at the new default).
 
 No default changed. `k_per_logint` sits on its plateau already (25, 50, and
@@ -285,10 +285,10 @@ refinement: the boost scan is smooth, with the refined grids agreeing to
 0.05 in $\chi^2$ through boost 5; the default stays at 1.0 and the
 likelihood yaml files carry this measurement as a comment.
 
-When a large accuracy delta appears, test the knobs in this order: cosmolike
+When a large accuracy delta appears, test the settings in this order: cosmolike
 `accuracyboost` first (cheap), then CAMB `k_per_logint`, and only then CAMB
 `AccuracyBoost` (expensive at run time). An apparent `AccuracyBoost`
-sensitivity can stand in for an unresolved cheap knob: in the roman_kl
+sensitivity can stand in for an unresolved cheap setting: in the roman_kl
 project, an apparent +0.80 from `AccuracyBoost` collapsed to +0.002 once
 `k_per_logint` reached 50. `kmax_boltzmann` (cosmolike) and `kmax` (CAMB) are
 one physical cutoff seen from the two sides; move them together.
