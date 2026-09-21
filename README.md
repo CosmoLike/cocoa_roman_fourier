@@ -267,9 +267,13 @@ point (NLA, chi2 = 0.680 at the defaults: cosmolike `accuracyboost` 1.0,
 | CAMB `k_per_logint` | 25 / 50 / 100 | +0.0005 / +0.0005 / +0.0005 |
 | CAMB `AccuracyBoost` (at `k_per_logint` 50) | 1.5 / 2 | +0.009 / +0.014 |
 
-With every knob raised at once, the six advisory checks report delta chi2 =
-+0.007 (shear NLA), +0.002 (shear TATT), -0.129 (2x2pt NLA), +0.036 (2x2pt
-TATT), -0.114 (3x2pt NLA), +0.039 (3x2pt TATT): all within the target.
+With every knob raised at once (the all-knobs set compares the default
+accuracyboost 1 against 3, the highest value that stays healthy in every
+project scanned), the six advisory checks report delta chi2 = +0.021
+(shear NLA), +0.007 (shear TATT), -0.195 (2x2pt NLA), +0.108 (2x2pt
+TATT), -0.106 (3x2pt NLA), +0.121 (3x2pt TATT): within the target, and
+carrying the accuracyboost jitter phase at boost 3 (the one-knob line
+above shows -0.117 from that knob alone).
 
 No default changed. `k_per_logint` sits on its plateau already (25, 50, and
 100 agree to 0.0001), and CAMB `AccuracyBoost` at 2 moves the chi2 by +0.014,
