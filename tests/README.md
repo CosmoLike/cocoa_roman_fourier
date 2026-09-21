@@ -52,11 +52,15 @@ so run the command with nothing piped after it.
 
 Accuracy checks (`test_accuracy.py`, A1-A6): the three probes with
 both IA models re-evaluated with the numerical settings pushed far
-beyond the defaults (cosmolike accuracyboost 5, integration_accuracy
+beyond the defaults (cosmolike accuracyboost 2, integration_accuracy
 10, kmax_boltzmann 40; CAMB AccuracyBoost 2, k_per_logint 50, kmax
 50; no lmax here, the ell range lives in the dataset). Each check
 reports delta chi2 = chi2(high accuracy) - chi2(default, frozen), no
-pass/fail. High-accuracy evaluations take minutes; skip the file with
+pass/fail. Before A1-A6, a one-knob-at-a-time scan (the KNOB lines)
+evaluates each setting alone on example2 NLA, so a large all-knobs
+delta can be attributed to the knob causing it; the measured deltas
+are in the project README under "Minimum accuracy parameters".
+High-accuracy evaluations take minutes; skip the file with
 `--ignore ./projects/roman_fourier/tests/test_accuracy.py`.
 
 All TATT variants evaluate against `frozen/data/tatt_roman_fourier.dataset`,
