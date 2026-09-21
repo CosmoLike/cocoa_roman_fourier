@@ -14,8 +14,11 @@
     "frozen/data/roman_example.datavector": "6cb3f705e0a6b2f9b1cdcb51bb4ce51b88d4a3fb9f2d65ec5c532094a05d28e2",
     "frozen/data/roman_example.mask": "f8d8248a1ee493682a3df43cf4b124334895c4185a178762e270a1025325e149",
     "frozen/data/roman_example.nz": "90a127b0f02c0fbfb4e41de39b6dc77f5b824a80a4a62dbf78fad856af4a41d9",
-    "frozen/frozen_config_example1.py": "4de44011e52f9c27fd9084699d57fb5f561ce1b017f5ca8f257420c26f976f9e",
-    "frozen/frozen_config_example2.py": "d14c96b37f77b09a5253cb2121ca4e3d84bd2ebedbc5882bde6bd27930cdb5b6",
-    "frozen/reference_chi2.json": "935fa5754652a41556459351ef3f1a9b4354c7cfcbb8be0c9e9980beb33b59e2"
+    "frozen/data/tatt_roman_fourier.dataset": "cb6c41b2d022adab51723bd47f3192e7527d67689b1ece706be7d24eae38d65b",
+    "frozen/data/tatt_roman_fourier.modelvector": "0002bc4f19aa3cfe128c3bd2ba6545a33253c12a9bbaa1ad0df5a1f95dba01ad",
+    "frozen/frozen_config_example1.py": "a33600cc5a1c6b16a8d8be2dc29fa0564349820c3168dfc9c7eb4699854cb538",
+    "frozen/frozen_config_example2.py": "5233f326203080c28d607d366c9951697210d07112dd5e34359fac9c169f458b",
+    "frozen/frozen_config_example2_2x2pt.py": "12af110a052bb4c1a8ac08874ab7d11463ecaa314e6821abee6d9c3fed5ea85d",
+    "frozen/reference_chi2.json": "a9c53a4a221c7b5409301f7fc9510501498ea16164887e3ad7bca1f154bc750a"
   }
 }
