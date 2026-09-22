@@ -12,7 +12,7 @@ likelihood:
     data_file: roman_example.dataset # this assumes lens = source
     print_datavector: False
     print_datavector_file: "./projects/roman_real/chains/theory.modelvector"
-    accuracyboost: 1.0
+    accuracyboost: 2.0
     integration_accuracy: 0
     kmax_boltzmann: 10.0
     # 1 EE2, 2 Halofit

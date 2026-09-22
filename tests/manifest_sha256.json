@@ -1,0 +1,24 @@
+{
+  "_comment": "SHA-256 of every file under tests/frozen/; verified by every test before evaluating anything.",
+  "files": {
+    "frozen/EXAMPLE_EVALUATE1.yaml": "2b975b98363bc163799a068b2448b827e17f7246053fb5bd7d4f119a918f6016",
+    "frozen/EXAMPLE_EVALUATE2.yaml": "bd7d429bcc92d00985fe48d66bcce6644b51bd6b809b7b3719bb5164d83f5094",
+    "frozen/data/.gitattributes": "1aaababc177bbedf16dcacd25f588b4b736a20ac3a4643705d0a71d40bb60346",
+    "frozen/data/.gitignore": "16af9a7a80eb5ea2c9b649e7259cd32e093532dd3ccc3be91379c231c57930b2",
+    "frozen/data/README": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "frozen/data/baryons_logPkR.h5": "1ab5cc0604925089787dd775740b368db2a83a0d10c88af54f3b3f4bfa33570d",
+    "frozen/data/calculate_mask.py": "daaa60b7b9b3bff859131d662f9669a98d294dbb25eca6d6a344e8773d950f90",
+    "frozen/data/ones.mask": "929a72103ca195fe60e42ddaafe2557b56ad614a15781c1277b3e9cfdf9f86fd",
+    "frozen/data/roman_example.cov": "1e2e2b0f0f2927729bdecdd22e12d41d2494f8e11616e17e46ca69512a210ac4",
+    "frozen/data/roman_example.dataset": "8ef0e1ff80032da8e77c398818fac50539f67a140eaa5e970ade433b6db740ad",
+    "frozen/data/roman_example.datavector": "6cb3f705e0a6b2f9b1cdcb51bb4ce51b88d4a3fb9f2d65ec5c532094a05d28e2",
+    "frozen/data/roman_example.mask": "f8d8248a1ee493682a3df43cf4b124334895c4185a178762e270a1025325e149",
+    "frozen/data/roman_example.nz": "90a127b0f02c0fbfb4e41de39b6dc77f5b824a80a4a62dbf78fad856af4a41d9",
+    "frozen/data/tatt_roman_fourier.dataset": "cb6c41b2d022adab51723bd47f3192e7527d67689b1ece706be7d24eae38d65b",
+    "frozen/data/tatt_roman_fourier.modelvector": "71ff5f04cb1e704330e6aeb0f6c8f3d01edfd5f751b54e6eb946854257f2eaa6",
+    "frozen/frozen_config_example1.py": "355a7a361311e01304312d92bde4121fe9c14b90e28299af38b02c8a3219adec",
+    "frozen/frozen_config_example2.py": "1046a4324665703a5a95a385df08d346faed0723aa578139548d7fece238e888",
+    "frozen/frozen_config_example2_2x2pt.py": "62917386dbebb130b3d975405f4e34a5dc756517379444fdeffda80af1ef9ebd",
+    "frozen/reference_chi2.json": "a68cf059d5cdd9cbbebd9acb4890b5086ff89cea13ea1ffd95eb7dcbec430b65"
+  }
+}
