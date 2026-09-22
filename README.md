@@ -263,8 +263,22 @@ are quoted here: rerun the checks to measure them on the current
 code, and see [tests/README.md](tests/README.md) for each check,
 the settings raised, and what each setting controls.
 
-The default is `accuracyboost: 2.0`: the boost-1 grid carried a
-measurable z-resolution error at the synthetic test point, removed
-on the nested boost-2 grid, and the stored references were
-regenerated at that default. The likelihood yaml files carry the
-measurement as a comment.
+The default is `accuracyboost: 2.0`, and the reason must not be
+lost. The boost-1 tables carried about $0.28$ of $\chi^2$ of pure
+z-resolution error on the synthetic test point — larger than the
+$0.2$ accuracy band itself. That number is the dated measurement
+that set this default, not a current check output.
+
+The old grid hid that error: its nodes re-phased whenever the boost
+changed, so scanning the boost jittered around the error instead of
+exposing it. The nested dyadic grid made the scan smooth and the
+error visible, and boost 2 removes it by refining the same nodes;
+the CAMB request grid stays at 140 redshifts (under CAMB's 256-node
+cap), so only the cosmolike tables pay.
+
+> [!Warning]
+> Do not lower `accuracyboost` back to `1.0` to save computing
+> time: the error it reintroduces exceeds the entire accuracy
+> budget of the reference tests. The likelihood yaml files repeat
+> this next to the knob, and the stored references were regenerated
+> at the boost-2 default.
