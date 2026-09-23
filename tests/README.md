@@ -92,15 +92,18 @@ The test files and the configurations they cover:
 | 13 | `test_example2_2x2pt.py` | 2x2pt (`roman_fourier.combo_2x2pt`: the 3x2pt configuration reduced to galaxy clustering plus galaxy-galaxy lensing); IA modeling: TATT | $\Delta\chi^2$ against the stored reference at the fiducial point |
 | 14 | `test_example2_2x2pt.py` | 2x2pt (`roman_fourier.combo_2x2pt`: the 3x2pt configuration reduced to galaxy clustering plus galaxy-galaxy lensing); IA modeling: TATT | race condition (OpenMP threading): fiducial alone vs after nine other cosmologies |
 | 15 | `test_fastpt.py` | cosmic shear; IA modeling: TATT; the C cfastpt (`IA_code: 0`) vs the python FAST-PT package (`IA_code: 1`) at 30 fixed points (20 across the intrinsic-alignment prior plus a one-parameter-at-a-time family), cosmology at the fiducial | $\Delta\chi^2$ of the FAST-PT data vector against the cfastpt data vector at the same point; the cfastpt vector is that point's fiducial, so agreement means zero |
+| 16 | `test_fastpt.py` | 3x2pt; IA modeling: TATT; the same comparison as test 15 on the 3x2pt likelihood (`roman_fourier.combo_3x2pt`) | the same pass rule as test 15, with the data-vector difference weighted by the 3x2pt masked inverse covariance |
+| 17 | `test_fastpt.py` | 2x2pt; IA modeling: TATT; the same comparison as test 15 on the 2x2pt likelihood (`roman_fourier.combo_2x2pt`) | the same pass rule as test 15; clustering carries no intrinsic alignment, so the TATT tables enter through galaxy-galaxy lensing alone, weighted by the 2x2pt masked inverse covariance |
 
-### The CFASTPT vs FASTPT comparison (`test_fastpt.py`, test 15) <a name="cfastpt_fastpt"></a>
+### The CFASTPT vs FASTPT comparison (`test_fastpt.py`, tests 15-17) <a name="cfastpt_fastpt"></a>
 
 Cosmolike computes the TATT perturbation-theory integrals with two
 implementations: cfastpt, the C code built into the interface
 (`IA_code: 0`), and the python FAST-PT package through the fastpt
-theory block (`IA_code: 1`). Test 15 evaluates both at 30
-fixed points across the intrinsic-alignment prior and checks
-their agreement.
+theory block (`IA_code: 1`). Both are evaluated at 30 fixed points
+across the intrinsic-alignment prior and checked for agreement:
+test 15 on cosmic shear, test 16 on the 3x2pt likelihood, test 17
+on the 2x2pt likelihood.
 
 At every point the cfastpt data vector is the fiducial: the reported
 quantity is the $\Delta\chi^2$ of the FAST-PT vector against it,
@@ -117,9 +120,21 @@ onto the other.
 
 Both boosts are rebased so 1.0 is the converged configuration; this
 project's precision needs `accuracyboost: 2`, the doubled output
-density. The test asserts there with the 0.2 band of the other
+density. The tests assert there with the 0.2 band of the other
 checks as the pass limit, doubling the configuration again as an
 advisory.
+
+In test 16 the TATT terms also enter galaxy-galaxy lensing, and the
+difference is weighted by the 3x2pt masked inverse covariance. The
+frozen configuration fixes the one-loop bias amplitudes
+(`roman_B2_*`) at zero, so the one-loop galaxy-bias tables both
+implementations compute multiply by zero: the sweep scores the
+intrinsic-alignment tables alone, on the wider data vector.
+
+Test 17 repeats the sweep on the 2x2pt likelihood. Clustering
+carries no intrinsic alignment, so there the TATT tables are scored
+through galaxy-galaxy lensing alone, under the 2x2pt masked
+inverse covariance.
 
 > [!NOTE]
 > Before the two-grid upgrade of the fastpt theory block (2026-09)
@@ -142,9 +157,16 @@ the table below is this project's own measurement:
 
 > [!NOTE]
 > This project's precision needs `accuracyboost: 2`, the value its
-> example yamls recommend and the test asserts on; the defaults
+> example yamls recommend and the tests assert on; the defaults
 > land at 0.209, just above the band. cfastpt (`IA_code: 0`)
 > remains the reference implementation.
+
+The same sweep on the 3x2pt likelihood (test 16, 2026-09-23)
+measures max $\Delta\chi^2 = 0.1475$ at the defaults and $0.1092$
+at the pushed camb/cosmolike settings, above cosmic shear's 0.1120
+under the 3x2pt masked covariance; on the 2x2pt likelihood (test
+17, 2026-09-23) it measures $0.0021$ and $0.0013$, with the TATT
+tables entering through galaxy-galaxy lensing alone.
 
 #### Running the comparison <a name="run_cfastpt_fastpt"></a>
 
@@ -168,8 +190,8 @@ settings
 
 > [!NOTE]
 > `--high=1`: applies the pushed camb/cosmolike settings of the
-> accuracy checks to every block of test 15 (the other tests do not
-> read it). The full comparison is both invocations.
+> accuracy checks to every block of tests 15-17 (the other tests do
+> not read it). The full comparison is both invocations.
 
 
 ### Accuracy checks (`test_accuracy.py`, A1-A6) <a name="accuracy_checks"></a>
