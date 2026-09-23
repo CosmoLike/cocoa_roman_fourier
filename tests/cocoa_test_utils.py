@@ -210,6 +210,11 @@ _H = _cct.CocoaTestHarness(
     fastpt_low_settings=FASTPT_LOW_SETTINGS,
     fastpt_high_settings=FASTPT_HIGH_SETTINGS,
     fastpt_points=FASTPT_COMPARISON_POINTS,
+    # the scale-cut masks the CFASTPT-vs-FASTPT sweeps accept (the
+    # --mask option of conftest.py): "frozen" keeps the contract mask,
+    # "ones" the frozen all-ones mask (every data point kept, no scale
+    # cuts) through tatt_roman_fourier_ones.dataset
+    fastpt_masks=("frozen", "ones"),
 )
 
 # ---- module functions re-exported from the core (no project state) ----------

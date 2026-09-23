@@ -45,9 +45,22 @@ start_cocoa.sh sourced):
 
 --high=1 repeats every block at the pushed camb/cosmolike settings
 of the low-vs-high accuracy checks; the full comparison is one run
-without the option and one with it. The design and the point values
-are shared with lsst_y1's tests 15-17; see that project's
-tests/README.md for the full discussion.
+without the option and one with it.
+
+The tests also read the --mask option (see conftest.py):
+--mask=frozen (the default) keeps the roman_example.mask of the
+frozen contract, and --mask=ones keeps every data point (no scale
+cuts), the strictest comparison; the 0.2 pass rule applies
+unchanged:
+
+    python -m pytest ./projects/roman_fourier/tests/test_fastpt.py --mask=ones
+
+The 3x2pt sweep (test 16) does not run under --mask=ones: with
+every data point kept the shipped covariance is not positive
+definite, and cosmolike aborts the model build (IP::set_inv_cov).
+
+The design and the point values are shared with lsst_y1's tests
+15-17; see that project's tests/README.md for the full discussion.
 """
 
 import os
@@ -90,13 +103,14 @@ class TestCfastptVsFastptSweep(unittest.TestCase):
         # is exported by hand
         high = os.environ.get("COCOA_FASTPT_HIGH", "0") == "1"
         setting = "high accuracy" if high else "default settings"
+        mask = os.environ.get("COCOA_FASTPT_MASK", "frozen")
         (chi2_cfastpt, chi2_fastpt_low, chi2_fastpt_high,
          dchi2_low, dchi2_high) = u.cfastpt_vs_fastpt_chi2s(
-            "example1", high=high)
+            "example1", high=high, mask=mask)
         largest = u.report_fastpt_comparison(
             15,
-            f"example1 (cosmic shear, TATT, camb/cosmolike {setting}): "
-            "CFASTPT vs FASTPT at 30 hard-coded points",
+            f"example1 (cosmic shear, TATT, camb/cosmolike {setting}, "
+            f"mask {mask}): CFASTPT vs FASTPT at 30 hard-coded points",
             chi2_cfastpt, chi2_fastpt_low, chi2_fastpt_high,
             dchi2_low, dchi2_high, u.FASTPT_COMPARISON_TOLERANCE)
         self.assertLess(
@@ -118,13 +132,14 @@ class TestCfastptVsFastptSweep(unittest.TestCase):
         """
         high = os.environ.get("COCOA_FASTPT_HIGH", "0") == "1"
         setting = "high accuracy" if high else "default settings"
+        mask = os.environ.get("COCOA_FASTPT_MASK", "frozen")
         (chi2_cfastpt, chi2_fastpt_low, chi2_fastpt_high,
          dchi2_low, dchi2_high) = u.cfastpt_vs_fastpt_chi2s(
-            "example2", high=high)
+            "example2", high=high, mask=mask)
         largest = u.report_fastpt_comparison(
             16,
-            f"example2 (3x2pt, TATT, camb/cosmolike {setting}): "
-            "CFASTPT vs FASTPT at 30 hard-coded points",
+            f"example2 (3x2pt, TATT, camb/cosmolike {setting}, "
+            f"mask {mask}): CFASTPT vs FASTPT at 30 hard-coded points",
             chi2_cfastpt, chi2_fastpt_low, chi2_fastpt_high,
             dchi2_low, dchi2_high, u.FASTPT_COMPARISON_TOLERANCE)
         self.assertLess(
@@ -147,13 +162,14 @@ class TestCfastptVsFastptSweep(unittest.TestCase):
         """
         high = os.environ.get("COCOA_FASTPT_HIGH", "0") == "1"
         setting = "high accuracy" if high else "default settings"
+        mask = os.environ.get("COCOA_FASTPT_MASK", "frozen")
         (chi2_cfastpt, chi2_fastpt_low, chi2_fastpt_high,
          dchi2_low, dchi2_high) = u.cfastpt_vs_fastpt_chi2s(
-            "example2_2x2pt", high=high)
+            "example2_2x2pt", high=high, mask=mask)
         largest = u.report_fastpt_comparison(
             17,
-            f"example2_2x2pt (2x2pt, TATT, camb/cosmolike {setting}): "
-            "CFASTPT vs FASTPT at 30 hard-coded points",
+            f"example2_2x2pt (2x2pt, TATT, camb/cosmolike {setting}, "
+            f"mask {mask}): CFASTPT vs FASTPT at 30 hard-coded points",
             chi2_cfastpt, chi2_fastpt_low, chi2_fastpt_high,
             dchi2_low, dchi2_high, u.FASTPT_COMPARISON_TOLERANCE)
         self.assertLess(

@@ -168,6 +168,24 @@ under the 3x2pt masked covariance; on the 2x2pt likelihood (test
 17, 2026-09-23) it measures $0.0021$ and $0.0013$, with the TATT
 tables entering through galaxy-galaxy lensing alone.
 
+Under the all-ones mask (`--mask=ones`, 2026-09-23: no scale cuts,
+all 1,485 points weighted) cosmic shear repeats its frozen-mask
+values exactly - the contract mask keeps every shear point, so the
+two masks coincide there - and measures 0.0903 at the pushed
+camb/cosmolike settings; the 2x2pt sweep measures max
+$\Delta\chi^2 = 0.0039$ at the defaults and 0.0025 pushed.
+
+> [!Warning]
+> `--mask=ones` with the 3x2pt likelihood (test 16, 2026-09-23)
+> fails at model build: with every data point kept the shipped
+> covariance is not positive definite, and cosmolike aborts
+> (`IP::set_inv_cov`). The mask runs with tests 15 and 17.
+
+Before 2026-09-23 `ones.mask` (in `data/` and pinned under
+`frozen/data/`) was a stray byte-copy of lsst_y1's 1,560-row mask,
+which cosmolike rejects against this project's 1,485-point data
+vector; it was replaced by the correct 1,485-row all-ones mask.
+
 #### Running the comparison <a name="run_cfastpt_fastpt"></a>
 
 We assume users are in the Conda cocoa environment from a previous
@@ -192,6 +210,16 @@ settings
 > `--high=1`: applies the pushed camb/cosmolike settings of the
 > accuracy checks to every block of tests 15-17 (the other tests do
 > not read it). The full comparison is both invocations.
+
+> [!NOTE]
+> `--mask`: reruns tests 15-17 under a different scale-cut mask.
+> `--mask=frozen` (the default) keeps the contract mask
+> (`roman_example.mask`, 1,359 of the 1,485 data points);
+> `--mask=ones` keeps every point (no scale cuts), the strictest
+> comparison. Each choice is a frozen TATT dataset variant
+> differing only in its `mask_file` line, and the 0.2 pass rule
+> applies unchanged. The 3x2pt sweep does not run under `ones`
+> (see the Warning above).
 
 
 ### Accuracy checks (`test_accuracy.py`, A1-A6) <a name="accuracy_checks"></a>
