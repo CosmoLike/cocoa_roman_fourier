@@ -18,9 +18,10 @@ same.
 2. [The tests](#the_tests)
     1. [The CFASTPT vs FASTPT comparison](#cfastpt_fastpt)
     2. [The Halofit vs EE2 checks](#halofit_ee2)
-    3. [Accuracy checks](#accuracy_checks)
-    4. [Baryonic feedback accuracy checks](#baryon_accuracy_checks)
-    5. [Baryonic feedback drift tests](#baryon_drift_tests)
+    3. [The EE2 race test](#ee2_race)
+    4. [Accuracy checks](#accuracy_checks)
+    5. [Baryonic feedback accuracy checks](#baryon_accuracy_checks)
+    6. [Baryonic feedback drift tests](#baryon_drift_tests)
 3. [Appendix](#appendix)
     1. [FAQ: Do the tests keep their own data?](#frozen_copy)
     2. [FAQ: Why do the TATT tests use their own data vector?](#synthetic_vectors)
@@ -95,6 +96,7 @@ The test files and the configurations they cover:
 | 15 | `test_fastpt.py` | cosmic shear; IA modeling: TATT; the C cfastpt (`IA_code: 0`) vs the python FAST-PT package (`IA_code: 1`) at 30 fixed points (20 across the intrinsic-alignment prior plus a one-parameter-at-a-time family), cosmology at the fiducial | $\Delta\chi^2$ of the FAST-PT data vector against the cfastpt data vector at the same point; the cfastpt vector is that point's fiducial, so agreement means zero |
 | 16 | `test_fastpt.py` | 3x2pt; IA modeling: TATT; the same comparison as test 15 on the 3x2pt likelihood (`roman_fourier.combo_3x2pt`) | the same pass rule as test 15, with the data-vector difference weighted by the 3x2pt masked inverse covariance |
 | 17 | `test_fastpt.py` | 2x2pt; IA modeling: TATT; the same comparison as test 15 on the 2x2pt likelihood (`roman_fourier.combo_2x2pt`) | the same pass rule as test 15; clustering carries no intrinsic alignment, so the TATT tables enter through galaxy-galaxy lensing alone, weighted by the 2x2pt masked inverse covariance |
+| 18 | `test_ee2.py` | cosmic shear; NLA with EE2 (`non_linear_emul: 1`) | race condition (OpenMP threading, including EE2's own threaded compute): fiducial alone vs after nine other cosmologies |
 
 ### The CFASTPT vs FASTPT comparison (`test_fastpt.py`, tests 15-17) <a name="cfastpt_fastpt"></a>
 
@@ -273,6 +275,37 @@ the script `start_cocoa.sh`
 
 `--mask=ones` reruns them with every data point kept; NL2 aborts
 there (the Warning above).
+
+### The EE2 race test (`test_ee2.py`, test 18) <a name="ee2_race"></a>
+
+Cocoa pins a modified EuclidEmulator2: OpenMP threading, a
+1,010-redshift capacity, the `get_boost2` API with a pre-built
+emulator, memory-leak fixes, and a bilinear interpolation with a
+border fix. The modifications and their measured speed-up are
+documented in the repository's own README
+(`external_modules/code/euclidemu2/README.md`).
+
+The test evaluates the fiducial fresh and again as the 10th of 10
+cosmologies on one model instance, with the nonlinear $P(k)$ from
+EE2 (`non_linear_emul: 1`) instead of the frozen contract's halofit.
+EE2's compute is OpenMP-threaded, so a thread race inside it shifts
+the second fiducial value; the two must agree within $10^{-4}$.
+
+The modification gate, which compiles the pre-modification build
+(commit `ff59f66`) at test time and scores the installed build
+against it, runs as the lsst_y1 project's test 18 (its
+`tests/test_ee2.py`); the emulator build is project-independent, so
+that comparison is not repeated here.
+
+Measured on 2026-09-23:
+
+- Test 18: the fresh and 10th-in-a-row fiducial agree to all eight
+  printed decimals.
+- The modified-vs-original comparison of the lsst_y1 gate, run on
+  this project's cosmic shear under its frozen mask (ten
+  cosmologies), measured max $\Delta\chi^2 = 4.3\times10^{-4}$ (max
+  fractional data-vector difference $3.5\times10^{-5}$): the largest
+  of the six projects, still far below the 0.2 band.
 
 ### Accuracy checks (`test_accuracy.py`, A1-A6) <a name="accuracy_checks"></a>
 
