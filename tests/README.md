@@ -16,7 +16,10 @@ same.
 
 1. [Running the tests](#run_tests)
 2. [The tests](#the_tests)
-    1. [Accuracy checks](#accuracy_checks)
+    1. [The CFASTPT vs FASTPT comparison](#cfastpt_fastpt)
+    2. [Accuracy checks](#accuracy_checks)
+    3. [Baryonic feedback accuracy checks](#baryon_accuracy_checks)
+    4. [Baryonic feedback drift tests](#baryon_drift_tests)
 3. [Appendix](#appendix)
     1. [FAQ: Do the tests keep their own data?](#frozen_copy)
     2. [FAQ: Why do the TATT tests use their own data vector?](#synthetic_vectors)
@@ -88,6 +91,86 @@ The test files and the configurations they cover:
 | 12 | `test_example2_2x2pt.py` | 2x2pt (`roman_fourier.combo_2x2pt`: the 3x2pt configuration reduced to galaxy clustering plus galaxy-galaxy lensing); IA modeling: NLA | race condition (OpenMP threading): fiducial alone vs after nine other cosmologies |
 | 13 | `test_example2_2x2pt.py` | 2x2pt (`roman_fourier.combo_2x2pt`: the 3x2pt configuration reduced to galaxy clustering plus galaxy-galaxy lensing); IA modeling: TATT | $\Delta\chi^2$ against the stored reference at the fiducial point |
 | 14 | `test_example2_2x2pt.py` | 2x2pt (`roman_fourier.combo_2x2pt`: the 3x2pt configuration reduced to galaxy clustering plus galaxy-galaxy lensing); IA modeling: TATT | race condition (OpenMP threading): fiducial alone vs after nine other cosmologies |
+| 15 | `test_fastpt.py` | cosmic shear; IA modeling: TATT; the C cfastpt (`IA_code: 0`) vs the python FAST-PT package (`IA_code: 1`) at 30 fixed points (20 across the intrinsic-alignment prior plus a one-parameter-at-a-time family), cosmology at the fiducial | $\Delta\chi^2$ of the FAST-PT data vector against the cfastpt data vector at the same point; the cfastpt vector is that point's fiducial, so agreement means zero |
+
+### The CFASTPT vs FASTPT comparison (`test_fastpt.py`, test 15) <a name="cfastpt_fastpt"></a>
+
+Cosmolike computes the TATT perturbation-theory integrals with two
+implementations: cfastpt, the C code built into the interface
+(`IA_code: 0`), and the python FAST-PT package through the fastpt
+theory block (`IA_code: 1`). Test 15 evaluates both at 30
+fixed points across the intrinsic-alignment prior and checks
+their agreement.
+
+At every point the cfastpt data vector is the fiducial: the reported
+quantity is the $\Delta\chi^2$ of the FAST-PT vector against it,
+zero for identical vectors and quadratic in their difference. A
+comparison against the shipped data vector would measure the slope
+of the distance to the data instead of the numerics.
+
+The fastpt block computes on two grids: `accuracyboost` multiplies
+the density of the output table cosmolike reads with linear
+interpolation (the accuracy driver), and `internal_accuracyboost`
+the density of the internal grid the FFTLog convolutions run on,
+with a cubic spline in log k upsampling the terms from one grid
+onto the other.
+
+Both boosts are rebased so 1.0 is the converged configuration; this
+project's precision needs `accuracyboost: 2`, the doubled output
+density. The test asserts there with the 0.2 band of the other
+checks as the pass limit, doubling the configuration again as an
+advisory.
+
+> [!NOTE]
+> Before the two-grid upgrade of the fastpt theory block (2026-09)
+> there was no upsampling and the difference reached
+> $\Delta\chi^2 = 87184$ across the prior.
+
+The point values, the design, and the decision record live with the
+lsst_y1 project (its tests/README.md carries the full discussion);
+the table below is this project's own measurement:
+
+| output table (points) | internal grid (points) | max $\Delta\chi^2$ | cost per cosmology |
+|---|---|---|---|
+| 1,100 | 1,100 (shared) | 87184 | 1.5 s |
+| 1,024,900 (`accuracyboost: 1`) | 1,100 | 0.209 | 1.9 s |
+| 2,048,900 (`accuracyboost: 2`, the pass configuration) | 1,100 | 0.1120 | 2.3 s |
+| 4,096,900 (`accuracyboost: 4`) | 1,300 (`internal_accuracyboost: 2`) | 0.0828 | 3.0 s |
+| 8,192,900 | 1,100 | 0.073 | 4.2 s |
+
+![The 30 comparison points, colored by the per-point difference](cfastpt_vs_fastpt_points.png)
+
+> [!NOTE]
+> This project's precision needs `accuracyboost: 2`, the value its
+> example yamls recommend and the test asserts on; the defaults
+> land at 0.209, just above the band. cfastpt (`IA_code: 0`)
+> remains the reference implementation.
+
+#### Running the comparison <a name="run_cfastpt_fastpt"></a>
+
+We assume users are in the Conda cocoa environment from a previous
+`conda activate cocoa` command, that the shell is bash, and that the
+current folder is the cocoa main folder `cocoa/Cocoa`.
+
+**Step :one:**: activate the private Python environment by sourcing
+the script `start_cocoa.sh`
+
+    source start_cocoa.sh
+
+**Step :two:**: run the comparison at the default camb/cosmolike
+settings
+
+    python -m pytest ./projects/roman_fourier/tests/test_fastpt.py
+
+**Step :three:**: repeat it at the pushed camb/cosmolike settings
+
+    python -m pytest ./projects/roman_fourier/tests/test_fastpt.py --high=1
+
+> [!NOTE]
+> `--high=1`: applies the pushed camb/cosmolike settings of the
+> accuracy checks to every block of test 15 (the other tests do not
+> read it). The full comparison is both invocations.
+
 
 ### Accuracy checks (`test_accuracy.py`, A1-A6) <a name="accuracy_checks"></a>
 
@@ -148,6 +231,74 @@ the script `start_cocoa.sh`
 To run every other test while skipping these:
 
     python -m pytest ./projects/roman_fourier/tests --ignore ./projects/roman_fourier/tests/test_accuracy.py
+
+### Baryonic feedback accuracy checks (`test_accuracy_baryons.py`, BF1-BF7) <a name="baryon_accuracy_checks"></a>
+
+The file `test_accuracy_baryons.py` repeats the default-versus-high
+accuracy comparison with the `bfmt` theory block switched on: one
+advisory check per feedback method (the three SP(k) fb relations,
+BCEmu, Flamingo, BACCOemu, and BCemu2025), at a fixed parameter
+point per method. Each check creates its data vector on the fly, by
+the same mechanism as the N-random-models check: the
+default-settings model writes its own theory vector during
+evaluation, that vector becomes the data of a temporary dataset, and
+the pushed-settings model evaluates at the same point against it.
+The fiducial $\chi^2$ is therefore zero by construction, nothing is
+stored in the snapshot, and the single reported number,
+$\Delta\chi^2$, is a pure numerics response. The check BF0
+additionally runs the one-setting-at-a-time scan with the Akino
+SP(k) feedback on, so a large delta names the setting causing it.
+
+Every checked configuration is measurable by construction. The
+BACCOemu check evaluates with `omegab: 0.049`, inside that
+emulator's baryon-density training box, whose floor sits exactly
+above the fiducial `omegab: 0.04`; and the double-power-law point is
+chosen to keep the baryon fraction inside SP(k)'s calibrated band
+over the full redshift grid.
+
+#### Running the baryonic feedback checks <a name="run_baryon_accuracy"></a>
+
+We assume users are in the Conda cocoa environment from a previous
+`conda activate cocoa` command, that the shell is bash, and that the
+current folder is the cocoa main folder `cocoa/Cocoa`.
+
+**Step :one:**: activate the private Python environment by sourcing
+the script `start_cocoa.sh`
+
+    source start_cocoa.sh
+
+**Step :two:**: run the baryonic feedback checks of this project
+
+    python -m pytest ./projects/roman_fourier/tests/test_accuracy_baryons.py
+
+### Baryonic feedback drift tests (`test_baryons.py`, BD1-BD7) <a name="baryon_drift_tests"></a>
+
+The file `test_baryons.py` pins the feedback pipeline against change
+over time, one test per method. Each method's default-settings
+theory prediction was stored at freeze time
+(`generate_frozen_reference.py --baryons`), and the test evaluates
+today's prediction against that stored vector: zero at freeze time
+by construction, so a $\chi^2$ above the tolerance means cosmolike
+or the `bfmt` theory block changed its prediction since the freeze.
+These tests complement the accuracy checks above: the accuracy
+checks regenerate their vector on the fly per run, so they measure
+the numerical settings and can never see drift; the drift tests hold
+the frozen vector still, so they measure drift and nothing else.
+
+#### Running the baryonic feedback drift tests <a name="run_baryon_drift"></a>
+
+We assume users are in the Conda cocoa environment from a previous
+`conda activate cocoa` command, that the shell is bash, and that the
+current folder is the cocoa main folder `cocoa/Cocoa`.
+
+**Step :one:**: activate the private Python environment by sourcing
+the script `start_cocoa.sh`
+
+    source start_cocoa.sh
+
+**Step :two:**: run the drift tests of this project
+
+    python -m pytest ./projects/roman_fourier/tests/test_baryons.py
 
 # Appendix <a name="appendix"></a>
 

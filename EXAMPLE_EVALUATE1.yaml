@@ -698,10 +698,18 @@ theory:
       accurate_massive_neutrino_transfers: false
       k_per_logint: 15
       kmax: 7.5
+#  NOTE: under TATT with IA_code: 1 this project's precision needs
+#  accuracyboost: 2 (the doubled output-table density). The fastpt
+#  boosts are rebased so 1.0 is the converged two-grid
+#  configuration: accuracyboost multiplies the density of the output
+#  table cosmolike interpolates (the accuracy driver) and
+#  internal_accuracyboost the FFTLog grid (see tests/README.md,
+#  test 15).
 #  fastpt:
 #    path: ./external_modules/code/FAST-PT
 #    extra_args:
-#      accuracyboost: 5
+#      accuracyboost: 2.0
+#      internal_accuracyboost: 1.0
 #      kmax_boltzmann: 7.5
 #      extrap_kmax: 250.0
   # bfmt:

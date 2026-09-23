@@ -395,6 +395,14 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
       py::return_value_policy::move
     );
 
+  m.def("get_inv_cov_masked",
+      []()->arma::Mat<double> {
+        return cosmolike_interface::IP::get_instance().get_inv_cov_masked();
+      },
+      "Get Mask Covariance Matrix",
+      py::return_value_policy::move
+    );
+
   m.def("compute_baryon_pcas",
       [](std::string scenarios, std::string allsims) {
         using namespace cosmolike_interface;
