@@ -262,12 +262,14 @@ The advisory checks in `tests/test_accuracy.py` measure the
 numerical error of the default accuracy settings: each setting is
 raised one at a time on the 3x2pt configuration, so a large
 $\Delta\chi^2$ can be attributed to the setting causing it, and
-then every setting at once. Each check prints the $\Delta\chi^2$
-between the high-accuracy and the default evaluations, to compare
-against the 0.2 band the reference tests allow. No measured values
-are quoted here: rerun the checks to measure them on the current
-code, and see [tests/README.md](tests/README.md) for each check,
-the settings raised, and what each setting controls.
+then every setting at once.
+
+Each check prints the $\Delta\chi^2$ between the high-accuracy and
+the default evaluations, to compare against the 0.2 band the
+reference tests allow. No measured values are quoted here: rerun
+the checks to measure them on the current code, and see
+[tests/README.md](tests/README.md) for each check, the settings
+raised, and what each setting controls.
 
 The default is `accuracyboost: 2.0`, and the reason must not be
 lost. The boost-1 tables carried about $0.28$ of $\chi^2$ of pure
