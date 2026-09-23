@@ -1,118 +1,51 @@
 import numpy as np
-import os
-from astropy.cosmology import FlatLambdaCDM
-import math as mt
 
-#VM code adapted from Supranta's Python script
-ggl_efficiency_cut = [0.05]
+#VM Fourier-space mask generator for the roman_fourier project.
+#VM Regenerates data/roman_example.mask and data/ones.mask exactly.
 
-#VM INPUT BEGINS ---------------------------------------------------------------
-for Year in [1]:
-  for mask_choice in [1,2,3,4,5,6]:
-    if (mask_choice == 1):
-      # LSST_YX_M1.mask  (lmax = 3000) on CS -----------------------------------
-      # lmax \times \theta_min corresponds to the first zero of the Bessel 𝐽0/4
-      # lmax x theta_min corresponds to the first zero of the Bessel 𝐽0/4
-      # J0 first zero is 2.4048, J4 first zero is 6.3802
-      # For theta = 1arc_min, lmax * theta_min = 0.87
-      ξp_CUTOFF = 2.756  # cutoff scale in arcminutes
-      ξm_CUTOFF = 8.6955 # cutoff scale in arcminutes
-      gc_CUTOFF = 21     # Galaxy clustering cutoff in Mpc/h
-    elif (mask_choice == 2):
-      # LSST_YX_M2.mask  -----------------------------------
-      ξp_CUTOFF = 5.512  # cutoff scale in arcminutes
-      ξm_CUTOFF = 17.391 # cutoff scale in arcminutes
-      gc_CUTOFF = 21     # Galaxy clustering cutoff in Mpc/h
-    elif (mask_choice == 3):
-      # LSST_YX_M3.mask  ------------------------------------
-      ξp_CUTOFF = 11.024  # cutoff scale in arcminutes
-      ξm_CUTOFF = 34.782 # cutoff scale in arcminutes
-      gc_CUTOFF = 21     # Galaxy clustering cutoff in Mpc/h
-    elif (mask_choice == 4):
-      # LSST_YX_M3.mask  ------------------------------------
-      ξp_CUTOFF = 22.048 # cutoff scale in arcminutes
-      ξm_CUTOFF = 69.564 # cutoff scale in arcminutes
-      gc_CUTOFF = 21     # Galaxy clustering cutoff in Mpc/h
-    elif (mask_choice == 5):
-      # LSST_YX_M3.mask  ------------------------------------
-      ξp_CUTOFF = 44.096  # cutoff scale in arcminutes
-      ξm_CUTOFF = 139.128 # cutoff scale in arcminutes
-      gc_CUTOFF = 21      # Galaxy clustering cutoff in Mpc/h
-    elif (mask_choice == 6):
-      # LSST_YX_M6.mask  all ones ---------------------------------------------
-      ξp_CUTOFF = 0 # cutoff scale in arcminutes
-      ξm_CUTOFF = 0 # cutoff scale in arcminutes
-      gc_CUTOFF = 0 # Galaxy clustering cutoff in Mpc/h
-    #VM INPUT ENDS -------------------------------------------------------------
+#VM INPUT (from data/roman_example.dataset and likelihood/*.yaml) ----------
+N_CL   = 15    # Number of C_ell bins (log-spaced)
+L_MIN  = 30.   # Minimum ell (lower edge of first bin)
+L_MAX  = 4000. # Maximum ell (upper edge of last bin)
+N_LENS = 8     # Number of lens tomographic bins
+N_SRC  = 8     # Number of source tomographic bins
 
-    #VM GLOBAL VARIABLES -------------------------------------------------------
-    THETA_MIN  = 2.5    # Minimum angular scale (in arcminutes)
-    THETA_MAX  = 900.  # Maximum angular scale (in arcminutes)
-    N_ANG_BINS = 26    # Number of angular bins
-    N_LENS = 5  # Number of lens tomographic bins
-    N_SRC  = 5  # Number of source tomographic bins
-    N_XI_PS = int(N_SRC * (N_SRC + 1) / 2) 
-    N_XI    = int(N_XI_PS * N_ANG_BINS)
-    
+# ggl (lens, source) pairs excluded from the data vector (likelihood yaml)
+GGL_EXCLUDE = [[4,0],[5,0],[6,0],[6,1],[6,2],[7,0],[7,1],[7,2],[7,3]]
 
-    # COMPUTE SHEAR SCALE CUTS
-    vtmin = THETA_MIN * 2.90888208665721580e-4;
-    vtmax = THETA_MAX * 2.90888208665721580e-4;
-    logdt = (mt.log(vtmax) - mt.log(vtmin))/N_ANG_BINS;
-    theta = np.zeros(N_ANG_BINS+1)
+# Scale cuts: shear keeps all bins (l_max_shear = 4000); ggl and clustering
+# drop the bins whose center ell exceeds LMAX_GC. With 15 log bins in
+# [30, 4000] the last three centers are 1770/2452/3398, so any LMAX_GC
+# between 1770 and 2452 zeroes exactly the last 2 bins of each block,
+# which is the pattern of the shipped roman_example.mask.
+LMAX_GC = 2000.
 
-    for i in range(N_ANG_BINS):
-      tmin = mt.exp(mt.log(vtmin) + (i + 0.0) * logdt);
-      tmax = mt.exp(mt.log(vtmin) + (i + 1.0) * logdt);
-      x = 2./ 3.
-      theta[i] = x * (tmax**3 - tmin**3) / (tmax**2- tmin**2)
-      theta[i] = theta[i]/2.90888208665721580e-4
+#VM GLOBAL VARIABLES -------------------------------------------------------
+N_SHEAR = int(N_SRC * (N_SRC + 1) / 2)              # 36 shear blocks
+N_GGL   = N_LENS * N_SRC - len(GGL_EXCLUDE)         # 55 ggl blocks
+# data vector = [shear, ggl, clustering] = 99 blocks x 15 ells = 1485
 
-    cosmo = FlatLambdaCDM(H0=100, Om0=0.3)
-    def ang_cut(z):
-      "Get Angular Cutoff from redshit z"
-      theta_rad = gc_CUTOFF / cosmo.angular_diameter_distance(z).value
-      return theta_rad * 180. / np.pi * 60.
+# C_ell bin centers (geometric mean of the log-spaced bin edges)
+ell_edges = np.logspace(np.log10(L_MIN), np.log10(L_MAX), N_CL + 1)
+ell = np.sqrt(ell_edges[1:] * ell_edges[:-1])
 
-    if (Year == 1):
-      zavg = [0.3269670081723307,
-              0.5086885453137051,
-              0.6699437575466684,
-              0.848472949839094,
-              1.0712458524571165]
+#VM COSMIC SHEAR MASK (no cut) ---------------------------------------------
+shear_mask = np.hstack([np.ones(N_CL) for i in range(N_SHEAR)])
 
-    #VM COSMIC SHEAR SCALE CUT -------------------------------------------------
-    ξp_mask = np.hstack([(theta[:-1] > ξp_CUTOFF) for i in range(N_XI_PS)])
-    ξm_mask = np.hstack([(theta[:-1] > ξm_CUTOFF) for i in range(N_XI_PS)])   
+#VM GGL MASK ---------------------------------------------------------------
+gc_cut = (ell < LMAX_GC)
+ggl_mask = np.hstack([gc_cut for i in range(N_GGL)])
 
-    #VM GGL mask ---------------------------------------------------------------
-    if (Year == 1):
-      ggl_efficiency = [
-        [0.4456315654,0.8790767396,0.9389947229,0.8354926862,0.631370374],
-        [0.0334525378,0.3739779295,0.8338207849,0.9821921200,0.8639203163],
-        [0.0004551936,0.0536064628,0.4178650771,0.8715050829,0.9711497877],
-        [0.0000006072,0.0015727852,0.0818817759,0.5363472954,0.9782246343],
-        [0.0000000000,0.0000024903,0.0025740396,0.1465300465,0.8300740215]
-      ]
+#VM w (clustering, auto only) MASK -----------------------------------------
+w_mask = np.hstack([gc_cut for i in range(N_LENS)])
 
-    γt_mask = [] 
-    if (Year == 1):
-      for i in range(N_LENS): 
-        for j in range(N_SRC):
-          if ggl_efficiency[i][j] > ggl_efficiency_cut[0]:
-            γt_mask.append((theta[:-1] > ang_cut(zavg[i])))
-          else:
-            γt_mask.append(np.zeros(N_ANG_BINS))
-    γt_mask = np.hstack(γt_mask) 
+#VM output -----------------------------------------------------------------
+mask = np.hstack([shear_mask, ggl_mask, w_mask])
+np.savetxt("roman_example.mask",
+  np.column_stack((np.arange(0, len(mask)), mask)),
+  fmt='%d %e')
 
-    #VM w_theta mask -----------------------------------------------------------
-    w_mask = np.hstack([(theta[:-1] > ang_cut(zavg[i])) for i in range(N_LENS)])
-
-    #VM output -----------------------------------------------------------------
-    mask = np.hstack([ξp_mask, ξm_mask, γt_mask, w_mask])
-    if (Year == 1):
-      np.savetxt("LSST_Y" + str(Year) + "_M" + str(mask_choice) +
-        "_GGLOLAP" + str(ggl_efficiency_cut[0]) + ".mask", 
-        np.column_stack((np.arange(0,len(mask)), mask)),
-        fmt='%d %1.1f')
-
+ones = np.ones(len(mask))
+np.savetxt("ones.mask",
+  np.column_stack((np.arange(0, len(ones)), ones)),
+  fmt='%d %e')
