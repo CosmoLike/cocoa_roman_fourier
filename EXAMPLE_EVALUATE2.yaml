@@ -517,10 +517,17 @@ theory:
       accurate_massive_neutrino_transfers: false
       k_per_logint: 15
       kmax: 10.0
+#  Warning: FAST-PT under TATT is a code cross-check for this
+#  project, never an analysis path. Reaching the 0.2 agreement
+#  band against cfastpt needs accuracyboost near 5120, at about
+#  160 s per cosmology; with the default fastpt settings the data
+#  vectors differ by up to delta chi2 = 87184 across the
+#  intrinsic-alignment prior. Use cfastpt (IA_code: 0) for
+#  analyses (see tests/README.md, test 15).
 #  fastpt:
 #    path: ./external_modules/code/FAST-PT
 #    extra_args:
-#      accuracyboost: 5
+#      accuracyboost: 5120
 #      kmax_boltzmann: 7.5
 #      extrap_kmax: 250.0 
 sampler:
