@@ -98,11 +98,9 @@ The test files and the configurations they cover:
 Cosmolike computes the TATT perturbation-theory integrals with two
 implementations: cfastpt, the C code built into the interface
 (`IA_code: 0`), and the python FAST-PT package through the fastpt
-theory block (`IA_code: 1`). Test 15 evaluates both at the same 30
-fixed points: 20 drawn once across the intrinsic-alignment prior and
-hard-coded, plus a one-parameter-at-a-time family that names the TATT
-parameter driving a divergence (every other parameter stays at the
-fiducial), each implementation in its own subprocess.
+theory block (`IA_code: 1`). Test 15 evaluates both at 30
+fixed points across the intrinsic-alignment prior and checks
+their agreement.
 
 At every point the cfastpt data vector is the fiducial: the reported
 quantity is the $\Delta\chi^2$ of the FAST-PT vector against it,
@@ -115,16 +113,22 @@ the density of the output table cosmolike reads with linear
 interpolation (the accuracy driver), and `internal_accuracyboost`
 the density of the internal grid the FFTLog convolutions run on,
 with a cubic spline in log k upsampling the terms from one grid
-onto the other. Both boosts are rebased so 1.0 is the converged
-configuration; this project's precision needs
-`accuracyboost: 2`, the doubled output density, and the test
-asserts there with the 0.2 band of the other checks as the pass
-limit, doubling the configuration again as an advisory. Before the two-grid upgrade of the
-fastpt theory block (2026-09) there was no upsampling and the
-difference reached $\Delta\chi^2 = 87184$ across the prior. The point values, the design, and the
-decision record live with the lsst_y1 project (its tests/README.md
-carries the full discussion); the table below is this project's own
-measurement:
+onto the other.
+
+Both boosts are rebased so 1.0 is the converged configuration; this
+project's precision needs `accuracyboost: 2`, the doubled output
+density. The test asserts there with the 0.2 band of the other
+checks as the pass limit, doubling the configuration again as an
+advisory.
+
+> [!NOTE]
+> Before the two-grid upgrade of the fastpt theory block (2026-09)
+> there was no upsampling and the difference reached
+> $\Delta\chi^2 = 87184$ across the prior.
+
+The point values, the design, and the decision record live with the
+lsst_y1 project (its tests/README.md carries the full discussion);
+the table below is this project's own measurement:
 
 | output table (points) | internal grid (points) | max $\Delta\chi^2$ | cost per cosmology |
 |---|---|---|---|
