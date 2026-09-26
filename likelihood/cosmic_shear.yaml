@@ -7,7 +7,12 @@ data_file: roman_fourier_M1_GGL0.05.dataset
 # synthetic test point; the nested boost-2 grid removes it, and the refined
 # grids agree to 0.05 through boost 5.
 accuracyboost: 2.0
+internal_accuracyboost: 1.0 # C-FAST-PT convolution grid / output grid
 integration_accuracy: 0
+# n(z) interpolation: 0 = cubic spline, 1 = linear, 2+ = Steffen (monotone)
+photoz_interpolation_type: 0
+# n(z) file z column: 0 = Z_LOW (left bin edges), 1 = Z_MID (sample points)
+photoz_zmid_convention: 0
 kmax_boltzmann: 7.5
 speed: 1
 non_linear_emul: 2
