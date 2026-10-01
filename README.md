@@ -271,22 +271,25 @@ the checks to measure them on the current code, and see
 [tests/README.md](tests/README.md) for each check, the settings
 raised, and what each setting controls.
 
-The default is `accuracyboost: 2.0`, and the reason must not be
-lost. The boost-1 tables carried about $0.28$ of $\chi^2$ of pure
-z-resolution error on the synthetic test point — larger than the
-$0.2$ accuracy band itself. That number is the dated measurement
-that set this default, not a current check output.
+The default is `accuracyboost: 1.0` with `pk_z_refinement: 4`, and the
+reason must not be lost. cosmolike interpolates the power-spectrum
+tables linearly in z between their nodes, and at the band centers of
+this Fourier-space data vector that residual does not average out: the
+3x2pt $\chi^2$ at the synthetic test point moves by 0.25, 0.030 and 0.002
+from 1 to 2, 4 and 8 times the nodes of `accuracyboost: 1` (measured
+2026-10-01). That z-resolution error is the 0.28 that set the previous
+default, `accuracyboost: 2.0`.
 
-The old grid hid that error: its nodes re-phased whenever the boost
-changed, so scanning the boost jittered around the error instead of
-exposing it. The nested dyadic grid made the scan smooth and the
-error visible, and boost 2 removes it by refining the same nodes;
-the CAMB request grid stays at 140 redshifts (under CAMB's 256-node
-cap), so only the cosmolike tables pay.
+The nested dyadic grid made the error visible (its nodes no longer
+re-phase when the refinement changes), and `pk_z_refinement` now
+refines these nodes alone: no other table of this project gains from a
+higher `accuracyboost`, which doubled the FAST-PT grids and every other
+table for nothing. `accuracyboost` stays global: it still multiplies
+every grid, these nodes included. The CAMB request grid stays at 140
+redshifts (under CAMB's 256-node cap), so only the cosmolike tables pay.
 
 > [!Warning]
-> Do not lower `accuracyboost` back to `1.0` to save computing
-> time: the error it reintroduces exceeds the entire accuracy
-> budget of the reference tests. The likelihood yaml files repeat
-> this next to the knob, and the stored references were regenerated
-> at the boost-2 default.
+> Do not lower `pk_z_refinement` below 4 to save computing time: the
+> error it reintroduces exceeds the 0.2 accuracy budget of the
+> reference tests (0.28 at 1). The likelihood yaml files repeat this
+> next to the knob.

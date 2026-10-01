@@ -111,6 +111,13 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
       (py::arg("internal_boost") = 1.0).none(false)
     );
 
+  m.def("init_nonlimber_accuracy_boost",
+      &cosmolike_interface::init_nonlimber_accuracy_boost,
+      "Refine the non-Limber FFTLog chi grid (Ntable.NL_Nchi) on top of the "
+      "accuracy boost (1.0 = the accuracy boost alone)",
+      (py::arg("nonlimber_boost") = 1.0).none(false)
+    );
+
   m.def("init_adopt_limber_gs",
       &cosmolike_interface::init_adopt_limber_gs,
       "Galaxy-galaxy lensing: 0 = non-Limber below limits.LMAX_NOLIMBER "
@@ -122,7 +129,7 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
       &cosmolike_interface::init_adopt_limber_gg,
       "Galaxy clustering: 0 = non-Limber below limits.LMAX_NOLIMBER, "
       "1 = Limber at every multipole",
-      (py::arg("adopt_limber_gg") = 1).none(false)
+      (py::arg("adopt_limber_gg") = 0).none(false)
     );
 
   m.def("init_include_HOD_GX",
