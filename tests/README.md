@@ -323,7 +323,7 @@ causing it; the measured values are in the project README under
 
 | setting | raised to | what it controls |
 |---------|-----------|------------------|
-| `accuracyboost` (cosmolike) | 2 | sizes of cosmolike's internal lookup tables, including the dyadic z grid of the power-spectrum tables |
+| `accuracyboost` (cosmolike) | 3 | sizes of cosmolike's internal lookup tables, including the dyadic z grid of the power-spectrum tables |
 | `integration_accuracy` (cosmolike) | 10 | extra refinement passes of cosmolike's numerical integrals |
 | `internal_accuracyboost` (cosmolike) | 2 | density of the C-FAST-PT convolution grid relative to the output table the likelihood interpolates; 1 is the legacy single-grid path |
 | `kmax_boltzmann` (cosmolike) | 40 | the k cutoff of the power spectrum the likelihood requests from CAMB |
@@ -525,11 +525,16 @@ entries change, a bit-identical round trip back to the default,
 agreement with the measured $\Delta\chi^2$ to 5%, and, last, the
 frozen-reference check on the default evaluation.
 
-Measured on 2026-09-27:
+Measured on 2026-10-01:
 
-- $\Delta\chi^2 = 1.30$ for the 3x2pt data vector.
+- $\Delta\chi^2 = 1.22$ for the 3x2pt data vector.
 - The pairs with lens bin = source bin carry it: (3,3), (2,2), (4,4),
-  (1,1), (5,5), (6,6) with 0.71, 0.70, 0.59, 0.49, 0.40, 0.21.
+  (1,1), (5,5), (6,6) with 0.72, 0.70, 0.59, 0.49, 0.40, 0.21.
+- 1.30 on 2026-09-27, before the band-center correction was computed
+  without cosmolike's 1% early exit, at the two integer multipoles
+  around each band center only, and before the z nodes of the
+  power-spectrum tables were doubled (`pk_z_refinement: 2` on top of
+  `accuracyboost: 2`).
 
 On 2026-09-28 the default switched from Limber to the exact
 projection: the measured $\Delta\chi^2$ was judged too large to
@@ -542,13 +547,13 @@ The likelihood yaml key `adopt_limber_gg` chooses how the galaxy
 clustering spectrum $C_\ell^{gg}$ is computed: `0` takes the
 multipoles below $\ell = 150$ from the exact projection (cosmolike's
 `C_cl_tomo`, the same FFTLog split as the galaxy-galaxy lensing check
-above), `1` uses the Limber approximation at every multipole; `1`
-(Limber at every multipole) is this project's default. In this
-project's Fourier-space data vector each band center takes its Limber
-value plus the non-Limber correction interpolated linearly between the
-two integer multipoles around it. The lens galaxy redshift
-distributions are narrow, so the Limber approximation fails at low
-$\ell$ for the clustering auto spectra.
+above), `1` uses the Limber approximation at every multipole; `0`
+(the exact projection) is this project's default. In this project's
+Fourier-space data vector each band center takes its Limber value plus
+the non-Limber correction interpolated linearly between the two integer
+multipoles around it. The lens galaxy redshift distributions are
+narrow, so the Limber approximation fails at low $\ell$ for the
+clustering auto spectra.
 
 The test evaluates the frozen 3x2pt fiducial with the default, the
 other setting, and the default again in one process and reports
@@ -559,12 +564,20 @@ clustering entries change, a bit-identical round trip back to the
 default, agreement with the measured $\Delta\chi^2$ to 5%, and, last,
 the frozen-reference check on the default evaluation.
 
-Measured on 2026-09-28:
+Measured on 2026-10-01:
 
-- $\Delta\chi^2 = 3.34$ for the 3x2pt data vector, against 1.30 for
+- $\Delta\chi^2 = 3.45$ for the 3x2pt data vector, against 1.22 for
   the same comparison in galaxy-galaxy lensing.
-- The largest contributions are lens bins 5, 6, 4, 3 with 1.02, 0.88,
-  0.80, 0.46 (each bin's block alone).
+- The largest contributions are lens bins 5, 6, 4, 3 with 1.04, 0.90,
+  0.82, 0.49 (each bin's block alone).
+
+On 2026-10-01 the default switched from Limber to the exact
+projection: the measured $\Delta\chi^2$ (3.34 on 2026-09-28) exceeds
+the 1.30 that switched galaxy-galaxy lensing, and clustering had
+stayed Limber only because the key preserved the old behavior when it
+was introduced. The shipped data vector was regenerated with the
+non-Limber default (and `accuracyboost: 2` with `pk_z_refinement: 2`)
+and the frozen references were refrozen from it.
 
 
 ### The sector-ladder cache check (`test_cache_consistency.py`) <a name="cache_ladder"></a>

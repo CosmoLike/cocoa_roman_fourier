@@ -271,25 +271,38 @@ the checks to measure them on the current code, and see
 [tests/README.md](tests/README.md) for each check, the settings
 raised, and what each setting controls.
 
-The default is `accuracyboost: 1.0` with `pk_z_refinement: 4`, and the
-reason must not be lost. cosmolike interpolates the power-spectrum
-tables linearly in z between their nodes, and at the band centers of
-this Fourier-space data vector that residual does not average out: the
-3x2pt $\chi^2$ at the synthetic test point moves by 0.25, 0.030 and 0.002
-from 1 to 2, 4 and 8 times the nodes of `accuracyboost: 1` (measured
-2026-10-01). That z-resolution error is the 0.28 that set the previous
-default, `accuracyboost: 2.0`.
+The default is `accuracyboost: 2.0` with `pk_z_refinement: 2`, and the
+reason must not be lost. Two grids of this project need more than
+`accuracyboost: 1` (measured 2026-10-01):
 
-The nested dyadic grid made the error visible (its nodes no longer
-re-phase when the refinement changes), and `pk_z_refinement` now
-refines these nodes alone: no other table of this project gains from a
-higher `accuracyboost`, which doubled the FAST-PT grids and every other
-table for nothing. `accuracyboost` stays global: it still multiplies
-every grid, these nodes included. The CAMB request grid stays at 140
-redshifts (under CAMB's 256-node cap), so only the cosmolike tables pay.
+- The z nodes of the power-spectrum tables. cosmolike interpolates the
+  tables linearly in z between their nodes, and at the band centers of
+  this Fourier-space data vector that residual does not average out:
+  the 3x2pt $\chi^2$ at the synthetic test point moves by 0.25, 0.030
+  and 0.002 from 1 to 2, 4 and 8 times the nodes of `accuracyboost: 1`.
+  The default has 4 times the nodes: `accuracyboost: 2` doubles them
+  and `pk_z_refinement: 2` doubles them again.
+- The C-FAST-PT tables of the TATT and one-loop galaxy-bias terms. At
+  `accuracyboost: 1` the cfastpt vs FAST-PT comparison of the tests
+  (tests 15 and 16) reaches $\Delta\chi^2$ = 0.25 (cosmic shear) and
+  0.31 (3x2pt), above the 0.2 band; at `accuracyboost: 2` it is 0.11
+  and 0.14.
+
+`accuracyboost` stays global: it multiplies every grid, these included,
+and `pk_z_refinement` refines the z nodes alone. Under NLA alone,
+`accuracyboost: 1` with `pk_z_refinement: 4` has the same z nodes and
+gives a data vector within $\delta^T C^{-1} \delta = 0.005$ of the
+default at a lower cost; the TATT tables are what need the boost. The
+CAMB request grid stays at 140 redshifts (under CAMB's 256-node cap), so
+only the cosmolike tables pay.
+
+The project tag v5.01 shipped `accuracyboost: 1` with
+`pk_z_refinement: 4`, which fails the TATT checks above; the default
+returned to `accuracyboost: 2` on 2026-10-01.
 
 > [!Warning]
-> Do not lower `pk_z_refinement` below 4 to save computing time: the
-> error it reintroduces exceeds the 0.2 accuracy budget of the
-> reference tests (0.28 at 1). The likelihood yaml files repeat this
-> next to the knob.
+> Do not lower these settings to save computing time: with fewer than 4
+> times the z nodes of `accuracyboost: 1`, or with `accuracyboost` below
+> 2 under TATT, the error exceeds the 0.2 accuracy budget of the
+> reference tests. The likelihood yaml files repeat this next to the
+> knobs.
