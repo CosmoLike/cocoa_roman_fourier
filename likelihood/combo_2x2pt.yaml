@@ -1,18 +1,22 @@
 path: null
 data_file: roman_fourier_M1_GGL0.05.dataset
-# The z nodes of the power-spectrum tables (cosmolike interpolates P(k, z)
-# linearly in z between them) need 4 times the nodes of accuracyboost 1:
-# the 3x2pt chi2 moves by 0.25, 0.030, 0.002 from 1 to 2, 4, 8 times the
-# nodes (2026-10-01). That z-resolution error is the 0.28 that once set
-# accuracyboost: 2.0. pk_z_refinement refines these nodes alone; no other
-# table of this project gains from a higher accuracyboost, which stays
-# global (it multiplies every grid, these nodes included).
-accuracyboost: 1.0
+# Two grids of this project need more than accuracyboost 1 (2026-10-01):
+# - the z nodes of the power-spectrum tables (cosmolike interpolates
+#   P(k, z) linearly in z between them) need 4 times the nodes of
+#   accuracyboost 1: the 3x2pt chi2 moves by 0.25, 0.030, 0.002 from 1 to
+#   2, 4, 8 times the nodes. accuracyboost 2 doubles them and
+#   pk_z_refinement 2 doubles them again;
+# - the C-FAST-PT tables of the TATT and one-loop bias terms need
+#   accuracyboost 2: at 1 the cfastpt vs FAST-PT check of the tests
+#   reaches delta chi2 0.25 (cosmic shear) and 0.31 (3x2pt), above the 0.2
+#   band; at 2 it is 0.11 and 0.14.
+# Do not lower either to save time (README: "Minimum accuracy parameters").
+accuracyboost: 2.0
 internal_accuracyboost: 1.0 # C-FAST-PT convolution grid / output grid
 # refinements on top of accuracyboost (which multiplies them too):
 # the non-Limber FFTLog chi grid, and the z nodes of the P(k) tables
 nonlimber_accuracyboost: 1.0
-pk_z_refinement: 4
+pk_z_refinement: 2
 integration_accuracy: 0
 # n(z) interpolation: 0 = cubic spline, 1 = linear, 2+ = Steffen (monotone)
 photoz_interpolation_type: 0
@@ -28,11 +32,6 @@ include_HOD_GX: 0
 # shear and ggl IA: 0 = the IA_model above, 1 = halo-model IA
 # (Fortuna et al. 2021; NLA only, Limber gs, include_HOD_GX = 0)
 include_halo_IA: 0
-# halo model: density field of sigma(M) and dn/dM. 0 = total matter;
-# 1 = cold dark matter + baryons, as the massive neutrinos free-stream
-# out of halos (sigma(M) from CAMB's delta_nonu P(k); the emulator path
-# approximates it; p_mm, p_my, p_yy stop under 1)
-halo_matter_field: 0
 kmax_boltzmann: 7.5
 speed: 1
 non_linear_emul: 2

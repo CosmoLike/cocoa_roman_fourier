@@ -111,7 +111,7 @@ HIGH_ACCURACY_LIKELIHOOD = {
     # scanned (desy1xplanck breaks down above it), so the all-knobs
     # check compares the default against 3; the one-at-a-time scan
     # keeps 5 as a deliberate stress knob
-    "accuracyboost": 3.0,       # default 1.0
+    "accuracyboost": 3.0,       # default 2.0
     "internal_accuracyboost": 2.0, # default 1.0 (denser convolution grid)
     "integration_accuracy": 10,  # default 0
     "kmax_boltzmann": 40.0,     # default 7.5
