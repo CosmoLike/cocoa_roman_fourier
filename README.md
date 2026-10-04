@@ -331,6 +331,14 @@ The primary example is the 15-band Fourier 3×2pt matrix. Its nine galaxy–shea
 exclusions match the project adapter and likelihood. The optional real-space
 calculation describes a different measurement.
 
+The default [installation options](../../set_installation_options.sh) set
+`IGNORE_COSMOLIKE_ROMAN_FOURIER_COVARIANCE=1`. This leaves covariance-generation
+kernels and notebook bindings out of the compiled interface. Likelihoods still
+read and invert their supplied covariance matrices. The steps below enable
+covariance generation for this build; comment out that export in
+`set_installation_options.sh` to keep it enabled in later sessions.
+Recompile after changing the option, then restart any running notebook kernel.
+
 We assume Cocoa and this project are installed, users have run
 `conda activate cocoa`, the shell is Bash, and the current folder is
 `cocoa/Cocoa`.
@@ -339,9 +347,10 @@ We assume Cocoa and this project are installed, users have run
 
     source start_cocoa.sh
 
-**Step :two:**: compile the project interface.
+**Step :two:**: enable covariance generation and compile the project interface.
 
     unset IGNORE_COSMOLIKE_ROMAN_FOURIER_CODE
+    unset IGNORE_COSMOLIKE_ROMAN_FOURIER_COVARIANCE
     source ./projects/roman_fourier/scripts/compile_roman_fourier.sh
 
 **Step :three:**: start Jupyter.
@@ -371,3 +380,16 @@ component plots, accuracy controls and covariance-only tests.
 > eight OpenMP threads and one BLAS thread. `accuracy_boost` refines
 > tables and cutoffs; `integration_accuracy` separately selects precomputed
 > GSL rules from [covariance/default.yaml](covariance/default.yaml).
+
+To return to a data-vector-only build, use the following steps from
+`cocoa/Cocoa` with `conda activate cocoa` and Bash.
+
+**Step :one:**: activate Cocoa.
+
+    source start_cocoa.sh
+
+**Step :two:**: omit covariance generation and rebuild the interface.
+
+    unset IGNORE_COSMOLIKE_ROMAN_FOURIER_CODE
+    export IGNORE_COSMOLIKE_ROMAN_FOURIER_COVARIANCE=1
+    source ./projects/roman_fourier/scripts/compile_roman_fourier.sh
