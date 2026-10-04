@@ -19,3 +19,6 @@ notebooks/*
 *.sbatch
 scripts/.DS_Store
 data_challenge/
+
+# Covariance notebook outputs; the survey settings remain tracked.
+covariance/forecast_*.npz

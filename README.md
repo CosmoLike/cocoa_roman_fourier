@@ -1,3 +1,12 @@
+# Table of contents <a name="table_of_contents"></a>
+
+1. [Running Cosmolike projects (Basic instructions)](#running_cosmolike_projects)
+2. [Baryonic feedback on EXAMPLE_EVALUATE1](#roman_fourier_baryonic_feedback)
+3. [Running Hybrid Cosmolike-ML emulators](#roman_fourier_examples_emul2)
+4. [Unit tests](#roman_fourier_unit_tests)
+5. [Minimum accuracy parameters](#roman_fourier_accuracy)
+6. [Computing covariances](#computing_covariances)
+
 ## Running Cosmolike projects (Basic instructions) <a name="running_cosmolike_projects"></a> 
 
 From `Cocoa/Readme` instructions:
@@ -149,12 +158,6 @@ model).
 > For the sampled parameters of each model, their validity ranges, and the `bfmt`
 > options, see `Cocoa/external_modules/code/baryon_suppression/README.md`.
 
-# Table of contents <a name="table_of_contents"></a>
-
-1. [Baryonic feedback on EXAMPLE_EVALUATE1](#roman_fourier_baryonic_feedback)
-2. [Running Hybrid Cosmolike-ML emulators](#roman_fourier_examples_emul2)
-3. [Unit tests](#roman_fourier_unit_tests)
-
 # Running Hybrid Cosmolike-ML emulators <a name="roman_fourier_examples_emul2"></a>
 
 > [!Warning]
@@ -254,11 +257,11 @@ the script `start_cocoa.sh`
 
 **Step :two:**: run the tests of this project
 
-    python -m pytest ./projects/roman_fourier/tests
+    python -m pytest ./projects/roman_fourier/tests/data_vector
 
 ## Minimum accuracy parameters <a name="roman_fourier_accuracy"></a>
 
-The advisory checks in `tests/test_accuracy.py` measure the
+The advisory checks in `tests/data_vector/test_accuracy.py` measure the
 numerical error of the default accuracy settings: each setting is
 raised one at a time on the 3x2pt configuration, so a large
 $\Delta\chi^2$ can be attributed to the setting causing it, and
@@ -306,3 +309,45 @@ returned to `accuracyboost: 2` on 2026-10-01.
 > 2 under TATT, the error exceeds the 0.2 accuracy budget of the
 > reference tests. The likelihood yaml files repeat this next to the
 > knobs.
+
+# Computing covariances <a name="computing_covariances"></a>
+
+[EXAMPLE_EVALUATE_COVARIANCE.ipynb](EXAMPLE_EVALUATE_COVARIANCE.ipynb)
+computes real-space and Fourier-space galaxy/shear covariances, with
+separate Gaussian, super-sample and connected components. It compares
+accuracy boosts, checks eigenvalues and plots the changes.
+
+We assume Cocoa and this project are installed, users have run
+`conda activate cocoa`, the shell is Bash, and the current folder is
+`cocoa/Cocoa`.
+
+**Step :one:**: activate Cocoa's private Python environment.
+
+    source start_cocoa.sh
+
+**Step :two:**: compile the project interface.
+
+    unset IGNORE_COSMOLIKE_ROMAN_FOURIER_CODE
+    source ./projects/roman_fourier/scripts/compile_roman_fourier.sh
+
+**Step :three:**: start Jupyter.
+
+    jupyter notebook --no-browser --port=8888
+
+**Step :four:**: open the printed URL and select
+`projects/roman_fourier/EXAMPLE_EVALUATE_COVARIANCE.ipynb`.
+
+**Step :five:**: inspect the survey settings, choose `boosts`, then select
+**Kernel → Restart Kernel and Run All Cells**.
+
+The final cell writes `covariance/forecast_real.npz`,
+`covariance/forecast_fourier.npz` and `covariance/forecast_camb.npz`.
+The [covariance guide](covariance/README.md) explains the settings, output
+arrays, physical approximations and separate covariance test command.
+
+> [!NOTE]
+> This is a massless-neutrino, Limber forecast with linear galaxy bias,
+> zero IA, magnification and RSD, and a spherical-cap footprint.
+> The notebook uses eight OpenMP threads and one BLAS thread.
+> A larger `accuracy_boost` refines integrations; it does not certify
+> parameter-error convergence or replace the likelihood's supplied matrix.
