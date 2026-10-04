@@ -20,6 +20,7 @@ shell is Bash and the current folder is `cocoa/Cocoa`.
 **Step :two:**: compile this project's interface.
 
     unset IGNORE_COSMOLIKE_ROMAN_FOURIER_CODE
+    unset IGNORE_COSMOLIKE_ROMAN_FOURIER_COVARIANCE
     source projects/roman_fourier/scripts/compile_roman_fourier.sh
 
 **Step :three:**: run the covariance checks.
