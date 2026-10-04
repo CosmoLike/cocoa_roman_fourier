@@ -102,7 +102,7 @@ boosts = [1, 2]
 settings = survey.configuration(accuracy_boost=boosts[0])
 ```
 
-The integration baseline is in [`default.yaml`](default.yaml). The notebook
+The numerical baseline is in [`default.yaml`](default.yaml). The notebook
 loads that file through `survey.configuration`. Its internal refinements
 multiply the global boost: factors 2 and 3 at boost 1 become 4 and 6 at
 boost 2. Resolved settings save both the base controls and effective grids.
@@ -115,7 +115,7 @@ is supported, including in low-level calls. To check quadrature alone, use
 with level zero. The defaults are being checked against refined full matrices;
 a higher level alone is not a convergence certificate.
 
-`accuracy_boost` is the single user control. Supported values are
+`accuracy_boost` controls interpolation and cutoffs. Supported values are
 1, 2, 4 and 8. It raises the covariance multipole cutoffs and refines the non-Gaussian,
 lensing-window and shared core interpolation tables. It leaves
 CAMB and data-vector accuracy settings unchanged.
