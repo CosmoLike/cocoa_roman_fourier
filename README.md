@@ -1,4 +1,26 @@
+# Table of contents <a name="table_of_contents"></a>
+
+1. [Running Cosmolike projects (Basic instructions)](#running_cosmolike_projects)
+2. [Baryonic feedback on EXAMPLE_EVALUATE1](#roman_fourier_baryonic_feedback)
+3. [Running Hybrid Cosmolike-ML emulators](#roman_fourier_examples_emul2)
+4. [Unit tests](#roman_fourier_unit_tests)
+5. [Minimum accuracy parameters](#roman_fourier_accuracy)
+6. [Computing covariances](#computing_covariances)
+
 ## Running Cosmolike projects (Basic instructions) <a name="running_cosmolike_projects"></a> 
+
+> [!WARNING]
+> **CLI for production; notebook wrappers for exploration.**
+>
+> Run production and HPC calculations from YAML through the optimized
+> `_interface` bindings. Notebook `_wrapper` APIs expose intermediate
+> quantities for exploration; copying and rearranging their arrays adds
+> overhead. Both routes call the same C kernels.
+>
+> In a matched **LSST Y1 covariance** test on an M2 Pro with eight threads,
+> the CLI averaged **68.34 s** (three runs); one wrapper run took **177.74 s**.
+> The CLI was **2.60× faster**, with bitwise-identical covariance components.
+> See [the production covariance CLI](#computing_covariances).
 
 From `Cocoa/Readme` instructions:
 
@@ -114,6 +136,18 @@ and
         mpirun -n 4 --oversubscribe \
           cobaya-run ./projects/roman_fourier/EXAMPLE_MCMC2.yaml -f
 
+
+> [!Warning]
+> CosmoLike supports the optimized strict-IEEE default build and
+> `COSMOLIKE_DEBUG_MODE`. The compiler mode `COSMOLIKE_AGGRESSIVE_MODE`
+> is retired because its fast-math configuration produced incorrect
+> covariance inverses. Unset that variable before compiling.
+> Do not enable `-ffast-math`, `-Ofast`, `-funsafe-math-optimizations`,
+> `-fassociative-math`, `-ffinite-math-only`, `-freciprocal-math`,
+> `-fno-signed-zeros`, or `-fno-trapping-math` in CosmoLike builds.
+> This does not change Cocoa's separate `--aggressive` download option.
+
+
 # Baryonic feedback on EXAMPLE_EVALUATE1 <a name="roman_fourier_baryonic_feedback"></a>
 
 `EXAMPLE_EVALUATE1.yaml` can apply an external baryonic feedback suppression to the
@@ -148,12 +182,6 @@ model).
 > [!TIP]
 > For the sampled parameters of each model, their validity ranges, and the `bfmt`
 > options, see `Cocoa/external_modules/code/baryon_suppression/README.md`.
-
-# Table of contents <a name="table_of_contents"></a>
-
-1. [Baryonic feedback on EXAMPLE_EVALUATE1](#roman_fourier_baryonic_feedback)
-2. [Running Hybrid Cosmolike-ML emulators](#roman_fourier_examples_emul2)
-3. [Unit tests](#roman_fourier_unit_tests)
 
 # Running Hybrid Cosmolike-ML emulators <a name="roman_fourier_examples_emul2"></a>
 
@@ -254,11 +282,11 @@ the script `start_cocoa.sh`
 
 **Step :two:**: run the tests of this project
 
-    python -m pytest ./projects/roman_fourier/tests
+    python -m pytest ./projects/roman_fourier/tests/data_vector
 
 ## Minimum accuracy parameters <a name="roman_fourier_accuracy"></a>
 
-The advisory checks in `tests/test_accuracy.py` measure the
+The advisory checks in `tests/data_vector/test_accuracy.py` measure the
 numerical error of the default accuracy settings: each setting is
 raised one at a time on the 3x2pt configuration, so a large
 $\Delta\chi^2$ can be attributed to the setting causing it, and
@@ -306,3 +334,143 @@ returned to `accuracyboost: 2` on 2026-10-01.
 > 2 under TATT, the error exceeds the 0.2 accuracy budget of the
 > reference tests. The likelihood yaml files repeat this next to the
 > knobs.
+
+# Computing covariances <a name="computing_covariances"></a>
+
+[EXAMPLE_EVALUATE_COVARIANCE.ipynb](EXAMPLE_EVALUATE_COVARIANCE.ipynb)
+computes a covariance with this project's 3×2pt measurement layout.
+It keeps G, SSC and cNG separately, applies the supplied likelihood mask,
+and plots the computed and supplied totals together.
+
+| Measurement choice | Notebook example |
+| --- | --- |
+| Dataset | [data/roman_example.dataset](data/roman_example.dataset) |
+| Primary space | Fourier-space 3×2pt |
+| Lens bins | 8 |
+| Source bins | 8 |
+| Bins per two-point observable | 15, multipoles 30–4000 |
+| Generated entries before cuts | 1,485 |
+| Entries after the dataset mask | 1,359 |
+
+The primary example is the 15-band Fourier 3×2pt matrix. Its nine galaxy–shear
+exclusions match the project adapter and likelihood. The optional real-space
+calculation describes a different measurement.
+
+The default [installation options](../../set_installation_options.sh) set
+`IGNORE_COSMOLIKE_ROMAN_FOURIER_COVARIANCE=1`. This leaves covariance-generation
+kernels and notebook bindings out of the compiled interface. Likelihoods still
+read and invert their supplied covariance matrices. The steps below enable
+covariance generation for this build; comment out that export in
+`set_installation_options.sh` to keep it enabled in later sessions.
+Recompile after changing the option, then restart any running notebook kernel.
+
+We assume Cocoa and this project are installed, users have run
+`conda activate cocoa`, the shell is Bash, and the current folder is
+`cocoa/Cocoa`.
+
+**Step :one:**: activate Cocoa's private Python environment.
+
+    source start_cocoa.sh
+
+**Step :two:**: enable covariance generation and compile the project interface.
+
+    unset IGNORE_COSMOLIKE_ROMAN_FOURIER_CODE
+    unset IGNORE_COSMOLIKE_ROMAN_FOURIER_COVARIANCE
+    source ./projects/roman_fourier/scripts/compile_roman_fourier.sh
+
+**Step :three:**: start Jupyter.
+
+    jupyter notebook --no-browser --port=8888
+
+**Step :four:**: open the printed URL and select
+`projects/roman_fourier/EXAMPLE_EVALUATE_COVARIANCE.ipynb`.
+
+**Step :five:**: inspect the survey inputs and keep `boosts = [1]` for the
+first calculation, then select **Kernel → Restart Kernel and Run All Cells**.
+Set `boosts = [1, 2]` to add the accuracy comparison.
+
+The notebook writes `covariance/forecast_fourier.npz`,
+`covariance/forecast_camb.npz` and
+`covariance/forecast_likelihood_selection.npz`. The last archive retains
+both cut totals and the original data-vector indices.
+Set `spaces = ["real", "fourier"]` to compute both transformations; only the native space is compared with the supplied likelihood.
+The [covariance guide](covariance/README.md) describes the physical inputs,
+component plots, accuracy controls and covariance-only tests.
+
+> [!NOTE]
+> The generated matrix is an analogous forecast, not a reproduction of the
+> supplied likelihood covariance. Gaussian spectra can include non-Limber
+> gg/gs and NLA/TATT; SSC/cNG retain zero-IA Limber physics. The forecast
+> uses massless neutrinos and a spherical-cap footprint.
+> `accuracy_boost` refines
+> tables and cutoffs; `integration_accuracy` separately selects precomputed
+> GSL rules from [covariance/default.yaml](covariance/default.yaml).
+
+## Command-line calculation
+
+The Python runner computes the full galaxy–shear covariance in Fourier space,
+using the optimized production interface. It saves G, SSC, cNG and their
+sum without plotting or opening a notebook. Numerical kernels and survey
+settings are shared with the notebook calculation.
+
+From Bash in `cocoa/Cocoa`, with `conda activate cocoa`:
+
+**Step :one:**: activate Cocoa and enable covariance generation.
+
+    source start_cocoa.sh
+    unset IGNORE_COSMOLIKE_ROMAN_FOURIER_CODE
+    unset IGNORE_COSMOLIKE_ROMAN_FOURIER_COVARIANCE
+
+**Step :two:**: compile the project interface.
+
+    source ./projects/roman_fourier/scripts/compile_roman_fourier.sh
+
+**Step :three:**: inspect the YAML cosmology and compute the matrix components.
+
+    export OMP_NUM_THREADS=8
+    python ./projects/roman_fourier/covariance/compute_covariance.py \
+        ./projects/roman_fourier/EXAMPLE_EVALUATE_COVARIANCE.yaml
+
+The `.npz` archive contains the full matrix before likelihood scale cuts,
+its components, measurement ordering, resolved settings and stage timings.
+Existing output files require `--overwrite`; likelihood inputs are separate.
+
+Set `covariance.space` to `real` or `fourier` to select the measurement.
+
+The [evaluate YAML](EXAMPLE_EVALUATE_COVARIANCE.yaml) uses Cobaya's YAML reader, with familiar
+`theory`, `params`, `sampler: evaluate` and `output` blocks. Fixed parameter
+values specify one cosmology; a parameter with a prior must be supplied
+explicitly in `sampler.evaluate.override`. No MCMC or random prior draw runs.
+
+In its `covariance` block, `accuracy_boost: 2` refines the project's
+`default.yaml` baseline. `integration_accuracy: 1` changes the quadrature
+level independently. Internal accuracy controls can also be set there.
+Use `space` for the measurement space. Set the OpenMP team with
+`OMP_NUM_THREADS` in the shell; no thread count belongs in the YAML.
+
+`theory.camb.extra_args` supports `AccuracyBoost`, `kmax`, `k_per_logint`,
+`lens_potential_accuracy` and `halofit_version`. CAMB's boost controls
+CAMB; the covariance boost controls its own tables and cutoffs.
+
+Paths in the YAML are relative to the working directory, `cocoa/Cocoa`.
+`output` names the `.npz` archive; `--output` can override it for an HPC
+job. Set `OMP_NUM_THREADS` in that job’s environment. `--help` lists the
+command options.
+
+To return to a data-vector-only build, use the following steps from
+`cocoa/Cocoa` with `conda activate cocoa` and Bash.
+
+**Step :one:**: activate Cocoa.
+
+    source start_cocoa.sh
+
+**Step :two:**: omit covariance generation and rebuild the interface.
+
+    unset IGNORE_COSMOLIKE_ROMAN_FOURIER_CODE
+    export IGNORE_COSMOLIKE_ROMAN_FOURIER_COVARIANCE=1
+    source ./projects/roman_fourier/scripts/compile_roman_fourier.sh
+
+Gaussian non-Limber and NLA/TATT options are documented in the
+[covariance guide](covariance/README.md#choosing-the-gaussian-spectra).
+The YAML keeps these Gaussian choices separate from SSC/cNG. OpenMP
+threads come exclusively from `OMP_NUM_THREADS`, not from a YAML key.

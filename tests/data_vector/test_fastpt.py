@@ -41,7 +41,7 @@ theory block (`IA_code: 1`).
 To run (from the Cocoa/ folder, cocoa environment active,
 start_cocoa.sh sourced):
 
-    python -m pytest ./projects/roman_fourier/tests/test_fastpt.py
+    python -m pytest ./projects/roman_fourier/tests/data_vector/test_fastpt.py
 
 --high=1 repeats every block at the pushed camb/cosmolike settings
 of the low-vs-high accuracy checks; the full comparison is one run
@@ -53,7 +53,7 @@ frozen contract, and --mask=ones keeps every data point (no scale
 cuts), the strictest comparison; the 0.2 pass rule applies
 unchanged:
 
-    python -m pytest ./projects/roman_fourier/tests/test_fastpt.py --mask=ones
+    python -m pytest ./projects/roman_fourier/tests/data_vector/test_fastpt.py --mask=ones
 
 The 3x2pt sweep (test 16) does not run under --mask=ones: with
 every data point kept the shipped covariance is not positive
@@ -72,11 +72,9 @@ os.environ["OMP_NUM_THREADS"] = "4"
 import sys
 import unittest
 
-# The tests folder is not a package; put it on the import path so the
-# shared harness resolves no matter where pytest was launched from.
-# insert(0, ...) puts the folder FIRST in the search order, ahead of
-# every other place a same-named module could hide.
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# The harness stays in the parent tests/ folder. Add it explicitly so
+# direct execution and worker processes resolve this project's stored inputs.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
 
