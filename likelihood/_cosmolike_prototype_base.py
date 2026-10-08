@@ -503,7 +503,6 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         "H0": None,
         "omegam": None,
         "omegab": None,
-        "omegab": None,
         "mnu": None,
         "w": None,
         "wa": None,
@@ -693,9 +692,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
           extrap_kmax=2.5e2*self.accuracyboost).logP(self.z_interp_2D,
           np.power(10.0,self.log10k_interp_2D)).flatten(order='F')+np.log(h**3)   
       else:
-        # non_linear_emul here is an undefined name (self.non_linear_emul is
-        # meant), so Python raises NameError before LoggedError is built.
-        raise LoggedError(self.log, "non_linear_emul = %d is an invalid option", non_linear_emul)
+        raise LoggedError(self.log, "non_linear_emul = %d is an invalid option", self.non_linear_emul)
 
       # The growth factor G(z) = D(z)(1+z) on the dense 1D z grid, up to the
       # last 2D node. Cosmolike interpolates G linearly in z: on the 2D grid
@@ -1018,17 +1015,22 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     Returns:
       float64 numpy array [n_data]: the full 3x2pt layout, zero outside the
-      mask and outside this likelihood's probes. Under use_emulator 1 the
-      emulator call is absent (commented out) and the value is the
-      placeholder 0.0, a zero-dimensional array.
+      mask and outside this likelihood's probes.
+
+    Raises:
+      LoggedError under use_emulator = 1: the emulator data-vector path is
+      not implemented in this project.
 
     Side effects:
       Replaces cosmolike's cosmology and nuisance state; may write files
       (see internal_get_datavector).
     """
     if self.use_emulator == 1:
-      #dv = self.internal_get_datavector_emulator(**params)
-      dv = 0.0
+      # The emulator data-vector path was never ported to this project:
+      # returning a placeholder here would feed a zero data vector to the
+      # likelihood, so refuse the mode instead.
+      raise LoggedError(self.log,
+                        "use_emulator = 1 is not implemented in this project")
     else:
       dv = self.internal_get_datavector(**params)
     return np.array(dv,dtype='float64')
