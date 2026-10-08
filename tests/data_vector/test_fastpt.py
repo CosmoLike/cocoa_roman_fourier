@@ -1,28 +1,29 @@
 """Unit tests 15-17: cfastpt vs python FAST-PT, compared directly.
 
-Cosmolike offers two implementations of the perturbation-theory
-integrals that the TATT intrinsic-alignment model needs: cfastpt, a C
-implementation built into the cosmolike interface (`IA_code: 0`, the
-default), and the python FAST-PT package used through the fastpt
-theory block (`IA_code: 1`).
+The TATT (tidal alignment and tidal torquing) intrinsic-alignment model
+needs perturbation-theory integrals: convolutions of the linear matter
+power spectrum with itself, computed with FFTLog (fast Fourier transforms
+in ln k). Cosmolike offers two implementations: cfastpt, C code built into
+the cosmolike interface (`IA_code: 0`, the default), and the python
+FAST-PT package used through the fastpt theory block (`IA_code: 1`).
 
-15. example1 (cosmic shear): the SAME 30 hard-coded points
-     across the intrinsic-alignment prior (FASTPT_COMPARISON_POINTS:
-     20 drawn across the prior boxes plus a one-parameter-at-a-time
-     family; cosmology fixed at the frozen fiducial) evaluated three
-     times - with cfastpt, with FASTPT at the pass configuration
-     (FASTPT_LOW_SETTINGS, hard-coded), and with FASTPT at the
-     doubled boosts (FASTPT_HIGH_SETTINGS). Every block prints its theory vector at
-     every point, and the CFASTPT vector is the fiducial of that
-     point: its own chi2 against it is zero by construction, so the
-     pass rule is the chi2 of the FASTPT(low) vector against it
-     (delta^T C^-1 delta, a pure second-order deviation; a chi2
-     difference against the shipped data would ride the slope
-     instead). FASTPT(high)'s deviation is printed as the advisory
-     FAST-PT grid response. Each configuration runs in its own
-     subprocess, so no cache survives from one block to the next;
-     inside a block the shared cosmology makes CAMB run once and the
-     30 points cheap.
+15. example1 (cosmic shear): one set of 30 hard-coded points across the
+     intrinsic-alignment prior (FASTPT_COMPARISON_POINTS: 20 drawn across
+     the prior boxes plus a one-parameter-at-a-time family; cosmology
+     fixed at the frozen fiducial) evaluated three times: with cfastpt,
+     with FASTPT at the pass configuration (FASTPT_LOW_SETTINGS,
+     hard-coded), and with FASTPT at the doubled boosts
+     (FASTPT_HIGH_SETTINGS). Every block prints its theory vector at
+     every point, and the cfastpt vector is the fiducial of that point:
+     its own chi2 against it is zero by construction, so the pass rule is
+     the chi2 of the FASTPT(low) vector against it, delta^T C^-1 delta, a
+     pure second-order deviation. (A difference of two chi2 values
+     against the shipped data would instead change linearly with the
+     vectors, through the slope of the chi2 away from its minimum.)
+     FASTPT(high)'s deviation is printed as the advisory FAST-PT grid
+     response. Each configuration runs in its own subprocess, so no
+     cache survives from one block to the next; inside a block the
+     shared cosmology makes CAMB run once and the 30 points cheap.
 16. example2 (3x2pt): the same three-block sweep as test 15 on the
      3x2pt likelihood, so the TATT terms are also scored inside
      galaxy-galaxy lensing and under the 3x2pt covariance. The
@@ -44,8 +45,8 @@ start_cocoa.sh sourced):
     python -m pytest ./projects/roman_fourier/tests/data_vector/test_fastpt.py
 
 --high=1 repeats every block at the pushed camb/cosmolike settings
-of the low-vs-high accuracy checks; the full comparison is one run
-without the option and one with it.
+of the accuracy checks (test_accuracy.py); the full comparison is one
+run without the option and one with it.
 
 The tests also read the --mask option (see conftest.py):
 --mask=frozen (the default) keeps the roman_example.mask of the
@@ -55,9 +56,11 @@ unchanged:
 
     python -m pytest ./projects/roman_fourier/tests/data_vector/test_fastpt.py --mask=ones
 
-The 3x2pt sweep (test 16) does not run under --mask=ones: with
-every data point kept the shipped covariance is not positive
-definite, and cosmolike aborts the model build (IP::set_inv_cov).
+The 3x2pt sweep (test 16) cannot run under --mask=ones: with every
+data point kept the shipped covariance is not positive definite, and
+cosmolike aborts the model build in the worker subprocess
+(IP::set_inv_cov), which pytest reports as an error of test 16. Tests
+15 and 17 are the meaningful ones under that mask.
 
 The design and the point values are shared with lsst_y1's tests
 15-17; see that project's tests/README.md for the full discussion.
@@ -66,14 +69,15 @@ The design and the point values are shared with lsst_y1's tests
 import os
 
 # OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so
-# this must run before ANY cobaya/cosmolike import in the process.
+# this must run before any cobaya/cosmolike import in the process.
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
 import unittest
 
-# The harness stays in the parent tests/ folder. Add it explicitly so
-# direct execution and worker processes resolve this project's stored inputs.
+# The shim cocoa_test_utils.py lives in the parent folder tests/; putting
+# that folder first on the module search path finds this project's copy
+# (every project names its shim the same) under pytest or direct runs.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
@@ -85,16 +89,33 @@ class TestCfastptVsFastptSweep(unittest.TestCase):
     verifies every frozen file against the SHA-256 manifest. No
     frozen reference chi2 is loaded: these tests compare the two
     implementations against each other, so the frozen state only
-    supplies the configuration and the data files.
+    supplies the configuration and the data files. The x prefix of the
+    method names marks two-digit test numbers (unittest sorts method
+    names alphabetically).
     """
 
     @classmethod
     def setUpClass(cls):
+        """Check the environment and the frozen state once, before the tests.
+
+        Moves to ROOTDIR and verifies every frozen file against the SHA-256
+        manifest.
+
+        Raises:
+          RuntimeError outside an activated Cocoa shell; AssertionError
+          when a frozen file differs from the manifest.
+        """
         u.require_cocoa_environment()
         u.verify_frozen()
 
     def test_x15_cfastpt_vs_fastpt_sweep(self):
-        """Cosmic shear: cfastpt and FASTPT agree at 30 IA points."""
+        """Cosmic shear: cfastpt and FASTPT agree at 30 IA points.
+
+        Raises:
+          AssertionError when the largest delta^T C^-1 delta of the
+          FASTPT(low) vector against the cfastpt vector reaches
+          FASTPT_COMPARISON_TOLERANCE (0.2).
+        """
         # the conftest copies the --high command line option into
         # this variable; .get with the "0" default keeps a run
         # outside pytest on the default settings unless the variable
@@ -122,11 +143,10 @@ class TestCfastptVsFastptSweep(unittest.TestCase):
         """3x2pt: cfastpt and FASTPT agree at the same 30 IA points.
 
         Test 15 on example2: the same three blocks, the same points,
-        the same pass rule, with the TATT terms now entering
-        galaxy-galaxy lensing as well and the difference weighted by
-        the 3x2pt masked inverse covariance. The method name carries
-        the x prefix only so unittest's alphabetical ordering runs it
-        after test 15.
+        the same pass rule, with the TATT terms also entering
+        galaxy-galaxy lensing and the difference weighted by the 3x2pt
+        masked inverse covariance. Fails under --mask=ones (see the
+        module docstring).
         """
         high = os.environ.get("COCOA_FASTPT_HIGH", "0") == "1"
         setting = "high accuracy" if high else "default settings"
@@ -154,9 +174,7 @@ class TestCfastptVsFastptSweep(unittest.TestCase):
         points, the same pass rule. Clustering carries no intrinsic
         alignment, so the TATT tables enter through galaxy-galaxy
         lensing alone and the difference is weighted by the 2x2pt
-        masked inverse covariance. The method name carries the x
-        prefix only so unittest's alphabetical ordering runs it after
-        test 16.
+        masked inverse covariance.
         """
         high = os.environ.get("COCOA_FASTPT_HIGH", "0") == "1"
         setting = "high accuracy" if high else "default settings"

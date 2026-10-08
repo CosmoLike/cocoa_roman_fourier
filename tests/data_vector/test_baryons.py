@@ -1,14 +1,15 @@
 """Baryonic feedback drift tests BD1-BD7: frozen-vector pinning.
 
-Each test evaluates the example1 configuration (NLA) with the bfmt
-theory block computing one feedback method, against that method's
-FROZEN data vector - the default-settings theory prediction written
-at freeze time by generate_frozen_reference.py --baryons, at the
-frozen fiducial point plus the method's cosmology override
-(cocoa_test_utils.BARYON_POINT_OVERRIDES). At freeze time the chi2
-against that vector was zero by construction, so the assertion
+Each test evaluates the example1 configuration (cosmic shear, NLA) with
+the bfmt theory block computing one baryonic-feedback method (the
+suppression of the small-scale matter power by gas physics), against
+that method's frozen data vector: the default-settings theory
+prediction written at freeze time by generate_frozen_reference.py
+--baryons, at the frozen fiducial point plus the method's cosmology
+override (cocoa_test_utils.BARYON_POINT_OVERRIDES). At freeze time the
+chi2 against that vector was zero by construction, so the assertion
 
-    chi2 <= chi2_tolerance
+    chi2 <= CHI2_TOLERANCE (0.2)
 
 pins the whole feedback pipeline: a failure means cosmolike or the
 bfmt theory block changed its prediction since the freeze. This is
@@ -17,7 +18,8 @@ pipeline, and it complements test_accuracy_baryons.py: the accuracy
 checks regenerate their vector on the fly per run, so they measure
 numerical settings and can never see drift; these tests hold the
 frozen vector still, so they measure drift and nothing else. The
-seven tests cover every method the bfmt theory block implements:
+seven tests cover every method the bfmt theory block implements (fb is
+the baryon fraction of a halo as a function of its mass):
 
   BD1. SP(k), power-law fb relation     BD2. SP(k), Akino et al. 2022
   BD3. SP(k), double power-law relation BD4. BCEmu
@@ -33,14 +35,15 @@ active, start_cocoa.sh sourced):
 import os
 
 # OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so
-# this must run before ANY cobaya/cosmolike import in the process.
+# this must run before any cobaya/cosmolike import in the process.
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
 import unittest
 
-# The harness stays in the parent tests/ folder. Add it explicitly so
-# direct execution and worker processes resolve this project's stored inputs.
+# The shim cocoa_test_utils.py lives in the parent folder tests/; putting
+# that folder first on the module search path finds this project's copy
+# (every project names its shim the same) under pytest or direct runs.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
@@ -54,16 +57,33 @@ class TestBaryonDrift(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        """Check the environment and the frozen state once, before the tests.
+
+        Moves to ROOTDIR and verifies every frozen file against the SHA-256
+        manifest.
+
+        Raises:
+          RuntimeError outside an activated Cocoa shell; AssertionError
+          when a frozen file differs from the manifest.
+        """
         u.require_cocoa_environment()
         u.verify_frozen()
 
     def _baryon_drift_check(self, name, baryon, label):
-        """One method's chi2 against its frozen feedback vector.
+        """Check one method's chi2 against its frozen feedback vector.
+
+        The chi2 comes from a worker subprocess (u.baryon_drift_chi2).
 
         Arguments:
           name   = the test label (BD1-BD7) for the report.
           baryon = a label of cocoa_test_utils.BARYON_METHODS.
           label  = one line naming the feedback method.
+
+        Returns:
+          nothing; the report is printed.
+
+        Raises:
+          AssertionError when the chi2 exceeds CHI2_TOLERANCE.
         """
         chi2 = u.baryon_drift_chi2(baryon)
         print(f"""
@@ -79,35 +99,35 @@ DRIFT: {name}: {label}
             "changed its prediction since the freeze")
 
     def test_bd1_spk_power_law(self):
-        """BD1: SP(k) with the power-law fb relation."""
+        """BD1: SP(k) with the power-law fb relation matches its frozen vector."""
         self._baryon_drift_check("BD1", "spk power law",
                                  "SP(k), power-law fb relation")
 
     def test_bd2_spk_akino(self):
-        """BD2: SP(k) with the Akino et al. 2022 fb relation."""
+        """BD2: SP(k) with the Akino et al. 2022 fb relation matches its frozen vector."""
         self._baryon_drift_check("BD2", "spk akino",
                                  "SP(k), Akino et al. 2022")
 
     def test_bd3_spk_double_power_law(self):
-        """BD3: SP(k) with the double power-law fb relation."""
+        """BD3: SP(k) with the double power-law fb relation matches its frozen vector."""
         self._baryon_drift_check("BD3", "spk double power law",
                                  "SP(k), double power-law fb relation")
 
     def test_bd4_bcemu(self):
-        """BD4: BCEmu."""
+        """BD4: BCEmu matches its frozen vector."""
         self._baryon_drift_check("BD4", "bcemu", "BCEmu")
 
     def test_bd5_flamingo(self):
-        """BD5: FlamingoBaryonResponseEmulator."""
+        """BD5: FlamingoBaryonResponseEmulator matches its frozen vector."""
         self._baryon_drift_check("BD5", "flamingo",
                                  "FlamingoBaryonResponseEmulator")
 
     def test_bd6_baccoemu(self):
-        """BD6: BACCOemu."""
+        """BD6: BACCOemu matches its frozen vector."""
         self._baryon_drift_check("BD6", "baccoemu", "BACCOemu")
 
     def test_bd7_bcemu2025(self):
-        """BD7: BCemu2025."""
+        """BD7: BCemu2025 matches its frozen vector."""
         self._baryon_drift_check("BD7", "bcemu2025", "BCemu2025")
 
 

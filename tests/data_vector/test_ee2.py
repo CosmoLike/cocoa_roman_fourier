@@ -1,16 +1,18 @@
 """Unit test 18: the race check with EuclidEmulator2 on.
 
-Cocoa pins a modified EuclidEmulator2 (the EE2_GIT_COMMIT of
+EuclidEmulator2 (EE2) predicts the nonlinear boost P_nl/P_lin of the
+matter power spectrum, trained on N-body simulations. Cocoa pins a
+modified EuclidEmulator2 (the EE2_GIT_COMMIT of
 set_installation_options.sh): OpenMP threading, a 1,010-redshift
 capacity, the get_boost2 API with a pre-built emulator, memory-leak
 fixes, and a bilinear interpolation with a border fix (the
 repository's own README, external_modules/code/euclidemu2/README.md,
 documents them). This test runs the race check with that build
-supplying the nonlinear P(k) (non_linear_emul: 1): the fiducial
-evaluated fresh and again as the 10th of 10 cosmologies on one model
-instance. EE2's compute is OpenMP-threaded, so leaked state or a
-thread race inside it shifts the second fiducial value; the two must
-agree within RACE_TOLERANCE (1e-4).
+supplying the nonlinear P(k) (non_linear_emul: 1) on the cosmic-shear
+configuration (example1, NLA): the fiducial evaluated fresh and again as
+the 10th of 10 cosmologies on one model instance. EE2's compute is
+OpenMP-threaded, so leaked state or a thread race inside it shifts the
+second fiducial value; the two must agree within RACE_TOLERANCE (1e-4).
 
 The gate that compiles the pre-modification EE2 (commit ff59f66)
 side by side and scores the installed build against it runs in the
@@ -27,14 +29,15 @@ start_cocoa.sh sourced):
 import os
 
 # OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so
-# this must run before ANY cobaya/cosmolike import in the process.
+# this must run before any cobaya/cosmolike import in the process.
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
 import unittest
 
-# The harness stays in the parent tests/ folder. Add it explicitly so
-# direct execution and worker processes resolve this project's stored inputs.
+# The shim cocoa_test_utils.py lives in the parent folder tests/; putting
+# that folder first on the module search path finds this project's copy
+# (every project names its shim the same) under pytest or direct runs.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
@@ -51,6 +54,15 @@ class TestEE2Race(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        """Check the environment and the frozen state once, before the tests.
+
+        Moves to ROOTDIR and verifies every frozen file against the SHA-256
+        manifest.
+
+        Raises:
+          RuntimeError outside an activated Cocoa shell; AssertionError
+          when a frozen file differs from the manifest.
+        """
         u.require_cocoa_environment()
         u.verify_frozen()
 
@@ -59,7 +71,13 @@ class TestEE2Race(unittest.TestCase):
 
         EE2's OpenMP-threaded compute runs inside every evaluation
         of the row, so a thread race or leaked state in it moves
-        the second fiducial value.
+        the second fiducial value. The x prefix marks a two-digit test
+        number (unittest sorts method names alphabetically).
+
+        Raises:
+          RuntimeError when OMP_NUM_THREADS is not 4 (assert_omp_threads);
+          AssertionError when the two chi2 values differ by
+          RACE_TOLERANCE or more.
         """
         u.assert_omp_threads()
         fresh, tenth = u.ten_in_a_row_chi2("example1", tatt=False,

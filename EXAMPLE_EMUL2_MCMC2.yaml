@@ -1,29 +1,24 @@
-timing: True
-debug: False
-stop_at_error: False
-
+timing: true
+debug: false
+stop_at_error: false
 likelihood:
-  #roman_fourier.combo_2x2pt:
-  #roman_fourier.combo_xi_ggl:
-  #roman_fourier.combo_xi_gg:
   roman_fourier.combo_3x2pt:
     use_emulator: 2
     path: ./external_modules/data/roman_fourier
-    data_file: roman_example.dataset # this assumes lens = source
-    print_datavector: False
-    print_datavector_file: "./projects/roman_real/chains/theory.modelvector"
+    data_file: roman_example.dataset
+    print_datavector: false
+    print_datavector_file: ./projects/roman_real/chains/theory.modelvector
     accuracyboost: 2.0
     integration_accuracy: 0
     kmax_boltzmann: 10.0
-    # 1 EE2, 2 Halofit
     non_linear_emul: 2
-    IA_model: 0 # NLA (0) or TATT (1)
-    IA_code: 0  # CFASTPT (0) or FASTPT (1) (only works if not NLA)
+    IA_model: 0
+    IA_code: 0
     IA_redshift_evolution: 3
     debug: false
     create_baryon_pca: false
-    baryon_pca_select_sims: "antilles-2-99/antilles-101-378/antilles-380-400"
-    filename_baryon_pca: "./projects/lsst_y1/chains/pca.txt"
+    baryon_pca_select_sims: antilles-2-99/antilles-101-378/antilles-380-400
+    filename_baryon_pca: ./projects/lsst_y1/chains/pca.txt
 params:
   As_1e9:
     prior:
@@ -88,7 +83,7 @@ params:
     latex: w_{0,\mathrm{DE}}
   w0pwa:
     prior:
-      min: -5 
+      min: -5
       max: -0.01
     ref:
       dist: norm
@@ -111,13 +106,6 @@ params:
   omegach2:
     value: 'lambda omegam, omegab, mnu, H0: (omegam-omegab)*(H0/100)**2-(mnu*(3.046/3)**0.75)/94.0708'
     latex: \Omega_\mathrm{c} h^2
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
-  # Nuisance parameters below (it overwrites the default settings)
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
   roman_DZ_S1:
     prior:
       dist: norm
@@ -206,8 +194,6 @@ params:
       scale: 0.002
     proposal: 0.002
     latex: \Delta z_\mathrm{s,roman}^8
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
   roman_M1:
     prior:
       dist: norm
@@ -296,13 +282,10 @@ params:
       scale: 0.005
     proposal: 0.005
     latex: m_\mathrm{roman}^8
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
-  # Intrinsic alignment
   roman_A1_1:
     prior:
       min: -5
-      max:  5
+      max: 5
     ref:
       dist: norm
       loc: 0.7
@@ -312,7 +295,7 @@ params:
   roman_A1_2:
     prior:
       min: -5
-      max:  5
+      max: 5
     ref:
       dist: norm
       loc: -1.7
@@ -322,7 +305,7 @@ params:
   roman_A2_1:
     prior:
       min: -5
-      max:  5
+      max: 5
     ref:
       dist: norm
       loc: -1.36
@@ -332,7 +315,7 @@ params:
   roman_A2_2:
     prior:
       min: -5
-      max:  5
+      max: 5
     ref:
       dist: norm
       loc: -2.5
@@ -349,9 +332,6 @@ params:
       scale: 0.15
     proposal: 0.1
     latex: A_\mathrm{BTA-IA,Roman}^1
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
-  # implementing lens = source
   roman_DZ_L1:
     value: 'lambda roman_DZ_S1: roman_DZ_S1'
     latex: \Delta z_\mathrm{l,Roman}^1
@@ -375,93 +355,71 @@ params:
     latex: \Delta z_\mathrm{l,Roman}^1
   roman_DZ_L8:
     value: 'lambda roman_DZ_S8: roman_DZ_S8'
-    latex: \Delta z_\mathrm{l,Roman}^1      
+    latex: \Delta z_\mathrm{l,Roman}^1
 theory:
   emulrdrag:
     path: ./cobaya/cobaya/theories/
-    provides: ['rdrag']
+    provides:
+    - rdrag
     extra_args:
-      file: ['external_modules/data/emultrf/BAO_SN_RES/emul_lcdm_rdrag_GP.joblib'] 
-      extra: ['external_modules/data/emultrf/BAO_SN_RES/extra_lcdm_rdrag.npy'] 
-      ord: [['omegabh2','omegach2']]
+      file:
+      - external_modules/data/emultrf/BAO_SN_RES/emul_lcdm_rdrag_GP.joblib
+      extra:
+      - external_modules/data/emultrf/BAO_SN_RES/extra_lcdm_rdrag.npy
+      ord:
+      - - omegabh2
+        - omegach2
   emulbaosn:
     path: ./cobaya/cobaya/theories/
-    stop_at_error: True
-    provides: ['comoving_radial_distance', 'angular_diameter_distance', 'Hubble']
+    stop_at_error: true
+    provides:
+    - comoving_radial_distance
+    - angular_diameter_distance
+    - Hubble
     extra_args:
-      device: "cpu"
-      file:  [None, 'external_modules/data/emultrf/BAO_SN_RES/w0wa/emul_w0wa_H.pt']
-      extra: [None, 'external_modules/data/emultrf/BAO_SN_RES/w0wa/extra_w0wa_H.npy']    
-      ord: [None, ['omegam','H0','w','wa']]
-      extrapar: [{'MLA': 'INT', 'ZMIN' : 0.0001, 'ZMAX' : 3, 'NZ' : 600},
-                 {'MLA': 'ResMLP', 'offset' : 0.0, 'INTDIM' : 4, 'NLAYER' : 6,
-                  'TMAT': 'external_modules/data/emultrf/BAO_SN_RES/w0wa/PCA_w0wa_H.npy',
-                  'ZLIN': 'external_modules/data/emultrf/BAO_SN_RES/w0wa/z_lin_w0wa.npy'}]
+      device: cpu
+      file:
+      - None
+      - external_modules/data/emultrf/BAO_SN_RES/w0wa/emul_w0wa_H.pt
+      extra:
+      - None
+      - external_modules/data/emultrf/BAO_SN_RES/w0wa/extra_w0wa_H.npy
+      ord:
+      - None
+      - - omegam
+        - H0
+        - w
+        - wa
+      extrapar:
+      - MLA: INT
+        ZMIN: 0.0001
+        ZMAX: 3
+        NZ: 600
+      - MLA: ResMLP
+        offset: 0.0
+        INTDIM: 4
+        NLAYER: 6
+        TMAT: external_modules/data/emultrf/BAO_SN_RES/w0wa/PCA_w0wa_H.npy
+        ZLIN: external_modules/data/emultrf/BAO_SN_RES/w0wa/z_lin_w0wa.npy
   emulmps:
     path: ./cobaya/cobaya/theories/
-    stop_at_error: True
+    stop_at_error: true
     extra_args:
-      model_file:    "external_modules/data/emultrf/emulmps/npce_emul/emulator_npce.keras"
-      metadata_file: "external_modules/data/emultrf/emulmps/npce_emul/metadata.joblib"
-      nl_model_file:    "external_modules/data/emultrf/emulmps/w0wa_halofit/emulator_halofit.keras"
-      nl_metadata_file: "external_modules/data/emultrf/emulmps/w0wa_halofit/metadata.joblib"
-      use_syren: False
-      param_order: ["As_1e9", "ns", "H0", "omegab", "omegam", 'w', 'wa']
-#  NOTE: under TATT with IA_code: 1 this project's precision needs
-#  accuracyboost: 2 (the doubled output-table density). The fastpt
-#  boosts are rebased so 1.0 is the converged two-grid
-#  configuration: accuracyboost multiplies the density of the output
-#  table cosmolike interpolates (the accuracy driver) and
-#  internal_accuracyboost the FFTLog grid (see tests/README.md,
-#  test 15).
-#  fastpt:
-#    path: ./external_modules/code/FAST-PT
-#    extra_args:
-#      accuracyboost: 2.0
-#      internal_accuracyboost: 1.0
-#      kmax_boltzmann: 7.5
-#      extrap_kmax: 250.0
+      model_file: external_modules/data/emultrf/emulmps/npce_emul/emulator_npce.keras
+      metadata_file: external_modules/data/emultrf/emulmps/npce_emul/metadata.joblib
+      nl_model_file: external_modules/data/emultrf/emulmps/w0wa_halofit/emulator_halofit.keras
+      nl_metadata_file: external_modules/data/emultrf/emulmps/w0wa_halofit/metadata.joblib
+      use_syren: false
+      param_order:
+      - As_1e9
+      - ns
+      - H0
+      - omegab
+      - omegam
+      - w
+      - wa
 sampler:
-  evaluate:
-    N: 1
-    override:
-      As_1e9: 2.1
-      ns: 0.96605
-      H0: 67.32
-      omegab: 0.04
-      omegam: 0.3
-      w0pwa: -1.0
-      w: -1.0
-      roman_DZ_S1: 0.0
-      roman_DZ_S2: 0.0
-      roman_DZ_S3: 0.0
-      roman_DZ_S4: 0.0
-      roman_DZ_S5: 0.0
-      roman_DZ_S6: 0.0
-      roman_DZ_S7: 0.0
-      roman_DZ_S8: 0.0
-      roman_M1: 0.0
-      roman_M2: 0.0
-      roman_M3: 0.0
-      roman_M4: 0.0
-      roman_M5: 0.0
-      roman_M6: 0.0
-      roman_M7: 0.0
-      roman_M8: 0.0
-      roman_A1_1: 0.6
-      roman_A1_2: -1.5
-      roman_B1_1: 1.4
-      roman_B1_2: 1.5
-      roman_B1_3: 1.6
-      roman_B1_4: 1.7
-      roman_B1_5: 1.8
-      roman_B1_6: 1.9
-      roman_B1_7: 2.0
-      roman_B1_8: 2.1
-      # TATT PARAMETERS
-      roman_A2_1: 0.0
-      roman_BTA_1: 0.0
-      #roman_A2_1: 0.05
-      #roman_BTA_1: 0.05
-      roman_A2_2: -1.51541
-output: ./projects/roman_real/chains/EXAMPLE_EMUL2_EVALUATE2
+  mcmc:
+    Rminus1_stop: 0.01
+    Rminus1_cl_stop: 0.2
+output: ./projects/roman_fourier/chains/EXAMPLE_EMUL2_MCMC2

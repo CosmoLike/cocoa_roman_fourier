@@ -1,24 +1,29 @@
-"""Shared harness for the roman_fourier unit tests: the project's data
-bound to the shared Cocoa test machinery.
+"""Project data of the roman_fourier unit tests, bound to the shared harness.
 
-The machinery itself (frozen-state verification, the chi2 pipeline,
-worker-subprocess isolation, the race and baryon checks, the
-CFASTPT-vs-FASTPT comparison, and the terminal reports) lives in
-external_modules/code/cosmolike_core/cocoa_testing.py. This file
-carries what is roman_fourier's alone - the examples table (the
-Fourier-space cosmic shear and 3x2pt/2x2pt configurations), the
-TATT point, the accuracy knobs, the dataset names, and the
-CFASTPT-vs-FASTPT comparison contract -
-and binds it to ONE cocoa_testing.CocoaTestHarness instance whose
-methods are re-exported under the historical names, so the test
-modules and generate_frozen_reference.py import everything from this
-module exactly as before.
+The test machinery is the same in every Cocoa project and lives once in
+external_modules/code/cosmolike_core/cocoa_testing.py: frozen-state
+verification, the chi2 pipeline, worker-subprocess isolation (each test
+quantity is computed in a fresh Python process), the race and baryon
+checks, the CFASTPT-vs-FASTPT and Halofit-vs-EE2 comparisons, and the
+terminal reports. This module is the project's "shim": it holds what
+belongs to roman_fourier alone (the examples table of the Fourier-space
+cosmic-shear, 3x2pt and 2x2pt configurations, the TATT point, the
+accuracy knobs, the dataset names and the CFASTPT-vs-FASTPT comparison
+settings), builds one cocoa_testing.CocoaTestHarness from them, and
+re-exports the harness functions as module-level names.
 
-The frozen-state doctrine is unchanged: everything a test evaluates
-lives under tests/frozen/, pinned byte for byte by
-tests/manifest_sha256.json and verified before any model is built;
-refreshing the frozen state stays a deliberate maintainer action
-(generate_frozen_reference.py --overwrite).
+Re-exporting means an assignment such as `verify_frozen = _H.verify_frozen`:
+a test module that runs `import cocoa_test_utils as u` can then call
+u.verify_frozen(). _H.verify_frozen is a bound method, a function that
+remembers the instance _H, so the call needs no harness argument. The
+test modules in data_vector/, conftest.py, generate_frozen_reference.py,
+generate_photoz_convention_figure.py and the worker subprocesses import
+only this module.
+
+Everything a test evaluates lives under tests/frozen/, pinned byte for
+byte by the SHA-256 hashes of tests/manifest_sha256.json and verified
+before any model is built. Refreshing it is a deliberate maintainer
+action (generate_frozen_reference.py --overwrite).
 """
 
 import os
@@ -36,9 +41,10 @@ REFERENCE_FILE = os.path.join(FROZEN_DIR, "reference_chi2.json")
 
 # ---- the shared machinery ---------------------------------------------------
 
-# The import is path-based (tests/ is three levels below Cocoa/, which
-# holds external_modules/code/cosmolike_core) so it works before
-# start_cocoa.sh's python-path setup runs.
+# The import is path-based (tests/ is three folders below Cocoa/, which
+# holds external_modules/code/cosmolike_core), so it works before
+# start_cocoa.sh sets up the Python path; the check avoids inserting the
+# folder twice when the module is imported again in the same process.
 _CORE_DIR = os.path.abspath(os.path.join(
     TESTS_DIR, "..", "..", "..", "external_modules", "code",
     "cosmolike_core"))
@@ -51,33 +57,41 @@ import cocoa_testing as _cct
 # ---- TATT -------------------------------------------------------------------
 
 # The TATT (Tidal Alignment and Tidal Torquing, an intrinsic-alignment
-# model with tidal second-order terms) tests replace these values in
-# the frozen point. In the NLA reference point A2 and BTA are zero, so
-# the nonzero values here make the TATT reference genuinely exercise
-# the second-order terms.
+# model with tidal second-order terms) tests replace these values in the
+# frozen point: roman_A2_1 is the amplitude of the tidal-torquing term,
+# roman_A2_2 its redshift exponent, and roman_BTA_1 the density-weighting
+# coefficient b_TA. In the NLA reference point A2_1 and BTA_1 are zero, so
+# the nonzero values here make the TATT reference exercise the
+# second-order terms.
 TATT_POINT = {
     "roman_A2_1": 0.05,
     "roman_BTA_1": 0.05,
     "roman_A2_2": -1.51541,
 }
 
-# The TATT variants evaluate against a data vector GENERATED WITH
-# TATT at the fiducial point. Reason: against an NLA-based vector the
-# TATT chi2 sits away from its minimum, where it responds linearly
-# (not quadratically) to tiny numerical changes: harmless
-# rounding-level shifts would then eat much of the 0.2 chi2 band the
-# reference tests allow. Both examples share one data set, so a single full-length
-# vector generated from the example2 TATT model serves every
-# configuration (the other probes' masks select their sections).
+# The TATT variants evaluate against a data vector generated with TATT at
+# the fiducial point. Against an NLA-based vector the TATT chi2 would sit
+# away from its minimum, where it responds linearly (not quadratically)
+# to tiny numerical changes, and harmless rounding-level shifts would eat
+# much of the 0.2 chi2 band of the reference tests. Both examples share
+# one data set, so one full-length vector generated by the example2 TATT
+# model (3x2pt) serves every configuration: cosmolike masks the entries
+# of the probes a likelihood does not use. Maps descriptor -> generator.
 TATT_GENERATORS = {
     "tatt_roman_fourier.dataset": "example2",
 }
 
 # ---- configurations ---------------------------------------------------------
 
-# The two frozen configurations. "likelihood" is the cobaya component
-# name, needed to reach that block inside the loaded info dictionary;
-# "provenance" names the human-readable snapshot (never loaded).
+# The three frozen configurations, by name. Keys of each entry:
+#   frozen_module  = the generated configuration module under frozen/;
+#   provenance     = the example yaml it was frozen from (a human-readable
+#                    snapshot under frozen/, never loaded by a test);
+#   likelihood     = the Cobaya component name, needed to reach that block
+#                    inside the loaded configuration dictionary;
+#   tatt_dataset   = the TATT-generated dataset of the TATT variants;
+#   source_likelihood = for example2_2x2pt, the block of the example yaml
+#                    that is renamed to combo_2x2pt at freeze time.
 EXAMPLES = {
     "example1": {
         "frozen_module": "frozen_config_example1.py",
@@ -107,10 +121,10 @@ EXAMPLES = {
 # lmax likelihood option (the ell range lives in the dataset), so
 # unlike the real-space projects the block carries no lmax key.
 HIGH_ACCURACY_LIKELIHOOD = {
-    # boost 3 is the highest value that stays healthy in every project
-    # scanned (desy1xplanck breaks down above it), so the all-knobs
-    # check compares the default against 3; the one-at-a-time scan
-    # keeps 5 as a deliberate stress knob
+    # boost 3 is the highest value at which every scanned project still
+    # evaluates correctly (desy1xplanck breaks down above it), so the
+    # all-knobs check compares the default against 3; the one-at-a-time
+    # scan keeps 5 as a deliberate stress test
     "accuracyboost": 3.0,       # default 2.0
     "internal_accuracyboost": 2.0, # default 1.0 (denser convolution grid)
     "integration_accuracy": 10,  # default 0
@@ -121,10 +135,10 @@ HIGH_ACCURACY_LIKELIHOOD = {
 # likelihood overrides, camb extra_args overrides), evaluated alone on
 # the example2 NLA configuration before the all-knobs checks, so a
 # large all-knobs delta can be attributed to the knob causing it. The
-# accuracyboost=5 entry is a stress knob: it exceeds what measuring
-# the default numerics needs, and it is kept because it exposed an
-# interface breakdown (a suspected fixed-size table) in desy1xplanck.
-# Investigation order when several knobs move the chi2: raise the
+# accuracyboost=5 entry is a stress test, beyond what measuring the
+# default numerics needs: an interface breakdown shows up there as an
+# explosive delta (in desy1xplanck it exposed one, a suspected fixed-size
+# table). Investigation order when several knobs move the chi2: raise the
 # cosmolike accuracyboost first (cheap), then camb k_per_logint, and
 # only then camb AccuracyBoost (expensive at run time): an apparent
 # CAMB sensitivity can masquerade as unresolved cosmolike-side
@@ -142,16 +156,16 @@ ACCURACY_KNOBS = [
     ("camb k_per_logint -> 50", {}, {"k_per_logint": 50}),
 ]
 
-# Pass limit on the covariance-weighted difference of the two
-# implementations at FASTPT_LOW_SETTINGS: at each point both blocks
-# print their theory data vector, and the tested number is
-# delta^T C^-1 delta - the chi2 OF the implementation difference,
-# zero when the vectors agree. 0.2 is the house comfort band of the
-# other checks, in reach since the two-grid fastpt block made the
-# output-table density cheap: this project's precision crosses the
-# band at accuracyboost: 2, the doubled output density (this
-# project's own sweep: max delta chi2 0.112045 there; the historical
-# single-grid default reached 87184 across the prior).
+# Pass limit of the CFASTPT-vs-FASTPT comparison at FASTPT_LOW_SETTINGS.
+# At each point both implementations print their theory data vector, and
+# the tested number is delta^T C^-1 delta, with delta the difference of
+# the two vectors and C^-1 the masked inverse covariance: the chi2 of the
+# implementation difference, zero when the vectors agree. 0.2 is the chi2
+# band of the other reference checks (CHI2_TOLERANCE). With the two-grid
+# fastpt theory block this project falls inside it at accuracyboost: 2,
+# the doubled output-table density (max delta chi2 = 0.112 over the 30
+# points), while a single shared grid of 1,100 points reaches 87184
+# across the prior.
 FASTPT_COMPARISON_TOLERANCE = 0.2
 
 # The python FAST-PT side has numerical settings of its own, read by
@@ -166,9 +180,11 @@ FASTPT_COMPARISON_TOLERANCE = 0.2
 # converged configuration; low here carries accuracyboost: 2, the
 # doubled output density this project's precision needs (the value
 # its example yamls recommend), hard-coded so the test keeps
-# evaluating this exact configuration even if the yamls later move.
+# evaluating this exact configuration even if the yamls change.
 # High doubles both boosts again, so the advisory column shows the
-# residual grid response of low.
+# residual grid response of low. kmax_boltzmann and extrap_kmax (both
+# in 1/Mpc) keep the block's defaults: CAMB computes the P_lin the block
+# reads up to 7.5/Mpc, and its interpolator extrapolates to 250/Mpc.
 FASTPT_LOW_SETTINGS = {
     "accuracyboost": 2.0,
     "internal_accuracyboost": 1.0,
@@ -205,8 +221,9 @@ NONLINEAR_COMPARISON_POINTS = _cct.NONLINEAR_COMPARISON_POINTS
 
 # ---- the harness -----------------------------------------------------------
 
-# ONE instance binds the shared machinery to this project's data;
-# everything below re-exports its surface under the historical names.
+# One CocoaTestHarness instance, _H, binds the shared machinery to this
+# project's data; the assignments below re-export its functions under the
+# names the test modules, conftest.py and the worker subprocesses use.
 _H = _cct.CocoaTestHarness(
     worker_file=__file__,
     interface_module="cosmolike_roman_fourier_interface",
@@ -225,6 +242,8 @@ _H = _cct.CocoaTestHarness(
 )
 
 # ---- module functions re-exported from the core (no project state) ----------
+# Each line binds a name of this module to the core's function object; no
+# function runs here.
 require_cocoa_environment = _cct.require_cocoa_environment
 assert_omp_threads = _cct.assert_omp_threads
 sha256_of = _cct.sha256_of
@@ -242,6 +261,11 @@ report_fastpt_comparison = _cct.report_fastpt_comparison
 report_nonlinear_comparison = _cct.report_nonlinear_comparison
 
 # ---- bound methods of the harness (the machinery, project-bound) ------------
+# Some names are looked up by their spelling from another process or file,
+# so a rename breaks the tests only when that path runs (AttributeError):
+# _worker (called inside every worker subprocess), _fastpt_comparison_block
+# and _nonlinear_comparison_block (called by the child programs of the
+# comparison sweeps), and _cct and _H (read by conftest.py).
 compute_manifest = _H.compute_manifest
 verify_frozen = _H.verify_frozen
 load_reference = _H.load_reference
@@ -263,7 +287,7 @@ _fastpt_comparison_info = _H._fastpt_comparison_info
 _fastpt_comparison_block = _H._fastpt_comparison_block
 _run_fastpt_comparison_worker = _H._run_fastpt_comparison_worker
 cfastpt_vs_fastpt_chi2s = _H.cfastpt_vs_fastpt_chi2s
-# the nonlinear-comparison worker child re-execs
-# u._nonlinear_comparison_block by name, so the re-export is load-bearing
+# the child program of the Halofit-vs-EE2 sweep calls
+# u._nonlinear_comparison_block by name, so this re-export is required
 _nonlinear_comparison_block = _H._nonlinear_comparison_block
 halofit_vs_ee2_dchi2s = _H.halofit_vs_ee2_dchi2s

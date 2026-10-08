@@ -1,25 +1,31 @@
 """Baryonic feedback accuracy checks BF1-BF7: default vs high accuracy.
 
-Each check evaluates the example1 configuration (NLA) with the bfmt
-theory block switched on for one of its feedback methods, using the
-mechanism of the N-random-models check: the default-settings model
-writes its own theory vector during evaluation, that vector becomes
-the data of a temporary dataset (so the default chi2 against it is
-zero by construction, and nothing is stored in frozen/), and the
-pushed-settings model evaluates at the same point against it. Its
-chi2 IS the reported quantity,
+Baryonic feedback (gas heated and expelled by supernovae and active
+galactic nuclei) suppresses the matter power spectrum on small scales.
+The bfmt theory block computes that suppression with one of several
+methods, and the likelihood multiplies the nonlinear power spectrum by
+it (external_baryon_suppression).
+
+Each check evaluates the example1 configuration (cosmic shear, NLA) with
+the bfmt theory block switched on for one feedback method, in three
+steps: the default-settings model writes its own theory vector during
+evaluation; that vector becomes the data of a temporary dataset (so the
+default chi2 against it is zero by construction, and nothing is stored
+in frozen/); the pushed-settings model evaluates at the same point
+against it. Its chi2 is then the reported quantity,
 
     delta chi2 = chi2(high accuracy) - chi2(default)
 
 a pure numerics (curvature) response at the minimum. The delta is
 advisory like test_accuracy.py: the question answered is whether the
 numerical error of the default settings stays harmless when the
-nonlinear power spectrum carries a baryonic suppression. BF0
-additionally runs the one-knob-at-a-time scan with the Akino SP(k)
-method on, so a large delta names the knob causing it.
+nonlinear power spectrum carries a baryonic suppression. BF0 also runs
+the one-knob-at-a-time scan with the Akino SP(k) method on, so a large
+delta names the knob causing it.
 
-The seven checks cover every method the bfmt theory block
-implements:
+The seven checks cover every method the bfmt theory block implements
+(fb is the baryon fraction of a halo as a function of its mass, the
+input of the SP(k) method):
 
   BF1. SP(k), power-law fb relation      BF2. SP(k), Akino et al. 2022
   BF3. SP(k), double power-law relation  BF4. BCEmu
@@ -40,10 +46,10 @@ fraction inside SP(k)'s calibrated band over the full redshift grid
 live in cocoa_test_utils.BARYON_METHODS and
 BARYON_POINT_OVERRIDES.
 
-This file adds to test_accuracy.py and does not replace or modify
-it. Two evaluations per check, one of them at high accuracy: expect
-minutes per check. To run only this file (from the Cocoa/ folder,
-cocoa environment active, start_cocoa.sh sourced):
+These checks complement test_accuracy.py. Two evaluations per check, one
+of them at high accuracy: expect minutes per check. To run only this
+file (from the Cocoa/ folder, cocoa environment active, start_cocoa.sh
+sourced):
 
     python -m pytest ./projects/roman_fourier/tests/data_vector/test_accuracy_baryons.py
 """
@@ -51,14 +57,15 @@ cocoa environment active, start_cocoa.sh sourced):
 import os
 
 # OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so
-# this must run before ANY cobaya/cosmolike import in the process.
+# this must run before any cobaya/cosmolike import in the process.
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
 import unittest
 
-# The harness stays in the parent tests/ folder. Add it explicitly so
-# direct execution and worker processes resolve this project's stored inputs.
+# The shim cocoa_test_utils.py lives in the parent folder tests/; putting
+# that folder first on the module search path finds this project's copy
+# (every project names its shim the same) under pytest or direct runs.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
@@ -68,24 +75,43 @@ class TestBaryonAccuracyAdvisory(unittest.TestCase):
 
     setUpClass runs once: it moves to ROOTDIR and verifies every
     frozen file against the SHA-256 manifest before any physics runs.
+    No frozen reference chi2 is loaded: each check builds its own
+    reference vector.
     """
 
     @classmethod
     def setUpClass(cls):
+        """Check the environment and the frozen state once, before the tests.
+
+        Moves to ROOTDIR and verifies every frozen file against the SHA-256
+        manifest.
+
+        Raises:
+          RuntimeError outside an activated Cocoa shell; AssertionError
+          when a frozen file differs from the manifest.
+        """
         u.require_cocoa_environment()
         u.verify_frozen()
 
     def _baryon_accuracy_check(self, name, baryon, label):
-        """Default vs high accuracy with one feedback method on.
+        """Compare default and high accuracy with one feedback method on.
 
         Arguments:
           name   = the advisory label (BF1-BF7) for the report.
           baryon = a label of cocoa_test_utils.BARYON_METHODS.
           label  = one line naming the feedback method.
+
+        Returns:
+          nothing; the delta is printed.
+
+        Raises:
+          AssertionError when the delta is not a finite number, the only
+          assertion of these advisory checks.
         """
         # the default chi2 is zero by construction (the default
         # model produced the very vector it is compared with), so the
-        # pushed evaluation's chi2 IS the delta; only that is printed
+        # pushed evaluation's chi2 is the delta; only that is printed.
+        # delta == delta is False only for NaN, which differs from itself.
         delta = u.baryon_accuracy_delta(baryon)
         self.assertTrue(
             delta == delta and abs(delta) != float("inf"),
@@ -99,7 +125,7 @@ ACCURACY: {name}: {label}
     def test_bf0_one_knob_at_a_time(self):
         """BF0: each accuracy knob alone, Akino SP(k) feedback on.
 
-        Advisory: the same K-scan as test_accuracy.py, with the bfmt
+        Advisory: the same knob scan as test_accuracy.py, with the bfmt
         block computing the Akino SP(k) suppression and the chi2
         measured against that method's own generated vector. A knob
         whose delta rivals the all-knobs delta of BF2 is the driver
@@ -107,7 +133,7 @@ ACCURACY: {name}: {label}
         """
         print("", flush=True)
         for label, _, _ in u.ACCURACY_KNOBS:
-            # each knob's chi2 against the on-the-fly vector IS its
+            # each knob's chi2 against the on-the-fly vector is its
             # delta (the default against that vector is zero)
             delta = u.baryon_accuracy_delta("spk akino", knob=label)
             print(f"  KNOB {label:30s} delta chi2 = {delta:+12.6f}",

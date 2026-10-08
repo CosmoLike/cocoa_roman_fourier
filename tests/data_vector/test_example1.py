@@ -1,16 +1,20 @@
 """Unit tests 1-4: the cosmic-shear likelihood on the frozen test data.
 
 Cosmic shear is the correlation of galaxy shape distortions produced by
-weak gravitational lensing; here it is the roman_fourier.cosmic_shear
-likelihood, evaluated on the frozen copy of example1's configuration
-(see cocoa_test_utils for what "frozen" means and why). The four tests:
+weak gravitational lensing; in this Fourier-space project it is measured
+by the angular power spectra C_ell^EE of the shear E modes, in 15
+multipole bands per source-bin pair. The tests evaluate the
+roman_fourier.cosmic_shear likelihood on the frozen copy of example1's
+configuration (see cocoa_test_utils for what "frozen" means and why).
+Every chi2 comes from a fresh worker subprocess. The four tests:
 
   1. chi2 at the frozen fiducial point, within CHI2_TOLERANCE (0.2) of
      the frozen reference value.
   2. race check: on one model, the fiducial evaluated fresh and again
      as the 10th of 10 cosmologies in a row must agree to
      RACE_TOLERANCE (1e-4). A disagreement means state leaked between
-     evaluations or OpenMP threads raced.
+     evaluations or OpenMP threads raced (a race: threads that read and
+     write shared memory in an unpredictable order).
   3. the same comparison as test 1 with the TATT intrinsic-alignment
      model (IA_model: 1) and roman_A2_1 = 0.05, roman_BTA_1 = 0.05,
      roman_A2_2 = -1.51541 replacing the NLA point's zeros.
@@ -25,14 +29,15 @@ start_cocoa.sh sourced):
 import os
 
 # OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so
-# this must run before ANY cobaya/cosmolike import in the process.
+# this must run before any cobaya/cosmolike import in the process.
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
 import unittest
 
-# The harness stays in the parent tests/ folder. Add it explicitly so
-# direct execution and worker processes resolve this project's stored inputs.
+# The shim cocoa_test_utils.py lives in the parent folder tests/; putting
+# that folder first on the module search path finds this project's copy
+# (every project names its shim the same) under pytest or direct runs.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
@@ -52,6 +57,16 @@ class TestExample1CosmicShear(unittest.TestCase):
     # this once, before the first test of the class
     @classmethod
     def setUpClass(cls):
+        """Check the environment and the frozen state once, before the tests.
+
+        Moves to ROOTDIR, verifies every frozen file against the SHA-256
+        manifest and stores the frozen reference chi2 values in
+        cls.reference (cls is the class itself, shared by its tests).
+
+        Raises:
+          RuntimeError outside an activated Cocoa shell; AssertionError
+          when a frozen file differs from the manifest.
+        """
         u.require_cocoa_environment()
         u.verify_frozen()
         cls.reference = u.load_reference()

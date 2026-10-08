@@ -1,11 +1,12 @@
 """Unit tests 11-14: the 2x2pt likelihood on the frozen test data.
 
-2x2pt combines two of example2's three two-point correlations: galaxy
-clustering and galaxy-galaxy lensing (cosmic shear is dropped). The
-frozen configuration is example2's with the likelihood renamed to
-roman_fourier.combo_2x2pt: same options, same data files, same evaluation
-point; only the probe selection inside cosmolike changes. The four
-tests mirror tests 5-8 (see cocoa_test_utils for what "frozen" means):
+2x2pt combines two of example2's three two-point statistics: galaxy
+clustering (C_ell^gg) and galaxy-galaxy lensing (C_ell^gs); cosmic shear
+is dropped. The frozen configuration is example2's with the likelihood
+renamed to roman_fourier.combo_2x2pt: same options, same data files,
+same evaluation point; only the probe selection inside cosmolike changes.
+The four tests mirror tests 5-8 (see cocoa_test_utils for what "frozen"
+means):
 
  11. chi2 at the frozen fiducial point, within CHI2_TOLERANCE (0.2) of
      the frozen reference value.
@@ -26,14 +27,15 @@ start_cocoa.sh sourced):
 import os
 
 # OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so
-# this must run before ANY cobaya/cosmolike import in the process.
+# this must run before any cobaya/cosmolike import in the process.
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
 import unittest
 
-# The harness stays in the parent tests/ folder. Add it explicitly so
-# direct execution and worker processes resolve this project's stored inputs.
+# The shim cocoa_test_utils.py lives in the parent folder tests/; putting
+# that folder first on the module search path finds this project's copy
+# (every project names its shim the same) under pytest or direct runs.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
@@ -53,6 +55,16 @@ class TestExample2TwoXTwo(unittest.TestCase):
     # this once, before the first test of the class
     @classmethod
     def setUpClass(cls):
+        """Check the environment and the frozen state once, before the tests.
+
+        Moves to ROOTDIR, verifies every frozen file against the SHA-256
+        manifest and stores the frozen reference chi2 values in
+        cls.reference (cls is the class itself, shared by its tests).
+
+        Raises:
+          RuntimeError outside an activated Cocoa shell; AssertionError
+          when a frozen file differs from the manifest.
+        """
         u.require_cocoa_environment()
         u.verify_frozen()
         cls.reference = u.load_reference()
@@ -60,9 +72,9 @@ class TestExample2TwoXTwo(unittest.TestCase):
     def test_x11_chi2_matches_frozen_reference(self):
         """chi2 at the frozen NLA point stays within 0.2 of the reference.
 
-        The x prefix on tests 11-14 only keeps unittest's alphabetical
-        ordering aligned with the numbering (test_11 would sort before
-        test_2).
+        The x prefix marks a two-digit test number: unittest runs the
+        methods of a class in alphabetical order of their names, in
+        which test_11 would sort before test_2.
         """
         chi2 = u.single_model_chi2(EXAMPLE, tatt=False)
         ref = self.reference[f"{EXAMPLE}_nla"]
