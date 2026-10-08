@@ -7,13 +7,18 @@ fractional data-vector differences against the default,
 
     delta C_ell / C_ell = C_ell(setting)/C_ell(default) - 1,
 
-per tomographic pair and per band power. Masked bands are left out.
-Two figures, because the two knobs live on different scales:
+per source-bin pair and per multipole band (C_ell^EE at the band
+center). Masked bands are left out. Two figures, because the two knobs
+act on different scales:
 
-    photoz_zmid_dcl.png   - the Z_LOW vs Z_MID reading of the n(z)
-                            file z column (percent level),
-    photoz_interp_dcl.png - linear and Steffen vs cubic spline
-                            (1e-4 level).
+    photoz_zmid_dcl.png    the Z_LOW vs Z_MID reading of the n(z)
+                           file z column (percent level),
+    photoz_interp_dcl.png  linear and Steffen vs cubic spline
+                           (1e-4 level).
+
+The four models are built one after the other in this process (they
+share example1's dimensions), and the figures are written into tests/,
+replacing the files of the same name.
 
 To run (from the Cocoa/ folder, cocoa environment active,
 start_cocoa.sh sourced):
@@ -23,20 +28,29 @@ start_cocoa.sh sourced):
 
 import os
 
+# OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so it is
+# set before any cobaya/cosmolike import; 4 is the count the tests use.
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
 import shutil
 import tempfile
 
+# Agg is matplotlib's non-interactive backend: it draws into files without
+# opening a window, and it must be selected before pyplot is imported.
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+# insert(0, ...) puts this folder (tests/) first on the module search path,
+# so the import below finds this project's shim.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import cocoa_test_utils as u
 
+# These repeat the frozen dataset (frozen/data/roman_example.dataset):
+# source_ntomo, n_cl, l_min and l_max. The shear block of the data vector
+# holds NTOMO (NTOMO + 1)/2 = 36 source pairs of NCL bands each.
 EXAMPLE = "example1"
 NTOMO = 8
 NCL = 15
@@ -44,12 +58,24 @@ L_MIN, L_MAX = 30.0, 4000.0
 MASK_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                          "frozen", "data", "roman_example.mask")
 
+# (report tag, photoz_interpolation_type, photoz_zmid_convention)
 SETTINGS = (("cspline/Z_LOW (default)", 0, 0), ("linear", 1, 0),
             ("steffen", 2, 0), ("Z_MID", 0, 1))
 
 
 def datavectors():
-    """The printed theory vector under each setting, keyed by tag."""
+    """Return the theory data vector under each setting, keyed by tag.
+
+    Each model prints its theory vector into a temporary folder, deleted
+    on exit (the finally block runs whether or not an error occurred).
+
+    Returns:
+      dict tag -> float64 array [1485], the full-length data vector.
+
+    Side effects:
+      Builds four example1 models in this process, replacing cosmolike's
+      global state.
+    """
     vectors_dir = tempfile.mkdtemp(prefix="photoz_conventions_fig_")
     out = {}
     try:
@@ -72,10 +98,27 @@ def datavectors():
 
 
 def plot(curves, fname, title, scale=100.0, unit="%", ylim=None):
-    """One 6x6 per-pair panel grid in the notebook-plotter layout.
+    """Draw one figure: a 6x6 grid of glued panels, one per source pair.
 
-    curves = {label: dcl}, each a (npair, NCL) fractional-difference
-    array with NaN at masked bands.
+    The 36 source pairs (i <= j) fill the grid exactly; panels share both
+    axes, and the bin labels count from 1.
+
+    Arguments:
+      curves = dict label -> fractional-difference array [36, NCL], NaN
+               at masked bands.
+      fname  = file name of the PNG, written into tests/.
+      title  = figure title.
+      scale  = factor applied to the fractions before plotting (100 for
+               percent).
+      unit   = unit text of the y label.
+      ylim   = None, or the half-height of the shared symmetric y range,
+               in plotted units.
+
+    Returns:
+      nothing.
+
+    Side effects:
+      Writes tests/<fname> at 120 dpi, replacing an existing file.
     """
     edges = np.geomspace(L_MIN, L_MAX, NCL + 1)
     ell = np.sqrt(edges[1:] * edges[:-1])  # geometric band centers
@@ -108,16 +151,33 @@ def plot(curves, fname, title, scale=100.0, unit="%", ylim=None):
 
 
 def main():
+    """Check the frozen state, compute the four vectors and draw both figures.
+
+    Raises:
+      RuntimeError outside an activated Cocoa shell; AssertionError from
+      verify_frozen when a frozen file changed.
+
+    Side effects:
+      Writes tests/photoz_zmid_dcl.png and tests/photoz_interp_dcl.png.
+    """
     u.require_cocoa_environment()
     u.verify_frozen()
     dv = datavectors()
 
+    # The mask file has two columns, index and value; the conditional
+    # expression keeps the value column (or the array itself if a file
+    # held one column).
     mask = np.loadtxt(MASK_FILE)
     mask = mask[:, 1] if mask.ndim == 2 else mask
     npair = NTOMO * (NTOMO + 1) // 2
     ncs = npair * NCL  # the cosmic-shear block leads the data vector
 
     def frac(tag):
+        """Return C_ell(tag)/C_ell(default) - 1, shape [36, NCL], NaN if masked.
+
+        errstate silences the division warnings of masked or zero entries,
+        which np.where replaces by NaN anyway.
+        """
         ref, cur = dv[SETTINGS[0][0]], dv[tag]
         with np.errstate(divide="ignore", invalid="ignore"):
             d = np.where(mask[:ncs] > 0, cur[:ncs] / ref[:ncs] - 1.0,

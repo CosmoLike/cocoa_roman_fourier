@@ -1,33 +1,51 @@
 """Maintainer tool: (re)create the frozen state the unit tests run on.
 
-Running this REDEFINES what the tests protect, so it refuses to run
-without the explicit --overwrite flag. Only run it when a change to
-the data vectors, n(z), covariance, examples, or likelihood defaults
-is deliberate, and review the printed chi2 values before committing:
-they become the new references the tests compare against.
+Running this redefines what the tests protect, so the full rebuild
+refuses to run without the explicit --overwrite flag. Only run it when a
+change to the data vectors, n(z), covariance, examples or likelihood
+defaults is deliberate, and review the printed chi2 values before
+committing: they become the new references the tests compare against.
 
-What one run produces, all under tests/ (see cocoa_test_utils for how
-the tests consume each piece):
+What one --overwrite run produces, all under tests/ (cocoa_test_utils
+and the shared cocoa_testing.py explain how the tests consume each
+piece):
 
-  - frozen/data/: a copy of the CURRENT ../data folder.
+  - frozen/data/: a copy of the current ../data folder.
   - frozen/EXAMPLE_EVALUATE{1,2}.yaml: snapshots of the current
     examples, kept for humans to diff (the tests never load them).
-  - frozen/frozen_config_example{1,2}.py: for each example, the model
-    is built from the CURRENT example yaml, cobaya resolves it against
-    the CURRENT likelihood defaults, and the complete resolved
-    configuration is written back out as a yaml string, together with
-    the exact evaluation point. Writing out every resolved option and
-    parameter is what makes the tests independent of later edits to
-    the live files.
-  - frozen/reference_chi2.json: the four reference chi2 values
-    (example1/2, each with NLA and TATT), computed FROM the frozen
-    modules just written, exactly the way the tests will compute them.
-  - manifest_sha256.json: the SHA-256 pin of every frozen file.
+  - frozen/frozen_config_<name>.py, one per EXAMPLES entry (example1,
+    example2, example2_2x2pt): the model is built from the current
+    example yaml, Cobaya resolves it against the current likelihood
+    defaults, and the complete resolved configuration is written back
+    out as a yaml string, together with the exact evaluation point.
+    Writing out every resolved option and parameter is what makes the
+    tests independent of later edits to the live files.
+  - frozen/data/tatt_roman_fourier.modelvector and .dataset: the
+    TATT-generated data vector of the TATT variants, and the per-mask
+    descriptor tatt_roman_fourier_ones.dataset of the --mask option.
+  - frozen/reference_chi2.json: the six reference chi2 values (each
+    configuration with NLA and with TATT), computed from the frozen
+    modules just written, exactly the way the tests compute them.
+  - manifest_sha256.json: the SHA-256 hash of every frozen file.
+
+The rebuild deletes frozen/ first, so the per-method feedback vectors of
+test_baryons.py must be added again afterwards with --baryons.
+
+Each model-building step runs in its own worker subprocess (this script
+started again with --freeze-one, --tatt-one or --baryon-one), because
+cosmolike aborts a process that initializes configurations with
+different data-vector dimensions (cocoa_testing.py, worker isolation).
+
+Two incremental modes update an existing frozen state and re-hash the
+manifest: --baryons adds the feedback vectors (one worker per method),
+and --tatt-masks rewrites the per-mask TATT descriptors (text only, no
+model evaluation).
 
 Usage (from the Cocoa/ folder, cocoa environment active,
 start_cocoa.sh sourced):
 
     python ./projects/roman_fourier/tests/generate_frozen_reference.py --overwrite
+    python ./projects/roman_fourier/tests/generate_frozen_reference.py --baryons
 """
 
 import json
@@ -41,8 +59,8 @@ import time
 os.environ["OMP_NUM_THREADS"] = "4"
 
 # __file__ is this script's own path; insert(0, ...) puts the tests/
-# folder FIRST on the module search path, so the import below finds
-# the harness no matter where the script was launched from
+# folder first on the module search path, so the import below finds the
+# shim cocoa_test_utils no matter where the script was launched from
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import cocoa_test_utils as u
 
@@ -84,12 +102,13 @@ def freeze_example(example, stamp):
     The expansion works by round trip through cobaya: build the model
     from the live example yaml (letting cobaya merge in the live
     likelihood defaults), then ask the model for its resolved
-    configuration with model.info() and store THAT. The resolved form
+    configuration with model.info() and store that. The resolved form
     lists every option and every parameter explicitly, so the frozen
     module no longer depends on any live default.
 
     Arguments:
-      example = "example1" or "example2" (a key of u.EXAMPLES).
+      example = a key of u.EXAMPLES: "example1", "example2" or
+                "example2_2x2pt".
       stamp   = the UTC time string written into the module header.
 
     Returns:
@@ -106,7 +125,7 @@ def freeze_example(example, stamp):
     live = yaml_load_file(os.path.join(PROJECT_DIR, cfg["provenance"]))
     # The evaluate sampler's override block is the example's fiducial
     # point; keep it before stripping the sampler from the info.
-    # dict(...) makes an independent COPY, so the pop below cannot
+    # dict(...) makes an independent copy, so the pop below cannot
     # take the block with it.
     override = dict(live["sampler"]["evaluate"]["override"])
     live.pop("sampler", None)
@@ -119,7 +138,7 @@ def freeze_example(example, stamp):
     # .get falls back to the plain likelihood name for the entries
     # that carry no source_likelihood key
     source_name = cfg.get("source_likelihood", cfg["likelihood"])
-    # pop removes the block from the dictionary AND hands it back, so
+    # pop removes the block from the dictionary and hands it back, so
     # the next line can re-insert it under the target name
     likelihood_block = live["likelihood"].pop(source_name)
     live["likelihood"][cfg["likelihood"]] = likelihood_block
@@ -148,8 +167,9 @@ def freeze_example(example, stamp):
             point[name] = override[name]
         else:
             # ref is either a {dist, loc, scale} block or a bare
-            # number; the a-if-else picks the center in the first
-            # case and the number itself in the second
+            # number; the conditional expression (a if test else b)
+            # picks the center in the first case and the number itself
+            # in the second
             ref = updated["params"][name].get("ref")
             point[name] = ref["loc"] if isinstance(ref, dict) else ref
             fallback.append(name)
@@ -182,12 +202,12 @@ def generate_tatt_datavector(dataset_name):
 
     The vector comes from the generating example named in
     u.TATT_GENERATORS, evaluated at the TATT point with datavector
-    printing enabled. It must be generated against the ORIGINAL frozen
+    printing enabled. It must be generated against the original frozen
     dataset (the TATT descriptor written here does not exist yet; the
     printed theory vector does not depend on which data vector it is
     compared against). Runs inside a --tatt-one worker subprocess: it
     builds a model, and two different-dimension builds in one process
-    abort (see cocoa_test_utils).
+    abort (cocoa_testing.py, worker isolation).
 
     Arguments:
       dataset_name = a key of u.TATT_GENERATORS, which is also the
@@ -241,7 +261,7 @@ def generate_tatt_datavector(dataset_name):
     # removed; strip() trims surrounding whitespace before the match
     for line in descriptor.splitlines():
         if line.strip().startswith("data_file"):
-            # split("=", 1) cuts at the FIRST "=" only; [1] is the
+            # split("=", 1) cuts at the first "=" only; [1] is the
             # part after it, stripped of spaces: the file name
             original_vector = line.split("=", 1)[1].strip()
     with open(os.path.join(data_dir, original_vector)) as f:
@@ -279,15 +299,15 @@ def generate_tatt_datavector(dataset_name):
 def generate_baryon_datavector(label):
     """Write one feedback method's frozen data vector and descriptor.
 
-    The vector is the example1 theory prediction WITH the bfmt theory
+    The vector is the example1 theory prediction with the bfmt theory
     block computing this method's suppression, at the frozen fiducial
     point plus the method's cosmology override
     (u.BARYON_POINT_OVERRIDES, e.g. BACCOemu's omegab shift into its
-    training box). The DRIFT tests of test_baryons.py evaluate
+    training box). The drift tests of test_baryons.py evaluate
     against this vector: at freeze time the chi2 is zero by
     construction, so any later chi2 above the tolerance means
     cosmolike or the theory block changed its prediction. (The
-    ACCURACY checks of test_accuracy_baryons.py do not use these
+    accuracy checks of test_accuracy_baryons.py do not use these
     files: they regenerate their vector on the fly per run.) Runs
     inside a --baryon-one worker subprocess for the same isolation
     reasons as the other steps.
@@ -362,8 +382,9 @@ def generate_baryon_datavector(label):
 
 # The --mask reruns of the comparison sweeps read one frozen TATT
 # dataset descriptor per scale-cut mask: identical to the base TATT
-# descriptor except for its mask_file line (the entries of
-# cocoa_test_utils.FASTPT_MASK_DATASETS). variant -> (base, mask).
+# descriptor except for its mask_file line. The harness finds a variant
+# by the name <tatt_dataset stem>_<mask>.dataset, for each non-default
+# name of fastpt_masks in cocoa_test_utils. variant -> (base, mask file).
 TATT_MASK_VARIANTS = {
     "tatt_roman_fourier_ones.dataset": ("tatt_roman_fourier.dataset", "ones.mask"),
 }
@@ -377,6 +398,9 @@ def generate_tatt_mask_datasets():
     scale-cut mask. Pure text, no model evaluations, so the variants
     regenerate in the --overwrite run and in the incremental
     --tatt-masks mode alike.
+
+    Arguments:
+      none (the variants come from TATT_MASK_VARIANTS).
 
     Returns:
       nothing; frozen/data/ gains one descriptor per variant.
@@ -411,11 +435,41 @@ def generate_tatt_mask_datasets():
 
 
 def main():
-    # worker modes first: --freeze-one X and --tatt-one D each run a
-    # single model-building step and exit. The parent below spawns one
-    # subprocess per step: a process that initializes configurations
-    # with different data-set dimensions aborts inside cosmolike (see
-    # cocoa_test_utils), and one architecture serves every project.
+    """Run one mode of the generator, chosen by the command-line flags.
+
+    Modes, checked in this order:
+      --freeze-one NAME --stamp TIME  worker: write one frozen
+                                      configuration module (returns 0);
+      --baryon-one LABEL              worker: write one feedback vector
+                                      and its descriptor (returns None);
+      --tatt-one DATASET              worker: write one TATT vector and
+                                      its descriptor (returns 0);
+      --tatt-masks                    rewrite the per-mask TATT
+                                      descriptors and the manifest;
+      --baryons                       add every feedback vector, one
+                                      worker each, then the manifest;
+      --overwrite                     the full rebuild of the module
+                                      docstring (returns 0).
+    Without any of them the usage text is printed and 1 is returned.
+
+    Returns:
+      the exit status for sys.exit: 0 or None on success (sys.exit(None)
+      also exits with status 0), 1 when the full rebuild was not
+      confirmed with --overwrite.
+
+    Raises:
+      RuntimeError when a worker subprocess fails.
+
+    Side effects:
+      Writes under tests/frozen/ and rewrites manifest_sha256.json; the
+      full rebuild first deletes tests/frozen/.
+    """
+    # worker modes first: --freeze-one X, --baryon-one L and --tatt-one D
+    # each run a single model-building step and exit. The parent below
+    # spawns one subprocess per step: a process that initializes
+    # configurations with different data-set dimensions aborts inside
+    # cosmolike (cocoa_testing.py, worker isolation), and one architecture
+    # serves every project.
     if "--freeze-one" in sys.argv:
         u.require_cocoa_environment()
         # sys.argv.index finds the flag's position in the argument
@@ -434,6 +488,12 @@ def main():
         dataset_name = sys.argv[sys.argv.index("--tatt-one") + 1]
         generate_tatt_datavector(dataset_name)
         return 0
+    # The string below is not main's docstring: Python takes only a string
+    # that opens a function body as its docstring, and this one follows the
+    # worker branches, so it is an expression statement with no effect. It
+    # describes the --overwrite rebuild, which writes one module per
+    # EXAMPLES entry (three) and six reference values, not the two modules
+    # and four values it names.
     """Rebuild tests/frozen/ and the manifest from the current project.
 
     The steps, in order: refuse without --overwrite; delete and
@@ -467,7 +527,7 @@ def main():
         return
     if "--baryons" in sys.argv:
         # incremental: add the per-method frozen baryon vectors of the
-        # DRIFT tests to an existing frozen state and re-pin the
+        # drift tests to an existing frozen state and re-pin the
         # manifest; nothing else changes
         import subprocess
 
@@ -568,7 +628,7 @@ def main():
         f.write("\n")
 
     # compute_manifest returns {relative path: sha256} for every file
-    # now under frozen/; writing it LAST means it covers every file
+    # now under frozen/; writing it last means it covers every file
     # the steps above produced
     manifest = {
         "_comment": "SHA-256 of every file under tests/frozen/; verified by "

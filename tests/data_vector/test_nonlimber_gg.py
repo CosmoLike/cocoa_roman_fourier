@@ -1,35 +1,42 @@
 """Unit test: non-Limber galaxy clustering (adopt_limber_gg).
 
-The galaxy clustering (gg) spectrum C_l^gg enters the data vector
-through w(theta) in real space and directly in Fourier space. The
-likelihood yaml key adopt_limber_gg chooses how it is computed:
+The galaxy clustering (gg) spectrum C_ell^gg enters the data vector
+through w(theta) in real space and directly in Fourier space. The Limber
+approximation reduces the exact projection, a double integral over the
+two radial kernels with spherical Bessel functions, to one integral along
+the line of sight with P(k) evaluated at k = (ell + 1/2)/chi; it is
+accurate when the kernels vary slowly on the radial scale chi/ell, so it
+degrades at low ell and for narrow kernels. The likelihood yaml key
+adopt_limber_gg chooses how C_ell^gg is computed:
 
-  adopt_limber_gg: 0 (the default) - below l = 150 the exact
+  adopt_limber_gg: 0 (the default): below ell = 150 the exact
       projection, computed by cosmolike's C_cl_tomo with the split of
       Fang, Krause, Eifler & MacCrann (arXiv:1911.11947): an FFTLog
       integral of the linear power spectrum plus, in Limber, what
       linear theory misses. In Fourier space each band center takes
       the Limber value plus the non-Limber correction interpolated
-      between integer multipoles.
-  adopt_limber_gg: 1 - Limber approximation at every multipole.
+      linearly between the two integer multipoles around it.
+  adopt_limber_gg: 1: the Limber approximation at every multipole.
 
 The lens galaxy redshift distributions are narrow, so the Limber
-approximation fails at low l for the clustering auto spectra; this
-project defaults to the exact projection (since 2026-10-01) because
-the delta chi2 below is too large to absorb. This test measures what
-Limber would cost.
+approximation fails at low ell for the clustering auto spectra; this
+project defaults to the exact projection because the delta chi2 below
+is too large to absorb. This test measures what Limber would cost.
 
-It evaluates the frozen 3x2pt fiducial (NLA) three times IN ONE
-PROCESS: the default, the other setting, the default again, and
-computes
+It evaluates the frozen 3x2pt fiducial (NLA) three times in this pytest
+process (one model per setting, all with example2's dimensions, so the
+flag must reach the compiled library and its caches must rebuild): the
+default, the other setting and the default again. It computes
 
     delta chi2 = delta^T C^-1 delta,
     delta = dv(non-Limber) - dv(Limber),
 
 with C^-1 the masked inverse covariance: the chi2 a Limber model would
-score against a data set generated with non-Limber clustering. It
-prints the total and the contribution of each lens bin (the bin's own
-block of delta, cross-covariance with other bins ignored).
+score against a data set generated with non-Limber clustering. It prints
+the total and the contribution of each lens bin, delta_b^T C^-1 delta_b
+with delta_b the bin's own block of delta (zero elsewhere); the cross
+terms between bins are left out, so the contributions need not add up to
+the total.
 
 Assertions:
   1. delta chi2 is above a dead-flag floor: the flag reaches the C code
@@ -55,15 +62,17 @@ start_cocoa.sh sourced):
 import os
 
 # OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so
-# this must run before ANY cobaya/cosmolike import in the process.
+# this must run before any cobaya/cosmolike import in the process (this
+# test builds its models in the pytest process itself).
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
 import time
 import unittest
 
-# The harness stays in the parent tests/ folder. Add it explicitly so
-# direct execution and worker processes resolve this project's stored inputs.
+# The shim cocoa_test_utils.py lives in the parent folder tests/; putting
+# that folder first on the module search path finds this project's copy
+# (every project names its shim the same) under pytest or direct runs.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
@@ -74,7 +83,7 @@ REFERENCE_KEY = "example2_nla"
 DEFAULT = 0
 
 # (report tag, adopt_limber_gg): the default, the other setting, the
-# default again
+# default again; 1 - DEFAULT is the other value of the 0/1 flag
 _NAME = {0: "non-Limber", 1: "Limber"}
 SETTINGS = (
     (f"{_NAME[DEFAULT]} (default)", DEFAULT),
@@ -87,8 +96,8 @@ SETTINGS = (
 # dead flag.
 DCHI2_FLOOR = 1.0e-6
 
-# delta chi2 measured on 2026-10-01 (macOS, arm64), and the relative band
-# assertion 4 allows around it.
+# The delta chi2 measured for this project (macOS, arm64), and the
+# relative band that assertion 4 allows around it.
 DCHI2_MEASURED = 3.445
 DCHI2_RTOL = 0.05
 
@@ -98,11 +107,31 @@ class TestNonLimberGG(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        """Check the environment and the frozen state once, before the tests.
+
+        Moves to ROOTDIR, verifies every frozen file against the SHA-256
+        manifest and stores the frozen reference chi2 values in
+        cls.reference (cls is the class itself, shared by its tests).
+
+        Raises:
+          RuntimeError outside an activated Cocoa shell; AssertionError
+          when a frozen file differs from the manifest.
+        """
         u.require_cocoa_environment()
         u.verify_frozen()
         cls.reference = u.load_reference()
 
     def test_nonlimber_gg(self):
+        """Measure the Limber cost in clustering and run assertions 1-5.
+
+        Raises:
+          AssertionError at the first violated assertion (numbered as in
+          the module docstring).
+
+        Side effects:
+          Builds three example2 models in this process, replacing
+          cosmolike's global state, and prints the report.
+        """
         import numpy as np
         import cosmolike_roman_fourier_interface as ci
 
@@ -138,6 +167,8 @@ class TestNonLimberGG(unittest.TestCase):
                     sizes = ci.compute_data_vector_3x2pt_fourier_sizes()
                     nlen = int(like.ncl)
 
+        # tags maps each flag value to its report tag (first two settings
+        # only), so delta below is non-Limber (0) minus Limber (1)
         tags = {flag: tag for tag, flag in SETTINGS[:2]}
         dv_default = vectors[SETTINGS[0][0]]
         delta = vectors[tags[0]] - vectors[tags[1]]
@@ -163,6 +194,8 @@ class TestNonLimberGG(unittest.TestCase):
             sl = slice(gg0 + b*nlen, gg0 + (b + 1)*nlen)
             block[sl] = delta[sl]
             rows.append((float(block @ icov @ block), b))
+        # largest contribution first; the printout stops at the first one
+        # below 0.1% of the total
         for contribution, b in sorted(rows, reverse=True):
             if contribution < 1.0e-3*max(dchi2, DCHI2_FLOOR):
                 break

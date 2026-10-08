@@ -1,19 +1,24 @@
 """Unit test: non-Limber galaxy-galaxy lensing (adopt_limber_gs).
 
-The galaxy-galaxy lensing (ggl) spectrum C_l^gs enters the data vector
+The galaxy-galaxy lensing (ggl) spectrum C_ell^gs enters the data vector
 through gamma_t(theta) in real space and directly in Fourier space. The
-likelihood yaml key adopt_limber_gs chooses how it is computed:
+Limber approximation reduces the exact projection, a double integral over
+the two radial kernels with spherical Bessel functions, to one integral
+along the line of sight with P(k) evaluated at k = (ell + 1/2)/chi; it is
+accurate when the kernels vary slowly on the radial scale chi/ell, so it
+degrades at low ell and for narrow kernels. The likelihood yaml key
+adopt_limber_gs chooses how C_ell^gs is computed:
 
-  adopt_limber_gs: 0 (the default) - below l = 150 the exact
+  adopt_limber_gs: 0 (the default): below ell = 150 the exact
       projection, computed by cosmolike's C_gs_tomo with the split of
       Fang, Krause, Eifler & MacCrann (arXiv:1911.11947): an FFTLog
       integral of the linear power spectrum plus, in Limber, what
       linear theory misses. In Fourier space each band center takes
       the Limber value plus the non-Limber correction interpolated
-      between integer multipoles.
-  adopt_limber_gs: 1 - Limber approximation at every multipole.
+      linearly between the two integer multipoles around it.
+  adopt_limber_gs: 1: the Limber approximation at every multipole.
 
-The Limber approximation fails at low l for the lens-source pairs
+The Limber approximation fails at low ell for the lens-source pairs
 whose kernels overlap in redshift (lens bin = source bin, or the
 source bin in front of the lens bin, where the signal is the intrinsic
 alignment of the sources times the lens density); this project defaults
@@ -21,16 +26,20 @@ to the exact projection because the delta chi2 below is too large to
 absorb (galaxy clustering has its own key, adopt_limber_gg; see
 test_nonlimber_gg.py). This test measures what Limber would cost.
 
-It evaluates the frozen 3x2pt fiducial (NLA) three times IN
-ONE PROCESS: non-Limber, Limber, non-Limber again, and computes
+It evaluates the frozen 3x2pt fiducial (NLA) three times in this pytest
+process (one model per setting, all with example2's dimensions, so the
+flag must reach the compiled library and its caches must rebuild):
+non-Limber, Limber and non-Limber again. It computes
 
     delta chi2 = delta^T C^-1 delta,
     delta = dv(non-Limber) - dv(Limber),
 
 with C^-1 the masked inverse covariance: the chi2 the Limber model
 would score against a data set generated with non-Limber ggl. It prints
-the total and the contribution of each lens-source pair (the pair's own
-block of delta, cross-covariance with other pairs ignored).
+the total and the contribution of each lens-source pair,
+delta_p^T C^-1 delta_p with delta_p the pair's own block of delta (zero
+elsewhere); the cross terms between pairs are left out, so the
+contributions need not add up to the total.
 
 Assertions:
   1. delta chi2 is above a dead-flag floor: the flag reaches the C code
@@ -55,15 +64,17 @@ start_cocoa.sh sourced):
 import os
 
 # OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so
-# this must run before ANY cobaya/cosmolike import in the process.
+# this must run before any cobaya/cosmolike import in the process (this
+# test builds its models in the pytest process itself).
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
 import time
 import unittest
 
-# The harness stays in the parent tests/ folder. Add it explicitly so
-# direct execution and worker processes resolve this project's stored inputs.
+# The shim cocoa_test_utils.py lives in the parent folder tests/; putting
+# that folder first on the module search path finds this project's copy
+# (every project names its shim the same) under pytest or direct runs.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
@@ -81,8 +92,8 @@ SETTINGS = (
 # magnitude below the measured value, so it only catches a dead flag.
 DCHI2_FLOOR = 1.0e-6
 
-# delta chi2 measured on 2026-10-01 (macOS, arm64), and the relative band
-# assertion 4 allows around it.
+# The delta chi2 measured for this project (macOS, arm64), and the
+# relative band that assertion 4 allows around it.
 DCHI2_MEASURED = 1.217
 DCHI2_RTOL = 0.05
 
@@ -92,11 +103,31 @@ class TestNonLimberGGL(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        """Check the environment and the frozen state once, before the tests.
+
+        Moves to ROOTDIR, verifies every frozen file against the SHA-256
+        manifest and stores the frozen reference chi2 values in
+        cls.reference (cls is the class itself, shared by its tests).
+
+        Raises:
+          RuntimeError outside an activated Cocoa shell; AssertionError
+          when a frozen file differs from the manifest.
+        """
         u.require_cocoa_environment()
         u.verify_frozen()
         cls.reference = u.load_reference()
 
     def test_nonlimber_ggl(self):
+        """Measure the Limber cost in ggl and run assertions 1-5.
+
+        Raises:
+          AssertionError at the first violated assertion (numbered as in
+          the module docstring).
+
+        Side effects:
+          Builds three example2 models in this process, replacing
+          cosmolike's global state, and prints the report.
+        """
         import numpy as np
         import cosmolike_roman_fourier_interface as ci
 
@@ -132,8 +163,10 @@ class TestNonLimberGGL(unittest.TestCase):
                 else:
                     sizes = ci.compute_data_vector_3x2pt_fourier_sizes()
                     nlen = int(like.ncl)
-                # the ggl pairs in data-vector order: lens-major, the
-                # pairs listed in the yaml key ggl_exclude left out
+                # the ggl pairs in data-vector order: lens-major (the
+                # source index runs fastest), the pairs listed in the yaml
+                # key ggl_exclude left out; the set and the list are built
+                # by comprehensions over all (lens, source) pairs
                 excluded = {(int(zl), int(zs)) for zl, zs in
                             (getattr(like, "ggl_exclude", None) or [])}
                 pairs = [(zl, zs) for zl in range(int(like.lens_ntomo))
@@ -163,6 +196,9 @@ class TestNonLimberGGL(unittest.TestCase):
             sl = slice(ggl0 + p*nlen, ggl0 + (p + 1)*nlen)
             block[sl] = delta[sl]
             rows.append((float(block @ icov @ block), p))
+        # largest contribution first; the printout stops at the first one
+        # below 0.1% of the total. A pair is labeled by its bins (counted
+        # from 0) when the pair list matches the block count.
         for contribution, p in sorted(rows, reverse=True):
             if contribution < 1.0e-3*max(dchi2, DCHI2_FLOOR):
                 break

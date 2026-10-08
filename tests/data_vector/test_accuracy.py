@@ -3,26 +3,29 @@
 Every reference in this suite is computed with the examples' default
 numerical settings. These checks answer: how much numerical error do
 those defaults carry? Each one re-evaluates a frozen configuration at
-its frozen point with the numerical knobs pushed far beyond the
-defaults (cosmolike: accuracyboost 2, integration_accuracy 10,
-kmax_boltzmann 40; CAMB: AccuracyBoost 2.0,
+its frozen point with the numerical knobs pushed beyond the defaults
+(cosmolike: accuracyboost 3 instead of 2, internal_accuracyboost 2,
+integration_accuracy 10, kmax_boltzmann 40; CAMB: AccuracyBoost 2.0,
 k_per_logint 50, kmax 50; the exact values live in
-cocoa_test_utils.HIGH_ACCURACY_*) and reports
+cocoa_test_utils.HIGH_ACCURACY_LIKELIHOOD and
+HIGH_ACCURACY_CAMB_EXTRA_ARGS) and reports
 
     delta chi2 = chi2(high accuracy) - chi2(default, frozen)
 
-There is NO pass/fail: how much numerical error an analysis tolerates
-is a judgment call. The six checks cover the three probes with both
-IA models:
+The checks are advisory: they print the number and assert nothing,
+because how much numerical error an analysis tolerates is a judgment
+call. The six checks cover the three probes with both intrinsic-alignment
+(IA) models, NLA (nonlinear alignment) and TATT (tidal alignment and
+tidal torquing):
 
   A1. cosmic shear (example1), NLA      A2. cosmic shear, TATT
   A3. 2x2pt (example2_2x2pt), NLA       A4. 2x2pt, TATT
   A5. 3x2pt (example2), NLA             A6. 3x2pt, TATT
 
-The TATT checks evaluate against their configuration's
-TATT-generated data vector (written at freeze time), so the
-chi2 sits at a minimum and the delta is a stable, quadratic response
-instead of a linear one.
+The TATT checks evaluate against their configuration's TATT-generated
+data vector (written at freeze time), so the chi2 sits at a minimum and
+the delta is a stable, quadratic response instead of a linear one. Before
+A1-A6, test_a0 raises one knob at a time (the KNOB lines of the output).
 
 A high-accuracy evaluation takes minutes, not seconds: the whole file
 is far slower than the rest of the suite. To run only this file (from
@@ -39,14 +42,15 @@ and to run the rest of the suite without it:
 import os
 
 # OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so
-# this must run before ANY cobaya/cosmolike import in the process.
+# this must run before any cobaya/cosmolike import in the process.
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
 import unittest
 
-# The harness stays in the parent tests/ folder. Add it explicitly so
-# direct execution and worker processes resolve this project's stored inputs.
+# The shim cocoa_test_utils.py lives in the parent folder tests/; putting
+# that folder first on the module search path finds this project's copy
+# (every project names its shim the same) under pytest or direct runs.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
@@ -64,12 +68,25 @@ class TestAccuracyAdvisory(unittest.TestCase):
     # this once, before the first test of the class
     @classmethod
     def setUpClass(cls):
+        """Check the environment and the frozen state once, before the tests.
+
+        Moves to ROOTDIR, verifies every frozen file against the SHA-256
+        manifest and stores the frozen reference chi2 values in
+        cls.reference (cls is the class itself, shared by its tests).
+
+        Raises:
+          RuntimeError outside an activated Cocoa shell; AssertionError
+          when a frozen file differs from the manifest.
+        """
         u.require_cocoa_environment()
         u.verify_frozen()
         cls.reference = u.load_reference()
 
     def _accuracy_check(self, name, example, tatt, label):
         """Evaluate one configuration at high accuracy and report.
+
+        The high-accuracy chi2 comes from a worker subprocess; the default
+        chi2 is the frozen reference of the same configuration.
 
         Arguments:
           name    = the advisory label (A1-A6) for the report.
@@ -78,6 +95,9 @@ class TestAccuracyAdvisory(unittest.TestCase):
           tatt    = True evaluates the TATT variant against the
                     TATT-generated data vector, False the NLA one.
           label   = one line naming the probe and IA model.
+
+        Returns:
+          nothing; the report is printed and nothing is asserted.
         """
         chi2_high = u.single_model_chi2(example, tatt, high_accuracy=True)
         # `"tatt" if tatt else "nla"` picks the reference-key suffix
@@ -86,18 +106,19 @@ class TestAccuracyAdvisory(unittest.TestCase):
         u.report_accuracy(f"{name}: {label}", chi2_high, default_ref)
 
     def test_a0_one_knob_at_a_time(self):
-        """K scan: each accuracy knob alone on example2, NLA.
+        """Knob scan: each accuracy knob raised alone on example2, NLA.
 
         Advisory: each knob's chi2 and its difference to the frozen
-        default reference print as the scan runs. A knob whose delta
-        rivals the all-knobs delta is the driver; a knob whose delta
-        explodes (orders of magnitude beyond the others) signals an
+        default reference print as KNOB lines while the scan runs. A knob
+        whose delta rivals the all-knobs delta is the driver; a knob whose
+        delta explodes (orders of magnitude beyond the others) signals an
         interface breakdown, not a numerics improvement.
         """
         default_ref = self.reference["example2_nla"]
         print("", flush=True)
         # each entry is (label, likelihood overrides, camb overrides);
-        # the two _ discard the overrides, only the label is needed
+        # the loop unpacks it into three names, and _ is the customary
+        # name for a value that is not used: only the label is needed
         # here (the worker looks the knob up again by its label)
         for label, _, _ in u.ACCURACY_KNOBS:
             chi2 = u.single_model_chi2("example2", False, knob=label)
