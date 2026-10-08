@@ -27,32 +27,23 @@
 From `Cocoa/Readme` instructions:
 
 > [!Note]
-> We provide several cosmolike projects that can be loaded and compiled using `setup_cocoa.sh` and `compile_cocoa.sh` scripts. To activate them, comment the following lines on `set_installation_options.sh` 
+> `setup_cocoa.sh` and `compile_cocoa.sh` install the cosmolike projects that `set_installation_options.sh` selects: a commented `IGNORE_*_CODE` key enables a project, and an active key skips it. The shipped file skips roman_fourier; comment out its `export IGNORE_COSMOLIKE_ROMAN_FOURIER_CODE=1` line to enable it:
 > 
 >     [Adapted from Cocoa/set_installation_options.sh shell script]
->     (...)
->
->     # ------------------------------------------------------------------------------
->     # The keys below control which cosmolike projects will be installed and compiled
->     # ------------------------------------------------------------------------------
 >     #export IGNORE_COSMOLIKE_LSST_Y1_CODE=1
->     #export IGNORE_COSMOLIKE_DES_Y3_CODE=1
+>     export IGNORE_COSMOLIKE_DES_Y3_CODE=1
+>     #export IGNORE_COSMOLIKE_DESXPLANCK_CODE=1
 >     export IGNORE_COSMOLIKE_ROMAN_FOURIER_CODE=1
 >     #export IGNORE_COSMOLIKE_ROMAN_REAL_CODE=1
->
->     (...)
->     # ------------------------------------------------------------------------------
->     # Cosmolike projects below -------------------------------------------
->     # ------------------------------------------------------------------------------
+>     export IGNORE_COSMOLIKE_ROMAN_KL_CODE=1
 >     (...)
 >     export ROMAN_FOURIER_URL="https://github.com/CosmoLike/cocoa_roman_fourier.git"
 >     export ROMAN_FOURIER_NAME="roman_fourier"
->     #Pin the project version with at most one of the keys below (COMMIT, BRANCH, or TAG).
->     #If more than one is set, COMMIT wins over BRANCH, and BRANCH wins over TAG.
->     #If none is set, Cocoa loads the latest commit on the repository default branch.
->     #export ROMAN_FOURIER_GIT_BRANCH="main"
->     #export ROMAN_FOURIER_GIT_COMMIT="abc"
->     export ROMAN_FOURIER_GIT_TAG="v4.10.5"
+>     export ROMAN_FOURIER_GIT_TAG="v5.05"
+>
+> Each released project is pinned to a tag. To select another revision, set
+> only one of its `GIT_COMMIT`, `GIT_BRANCH` or `GIT_TAG` keys: a commit takes
+> precedence over a branch, and a branch over a tag.
 
 > [!NOTE]
 > If users want to recompile cosmolike, there is no need to rerun the Cocoa general scripts. Instead, run the following three commands:
@@ -76,7 +67,7 @@ From `Cocoa/Readme` instructions:
 >
 >     jupyter notebook --no-browser --port=8888
 >
-> The project roman_fourier contains jupyter notebook examples located at `projects/roman_fourier/notebooks`.
+> The project roman_fourier contains jupyter notebook examples located at `projects/roman_fourier` (covariance) and `projects/roman_fourier/notebooks` (data vector).
 
 To run the example
 
@@ -183,6 +174,13 @@ model).
 > [!TIP]
 > For the sampled parameters of each model, their validity ranges, and the `bfmt`
 > options, see `Cocoa/external_modules/code/baryon_suppression/README.md`.
+
+> [!NOTE]
+> The section **Baryonic feedback from the `bfmt` theory block** of
+> [notebooks/RomanFourierDataVector.ipynb](notebooks/RomanFourierDataVector.ipynb)
+> runs six of these methods (the three SP(k) relations, BCEmu, Flamingo and
+> BCemu2025) through the `bfmt` block on the 3x2pt band powers. It needs the
+> packages of the first step above; see [Exploring notebooks](#notebooks).
 
 # Running Hybrid Cosmolike-ML emulators <a name="roman_fourier_examples_emul2"></a>
 
@@ -519,10 +517,30 @@ jupyter notebook --no-browser --port=8888
 
 | Notebook | Contents |
 |---|---|
+| [notebooks/RomanFourierDataVector.ipynb](notebooks/RomanFourierDataVector.ipynb) | 3x2pt band powers. A first part compares two $`w_0w_a`$CDM model vectors with ΛCDM against the diagonal errors of `data/roman_example.cov`. A second part computes the band powers at the fiducial point of `EXAMPLE_EVALUATE2.yaml` through the compiled interface, then applies six `bfmt` feedback methods and tabulates $`\chi^2`$, $`\Delta\chi^2`$ and the $`\chi^2`$ of each shift over the 1,359 entries the mask keeps. |
 | [EXAMPLE_EVALUATE_COVARIANCE.ipynb](EXAMPLE_EVALUATE_COVARIANCE.ipynb) | G, SSC, cNG, total, separate 1h–4h matter trispectra and matrix diagnostics. |
 
-This repository currently ships a covariance notebook. Its data-vector
-examples are YAML commands; a data-vector notebook is not supplied.
+> [!NOTE]
+> The first part of `RomanFourierDataVector.ipynb` reads three model
+> vectors that this project does not ship, through absolute paths of
+> another machine. To run the computed part alone, restart the kernel,
+> select the first cell of the section **Compute the model band powers
+> with the compiled interface** and choose
+> **Run → Run Selected Cell and All Below**. Its `bfmt` section needs the
+> packages of the [baryonic feedback section](#roman_fourier_baryonic_feedback).
+
+The computed part of the data-vector notebook mirrors the settings of
+`EXAMPLE_EVALUATE2.yaml`; the covariance notebook calls the survey
+adapter `covariance/roman_fourier_covariance.py`. Read the notebooks in
+this order:
+
+```mermaid
+flowchart TD
+  A["RomanFourierDataVector: computed band powers"] --> B["bfmt feedback: chi2 table and figures"]
+  A --> C["EXAMPLE_EVALUATE_COVARIANCE: G, SSC, cNG"]
+  Y["EXAMPLE_EVALUATE2.yaml"] --> A
+  S["roman_fourier_covariance.py"] --> C
+```
 
 Choose the Python kernel from the activated Cocoa environment and restart it
 after recompiling. The [covariance guide](covariance/README.md) explains the
@@ -617,6 +635,6 @@ Check interpolation, quadrature, input-power sampling and transform cutoffs
 separately at fixed cosmology and measurement bins. Narrow n(z) overlaps
 particularly require a quadrature check; increasing `accuracyboost` alone
 is not that check. The [data-vector test guide](tests/data_vector/README.md)
-and [covariance test guide](tests/covariance/README.md) state what each suite
-actually verifies. A passing regression or a larger boost is not a general
+and [covariance test guide](tests/covariance/README.md) state what each set of
+tests actually verifies. A passing regression or a larger boost is not a general
 claim of survey or Fisher convergence.

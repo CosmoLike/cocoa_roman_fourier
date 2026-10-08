@@ -8,8 +8,8 @@ through leftover internal state or colliding OpenMP threads).
 Every model build runs in its own worker subprocess. In this project
 both examples share one data set, so the isolation is preventive: it
 keeps the tests immune to the process abort that different data-set
-dimensions trigger inside cosmolike (roman_fourier has that layout), and
-every project keeps one architecture. The commands below stay the
+dimensions trigger inside cosmolike, and every project keeps one
+architecture. The commands below stay the
 same.
 
 # Table of contents
@@ -181,15 +181,10 @@ Measured on 2026-09-23:
   measures 0.0903 at the pushed camb/cosmolike settings; the 2x2pt
   sweep measures max $\Delta\chi^2 = 0.0039$ at the defaults and
   0.0025 pushed.
-- Before 2026-09-23 `ones.mask` (in `data/` and pinned under
-  `frozen/data/`) was a stray byte-copy of lsst_y1's 1,560-row
-  mask, which cosmolike rejects against this project's 1,485-point
-  data vector; it was replaced by the correct 1,485-row all-ones
-  mask.
 
 > [!Warning]
-> `--mask=ones` with the 3x2pt likelihood (test 16, 2026-09-23)
-> fails at model build: with every data point kept the shipped
+> `--mask=ones` with the 3x2pt likelihood (test 16) fails at model
+> build: with every data point kept the shipped
 > covariance is not positive definite, and cosmolike aborts
 > (`IP::set_inv_cov`). The mask runs with tests 15 and 17.
 
@@ -341,11 +336,11 @@ moving the nodes (the construction is commented in
 
 `internal_accuracyboost` scales only the C-FAST-PT convolution
 grid; the output table the likelihood interpolates is unchanged.
-
-- 2026-09-25: the 0.5 default is converged. The lsst_y1 scan
-  measured $\Delta^T C^{-1} \Delta \le 10^{-9}$ against the
-  single-grid path down to 0.27, and `internal_accuracyboost: 1`
-  recovers that path exactly.
+The likelihood yamls set `internal_accuracyboost: 1`, which keeps the
+convolution grid equal to the output table: the exact single-grid
+path. Coarser grids also hold: the lsst_y1 scan of this setting
+measured $`\Delta^T C^{-1} \Delta \le 10^{-9}`$ against the single-grid
+path down to `internal_accuracyboost: 0.27`.
 
 When several settings move the $\chi^2$, settle them in cost order:
 raise cosmolike `accuracyboost` first (cheap), then CAMB
@@ -388,8 +383,7 @@ advisory check per feedback method (the three SP(k) fb relations,
 BCEmu, Flamingo, BACCOemu, and BCemu2025), at a fixed parameter
 point per method.
 
-Each check creates its data vector on the fly, by the same mechanism
-as the N-random-models check:
+Each check creates its data vector on the fly:
 
 1. The default-settings model writes its own theory vector during
    evaluation.
@@ -608,8 +602,9 @@ files. Instead, `frozen/` holds:
 
 | `frozen/` entry | holds |
 |---|---|
-| `frozen_config_example{1,2}.py` | the complete cobaya configuration as a yaml string, plus the exact evaluation point |
+| `frozen_config_*.py` | one module per configuration (cosmic shear, 3x2pt, and 2x2pt): the complete cobaya configuration as a yaml string, plus the exact evaluation point |
 | `data/` | the tests' own copy of the data vectors, covariance, n(z), and masks |
+| `reference_chi2.json` | the six reference $`\chi^2`$ values: cosmic shear, 3x2pt, and 2x2pt, each with NLA and TATT |
 | `EXAMPLE_EVALUATE{1,2}.yaml` | snapshots kept only so a human can diff how the live examples drifted since the freeze |
 
 In the configuration modules every option and every parameter is
@@ -650,7 +645,14 @@ the script `start_cocoa.sh`
 
     python ./projects/roman_fourier/tests/generate_frozen_reference.py --overwrite
 
-It rebuilds `frozen/` from the current project, prints the four new
-reference $\chi^2$ values, and rewrites the manifest. Review the printed
-$\chi^2$ values against the old references before committing: they define
-what every later test run compares against.
+**Step :three:**: add the feedback vectors of the drift tests
+
+    python ./projects/roman_fourier/tests/generate_frozen_reference.py --baryons
+
+The first command deletes and rebuilds `frozen/` from the current
+project, prints the six new reference $\chi^2$ values, and rewrites the
+manifest. It does not write the per-method feedback vectors of
+`test_baryons.py`; the second command adds them and rewrites the
+manifest again. Review the printed $\chi^2$ values against the old
+references before committing: they define what every later test run
+compares against.
