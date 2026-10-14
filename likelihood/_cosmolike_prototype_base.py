@@ -283,6 +283,12 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     # the option. n(z) interpolation: 0 = cubic spline, 1 = linear,
     # 2+ = Steffen (monotone, no overshoot below zero); z column of the
     # n(z) files: 0 = left bin edges (Z_LOW), 1 = sample points (Z_MID).
+    # Select the reconstruction before loading either histogram.
+    histogram_akima = getattr(self, "photoz_histogram_akima", 0)
+    if histogram_akima not in (0, 1):
+      raise LoggedError(self.log, "photoz_histogram_akima must be 0 or 1")
+    ci.init_photoz_histogram_akima(enabled=int(histogram_akima))
+
     ci.init_photoz_conventions(
         interpolation_type=int(getattr(self, "photoz_interpolation_type", 0)),
         zmid_convention=int(getattr(self, "photoz_zmid_convention", 0)))
