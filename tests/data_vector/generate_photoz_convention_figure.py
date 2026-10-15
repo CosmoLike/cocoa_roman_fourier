@@ -17,13 +17,13 @@ act on different scales:
                            (1e-4 level).
 
 The four models are built one after the other in this process (they
-share example1's dimensions), and the figures are written into tests/,
+share example1's dimensions), and the figures are written into tests/data_vector/,
 replacing the files of the same name.
 
 To run (from the Cocoa/ folder, cocoa environment active,
 start_cocoa.sh sourced):
 
-    python ./projects/roman_fourier/tests/generate_photoz_convention_figure.py
+    python ./projects/roman_fourier/tests/data_vector/generate_photoz_convention_figure.py
 """
 
 import os
@@ -43,9 +43,12 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-# insert(0, ...) puts this folder (tests/) first on the module search path,
-# so the import below finds this project's shim.
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Figures belong beside these data-vector checks. The shared harness and
+# frozen inputs remain one folder above, in tests/. Resolve both from
+# this script so it can be launched from any working directory.
+FIGURES = os.path.dirname(os.path.abspath(__file__))
+TESTS = os.path.dirname(FIGURES)
+sys.path.insert(0, TESTS)
 import cocoa_test_utils as u
 
 # These repeat the frozen dataset (frozen/data/roman_example.dataset):
@@ -55,7 +58,7 @@ EXAMPLE = "example1"
 NTOMO = 8
 NCL = 15
 L_MIN, L_MAX = 30.0, 4000.0
-MASK_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+MASK_FILE = os.path.join(TESTS,
                          "frozen", "data", "roman_example.mask")
 
 # (report tag, photoz_interpolation_type, photoz_zmid_convention)
@@ -106,7 +109,7 @@ def plot(curves, fname, title, scale=100.0, unit="%", ylim=None):
     Arguments:
       curves = dict label -> fractional-difference array [36, NCL], NaN
                at masked bands.
-      fname  = file name of the PNG, written into tests/.
+      fname  = file name of the PNG, written into tests/data_vector/.
       title  = figure title.
       scale  = factor applied to the fractions before plotting (100 for
                percent).
@@ -118,7 +121,7 @@ def plot(curves, fname, title, scale=100.0, unit="%", ylim=None):
       nothing.
 
     Side effects:
-      Writes tests/<fname> at 120 dpi, replacing an existing file.
+      Writes tests/data_vector/<fname> at 120 dpi, replacing an existing file.
     """
     edges = np.geomspace(L_MIN, L_MAX, NCL + 1)
     ell = np.sqrt(edges[1:] * edges[:-1])  # geometric band centers
@@ -144,7 +147,7 @@ def plot(curves, fname, title, scale=100.0, unit="%", ylim=None):
         axes.ravel()[0].set_ylim(-ylim, ylim)
     axes.ravel()[0].legend(fontsize=9, loc="lower left")
     fig.suptitle(title, fontsize=17)
-    fig.savefig(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+    fig.savefig(os.path.join(FIGURES,
                              fname), dpi=120, bbox_inches="tight")
     plt.close(fig)
     print(f"wrote {fname}")
@@ -158,7 +161,7 @@ def main():
       verify_frozen when a frozen file changed.
 
     Side effects:
-      Writes tests/photoz_zmid_dcl.png and tests/photoz_interp_dcl.png.
+      Writes tests/data_vector/photoz_zmid_dcl.png and tests/data_vector/photoz_interp_dcl.png.
     """
     u.require_cocoa_environment()
     u.verify_frozen()

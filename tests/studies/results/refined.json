@@ -1,0 +1,84 @@
+{
+  "project": "roman_fourier",
+  "part": "refined",
+  "point": {
+    "As_1e9": 2.1,
+    "H0": 67.32,
+    "mnu": 0.06,
+    "ns": 0.96605,
+    "omegab": 0.04,
+    "omegam": 0.3,
+    "roman_A1_1": 0.6,
+    "roman_A1_2": -1.5,
+    "roman_A2_1": 0.0,
+    "roman_A2_2": -1.51541,
+    "roman_B1_1": 1.4,
+    "roman_B1_2": 1.5,
+    "roman_B1_3": 1.6,
+    "roman_B1_4": 1.7,
+    "roman_B1_5": 1.8,
+    "roman_B1_6": 1.9,
+    "roman_B1_7": 2.0,
+    "roman_B1_8": 2.1,
+    "roman_BTA_1": 0.0,
+    "roman_DZ_S1": 0.0,
+    "roman_DZ_S2": 0.0,
+    "roman_DZ_S3": 0.0,
+    "roman_DZ_S4": 0.0,
+    "roman_DZ_S5": 0.0,
+    "roman_DZ_S6": 0.0,
+    "roman_DZ_S7": 0.0,
+    "roman_DZ_S8": 0.0,
+    "roman_M1": 0.0,
+    "roman_M2": 0.0,
+    "roman_M3": 0.0,
+    "roman_M4": 0.0,
+    "roman_M5": 0.0,
+    "roman_M6": 0.0,
+    "roman_M7": 0.0,
+    "roman_M8": 0.0,
+    "w": -1.0,
+    "w0pwa": -1.0
+  },
+  "input_files": {
+    "source_file": {
+      "name": "roman_example.nz",
+      "sha256": "90a127b0f02c0fbfb4e41de39b6dc77f5b824a80a4a62dbf78fad856af4a41d9"
+    },
+    "lens_file": {
+      "name": "roman_example.nz",
+      "sha256": "90a127b0f02c0fbfb4e41de39b6dc77f5b824a80a4a62dbf78fad856af4a41d9"
+    },
+    "cov_file": {
+      "name": "roman_example.cov",
+      "sha256": "1e2e2b0f0f2927729bdecdd22e12d41d2494f8e11616e17e46ca69512a210ac4"
+    },
+    "mask_file": {
+      "name": "roman_example.mask",
+      "sha256": "f8d8248a1ee493682a3df43cf4b124334895c4185a178762e270a1025325e149"
+    },
+    "data_vector_file": {
+      "name": "roman_example.datavector",
+      "sha256": "a6c5bb18b139c1b7a2b8e46ef47110b134662d94ae12ed2b9d35fc884de25b6b"
+    }
+  },
+  "accuracyboost": 5.0,
+  "integration_accuracy": 7,
+  "defaults_yaml_sha256": "2d016fec30b29005257959029ea4be34276f2177c0ed7ac5702893271b8de962",
+  "interface_sha256": "b59e76dc959c2a84421241fb44b468aa6c26f7d125342d18a88eb88103c59dfe",
+  "study_sha256": "ec356f5fe96ce3c418449392057aba238f77378e798274e807d4f70ff95d821c",
+  "delta_chi2": {
+    "original_to_three": 0.3884213594514962,
+    "three_to_five": 0.030660172288317827,
+    "three_to_seven": 0.06344007635122924,
+    "five_to_seven": 0.00603868590926878
+  },
+  "elapsed_seconds": 13.612626958056353,
+  "thread_environment": {
+    "OMP_NUM_THREADS": "8",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "inverse_covariance_sha256": "03d0d65b0a88456c7475562907cdf51d6bd1c110ebe84f36fb167e09f0097f8b"
+}

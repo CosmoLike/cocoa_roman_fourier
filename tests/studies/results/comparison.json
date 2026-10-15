@@ -1,0 +1,21 @@
+{
+  "project": "roman_fourier",
+  "default_accuracyboost": 2.0,
+  "default_integration_accuracy": 0,
+  "refined_accuracyboost": 5.0,
+  "refined_integration_accuracy": 7,
+  "original_default_to_refined": 0.009719737669342775,
+  "reconstruction_distances": {
+    "original_to_three": 0.3884213594514962,
+    "three_to_five": 0.030660172288317827,
+    "three_to_seven": 0.06344007635122924,
+    "five_to_seven": 0.00603868590926878
+  },
+  "redshift_moment_refinement_delta_chi2": {
+    "original": 2.0224910807737018e-25,
+    "three": 6.780241264396057e-17,
+    "five": 5.885505499793521e-16,
+    "seven": 2.9201071793200612e-15
+  },
+  "default_vector_unchanged_bitwise": true
+}
