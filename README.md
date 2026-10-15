@@ -4,10 +4,9 @@
 2. [Baryonic feedback on EXAMPLE_EVALUATE1](#roman_fourier_baryonic_feedback)
 3. [Running Hybrid Cosmolike-ML emulators](#roman_fourier_examples_emul2)
 4. [Unit tests](#roman_fourier_unit_tests)
-5. [Minimum accuracy parameters](#roman_fourier_accuracy)
-6. [Computing covariances](#computing_covariances)
-7. [Exploring notebooks](#notebooks)
-8. [Appendix: Which accuracy settings are available?](#accuracy)
+5. [Computing covariances](#computing_covariances)
+6. [Exploring notebooks](#notebooks)
+7. [Appendix: Which accuracy settings are available?](#accuracy)
 
 ## Running Cosmolike projects (Basic instructions) <a name="running_cosmolike_projects"></a> 
 
@@ -410,77 +409,11 @@ supply the hosts and slots with the cluster's `--hostfile` or `--host` recipe.
 
 # Unit tests <a name="roman_fourier_unit_tests"></a>
 
-The `tests/` folder holds unit tests for the likelihoods of this
-project: they compare each likelihood against stored reference
-values, check for race conditions from OpenMP threading, and measure
-the numerical error of the default accuracy settings. The
-tests read nothing from the live project;
-[tests/README.md](tests/README.md) describes every test, the tests'
-own data snapshot, and how to refresh it.
-
-We assume users are in the Conda cocoa environment from a previous
-`conda activate cocoa` command, that the shell is bash, and that the
-current folder is the cocoa main folder `cocoa/Cocoa`.
-
-**Step :one:**: activate the private Python environment by sourcing
-the script `start_cocoa.sh`
-
-    source start_cocoa.sh
-
-**Step :two:**: run the tests of this project
-
-    python -m pytest ./projects/roman_fourier/tests/data_vector
-
-## Minimum accuracy parameters <a name="roman_fourier_accuracy"></a>
-
-The advisory checks in `tests/data_vector/test_accuracy.py` measure the
-numerical error of the default accuracy settings: each setting is
-raised one at a time on the 3x2pt configuration, so a large
-$\Delta\chi^2$ can be attributed to the setting causing it, and
-then every setting at once.
-
-Each check prints the $\Delta\chi^2$ between the high-accuracy and
-the default evaluations, to compare against the 0.2 band the
-reference tests allow. No measured values are quoted here: rerun
-the checks to measure them on the current code, and see
-[tests/README.md](tests/README.md) for each check, the settings
-raised, and what each setting controls.
-
-The default is `accuracyboost: 2.0` with `pk_z_refinement: 2`, and the
-reason must not be lost. Two grids of this project need more than
-`accuracyboost: 1` (measured 2026-10-01):
-
-- The z nodes of the power-spectrum tables. cosmolike interpolates the
-  tables linearly in z between their nodes, and at the band centers of
-  this Fourier-space data vector that residual does not average out:
-  the 3x2pt $\chi^2$ at the synthetic test point moves by 0.25, 0.030
-  and 0.002 from 1 to 2, 4 and 8 times the nodes of `accuracyboost: 1`.
-  The default has 4 times the nodes: `accuracyboost: 2` doubles them
-  and `pk_z_refinement: 2` doubles them again.
-- The C-FAST-PT tables of the TATT and one-loop galaxy-bias terms. At
-  `accuracyboost: 1` the cfastpt vs FAST-PT comparison of the tests
-  (tests 15 and 16) reaches $\Delta\chi^2$ = 0.25 (cosmic shear) and
-  0.31 (3x2pt), above the 0.2 band; at `accuracyboost: 2` it is 0.11
-  and 0.14.
-
-`accuracyboost` stays global: it multiplies every grid, these included,
-and `pk_z_refinement` refines the z nodes alone. Under NLA alone,
-`accuracyboost: 1` with `pk_z_refinement: 4` has the same z nodes and
-gives a data vector within $\delta^T C^{-1} \delta = 0.005$ of the
-default at a lower cost; the TATT tables are what need the boost. The
-CAMB request grid stays at 140 redshifts (under CAMB's 256-node cap), so
-only the cosmolike tables pay.
-
-The project tag v5.01 shipped `accuracyboost: 1` with
-`pk_z_refinement: 4`, which fails the TATT checks above; the default
-returned to `accuracyboost: 2` on 2026-10-01.
-
-> [!Warning]
-> Do not lower these settings to save computing time: with fewer than 4
-> times the z nodes of `accuracyboost: 1`, or with `accuracyboost` below
-> 2 under TATT, the error exceeds the 0.2 accuracy budget of the
-> reference tests. The likelihood yaml files repeat this next to the
-> knobs.
+The `tests/` folder compares likelihood predictions against stored reference
+values, checks for race conditions from OpenMP threading, and measures the
+numerical error of the default accuracy settings.
+[tests/README.md](tests/README.md) describes the checks, how to run them,
+the input data snapshots, and how to refresh them.
 
 # Exploring notebooks <a name="notebooks"></a>
 
@@ -560,76 +493,10 @@ forecast files, figures and refinement workflow.
 
 # Computing covariances <a name="computing_covariances"></a>
 
-> [!WARNING]
-> **CLI for production; notebook wrappers for exploration.**
->
-> Run production and HPC covariance calculations from YAML through the
-> `_interface` bindings. Notebook `_wrapper` APIs expose intermediate
-> quantities for exploration; copying and rearranging their arrays adds
-> overhead. Both routes call the same C kernels.
->
-> For timing measurements, see
-> [Cocoa's main README](https://github.com/CosmoLike/cocoa#overview).
-
-The production CLI saves G, SSC, cNG and total before scale cuts. It reads
-[the covariance evaluate YAML](EXAMPLE_EVALUATE_COVARIANCE.yaml) and calls the shared C kernels.
-
-We assume Cocoa and this project are installed, the Cocoa Conda environment
-is active, the shell is Bash, and the current folder is `cocoa/Cocoa/`.
-
-**Step :one:**: enable this project in `set_installation_options.sh` by commenting out
-`export IGNORE_COSMOLIKE_ROMAN_FOURIER_CODE=1` before activation.
-
-**Step :two:**: activate Cocoa.
-
-```bash
-source start_cocoa.sh
-```
-
-**Step :three:**: enable covariance generation.
-
-```bash
-unset IGNORE_COSMOLIKE_ROMAN_FOURIER_COVARIANCE
-```
-
-**Step :four:**: compile the project.
-
-```bash
-source ./projects/roman_fourier/scripts/compile_roman_fourier.sh
-```
-
-**Step :five:**: Select the number of OpenMP cores (below, we set it to 8).
-
-  - Linux
-
-        export OMP_NUM_THREADS=8; export OMP_PROC_BIND=close; \
-        export OMP_PLACES=cores; export OMP_DYNAMIC=FALSE; \
-        export OPENBLAS_NUM_THREADS=1; export MKL_NUM_THREADS=1
-
-  - macOS (arm)
-
-        export OMP_NUM_THREADS=8; export OMP_PROC_BIND=disabled; \
-        export OMP_PLACES=cores; export OMP_DYNAMIC=FALSE; \
-        export OPENBLAS_NUM_THREADS=1; export MKL_NUM_THREADS=1
-
-**Step :six:**: compute the fixed YAML cosmology.
-
-```bash
-python ./projects/roman_fourier/covariance/compute_covariance.py ./projects/roman_fourier/EXAMPLE_EVALUATE_COVARIANCE.yaml
-```
-
-Use `--output PATH` for a separate output or `--overwrite` to replace an
-existing computed archive. Paths are relative to `cocoa/Cocoa/`. Threads
-come only from `OMP_NUM_THREADS`, never from the YAML; the runner fixes BLAS
-to one thread. Ordinary likelihoods read their supplied covariance and do
-not generate a new one.
-
-Cobaya's YAML reader supplies the familiar `theory`, `params` and
-`sampler: evaluate` syntax. This runner evaluates one fixed cosmology and
-does not run MCMC. See the [covariance guide](covariance/README.md) for output
-ordering, physics, Gaussian non-Limber/IA limits, plots and test commands,
-and the [accuracy FAQ](#accuracy) for the separate numerical controls.
-
+The covariance tools compute Gaussian (G), super-sample (SSC), connected
+non-Gaussian (cNG) and total matrices before scale cuts.
+[covariance/README.md](covariance/README.md) explains compilation, the production
+CLI, exploratory notebooks, accuracy settings and output files.
 
 # Appendix <a name="appendix"></a>
 
