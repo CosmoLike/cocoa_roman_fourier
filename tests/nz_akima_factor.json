@@ -1,0 +1,158 @@
+{
+  "project": "roman_fourier",
+  "example": "example2",
+  "point": {
+    "As_1e9": 2.1,
+    "H0": 67.32,
+    "mnu": 0.06,
+    "ns": 0.96605,
+    "omegab": 0.04,
+    "omegam": 0.3,
+    "roman_A1_1": 0.6,
+    "roman_A1_2": -1.5,
+    "roman_A2_1": 0.0,
+    "roman_A2_2": -1.51541,
+    "roman_B1_1": 1.4,
+    "roman_B1_2": 1.5,
+    "roman_B1_3": 1.6,
+    "roman_B1_4": 1.7,
+    "roman_B1_5": 1.8,
+    "roman_B1_6": 1.9,
+    "roman_B1_7": 2.0,
+    "roman_B1_8": 2.1,
+    "roman_BTA_1": 0.0,
+    "roman_DZ_S1": 0.0,
+    "roman_DZ_S2": 0.0,
+    "roman_DZ_S3": 0.0,
+    "roman_DZ_S4": 0.0,
+    "roman_DZ_S5": 0.0,
+    "roman_DZ_S6": 0.0,
+    "roman_DZ_S7": 0.0,
+    "roman_DZ_S8": 0.0,
+    "roman_M1": 0.0,
+    "roman_M2": 0.0,
+    "roman_M3": 0.0,
+    "roman_M4": 0.0,
+    "roman_M5": 0.0,
+    "roman_M6": 0.0,
+    "roman_M7": 0.0,
+    "roman_M8": 0.0,
+    "w": -1.0,
+    "w0pwa": -1.0
+  },
+  "input_files": {
+    "source_file": {
+      "name": "roman_example.nz",
+      "sha256": "90a127b0f02c0fbfb4e41de39b6dc77f5b824a80a4a62dbf78fad856af4a41d9"
+    },
+    "lens_file": {
+      "name": "roman_example.nz",
+      "sha256": "90a127b0f02c0fbfb4e41de39b6dc77f5b824a80a4a62dbf78fad856af4a41d9"
+    },
+    "cov_file": {
+      "name": "roman_example.cov",
+      "sha256": "1e2e2b0f0f2927729bdecdd22e12d41d2494f8e11616e17e46ca69512a210ac4"
+    },
+    "mask_file": {
+      "name": "roman_example.mask",
+      "sha256": "f8d8248a1ee493682a3df43cf4b124334895c4185a178762e270a1025325e149"
+    },
+    "data_vector_file": {
+      "name": "roman_example.datavector",
+      "sha256": "a6c5bb18b139c1b7a2b8e46ef47110b134662d94ae12ed2b9d35fc884de25b6b"
+    }
+  },
+  "accuracyboost": 2.0,
+  "physical_covariance": true,
+  "reference_integration_accuracy": 6,
+  "pairwise_delta_chi2": {
+    "original_to_three": 0.4914196075940396,
+    "original_to_five": 0.5185755399094777,
+    "original_to_seven": 0.5436129827716992,
+    "three_to_five": 0.03370578113655531,
+    "three_to_seven": 0.06879780713071673,
+    "five_to_seven": 0.0066898843161503465
+  },
+  "practical_levels": {
+    "three": 3,
+    "five": 4,
+    "seven": 4
+  },
+  "quadrature_scans": {
+    "five": [
+      {
+        "integration_accuracy": 5,
+        "five_numerical_delta_chi2": 0.00017614355278620353,
+        "distance_to_refined_three": 0.03530200598912557,
+        "three_to_five_at_level5": 0.034768711185485475,
+        "model_displacement_refinement_delta_chi2": 7.206548762975446e-05
+      },
+      {
+        "integration_accuracy": 0,
+        "five_numerical_delta_chi2": 162.39993572433224,
+        "distance_to_refined_three": 165.43716638651352
+      },
+      {
+        "integration_accuracy": 1,
+        "five_numerical_delta_chi2": 86.91320112676053,
+        "distance_to_refined_three": 84.36803139343479
+      },
+      {
+        "integration_accuracy": 2,
+        "five_numerical_delta_chi2": 3.8791161413450856,
+        "distance_to_refined_three": 3.577874463010496
+      },
+      {
+        "integration_accuracy": 3,
+        "five_numerical_delta_chi2": 0.19677684587125976,
+        "distance_to_refined_three": 0.27924454102375285
+      },
+      {
+        "integration_accuracy": 4,
+        "five_numerical_delta_chi2": 0.02286216728108572,
+        "distance_to_refined_three": 0.05747781258342037
+      }
+    ],
+    "seven": [
+      {
+        "integration_accuracy": 5,
+        "seven_numerical_delta_chi2": 0.0002673370719071993,
+        "distance_to_refined_three": 0.06575894806703698,
+        "three_to_seven_at_level5": 0.06508991194428924,
+        "model_displacement_refinement_delta_chi2": 0.00020746871158879162
+      },
+      {
+        "integration_accuracy": 0,
+        "seven_numerical_delta_chi2": 183.24624145478813,
+        "distance_to_refined_three": 187.93558683707266
+      },
+      {
+        "integration_accuracy": 1,
+        "seven_numerical_delta_chi2": 99.39101220111826,
+        "distance_to_refined_three": 95.52543664993351
+      },
+      {
+        "integration_accuracy": 2,
+        "seven_numerical_delta_chi2": 6.418318648442637,
+        "distance_to_refined_three": 5.812862674293328
+      },
+      {
+        "integration_accuracy": 3,
+        "seven_numerical_delta_chi2": 0.5254976271632981,
+        "distance_to_refined_three": 0.7606032150912165
+      },
+      {
+        "integration_accuracy": 4,
+        "seven_numerical_delta_chi2": 0.09697054269720246,
+        "distance_to_refined_three": 0.15933902708609926
+      }
+    ]
+  },
+  "budget_delta_chi2": 0.1,
+  "checks": {
+    "three_reference_bitwise_unchanged": true,
+    "roundtrips_3_5_3_and_3_7_3_bitwise": true,
+    "fresh_yaml_matches_live": true,
+    "inverse_covariance_unchanged": true
+  }
+}
