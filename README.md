@@ -185,11 +185,19 @@ is active, the shell is Bash, and the current folder is `cocoa/Cocoa/`.
 source start_cocoa.sh
 ```
 
-**Step :two:**: select the OpenMP threads per process.
+**Step :two:**: Select the number of OpenMP cores (below, we set it to 4).
 
-```bash
-export OMP_NUM_THREADS=4
-```
+  - Linux
+
+        export OMP_NUM_THREADS=4; export OMP_PROC_BIND=close; \
+        export OMP_PLACES=cores; export OMP_DYNAMIC=FALSE; \
+        export OPENBLAS_NUM_THREADS=1; export MKL_NUM_THREADS=1
+
+  - macOS (arm)
+
+        export OMP_NUM_THREADS=4; export OMP_PROC_BIND=disabled; \
+        export OMP_PLACES=cores; export OMP_DYNAMIC=FALSE; \
+        export OPENBLAS_NUM_THREADS=1; export MKL_NUM_THREADS=1
 
 **Step :three:**: remove GPU access on Linux; these examples use the CPU.
 
@@ -494,11 +502,19 @@ covariance build described [below](#computing_covariances).
 source start_cocoa.sh
 ```
 
-**Step :two:**: select the OpenMP team.
+**Step :two:**: Select the number of OpenMP cores (below, we set it to 8).
 
-```bash
-export OMP_NUM_THREADS=8
-```
+  - Linux
+
+        export OMP_NUM_THREADS=8; export OMP_PROC_BIND=close; \
+        export OMP_PLACES=cores; export OMP_DYNAMIC=FALSE; \
+        export OPENBLAS_NUM_THREADS=1; export MKL_NUM_THREADS=1
+
+  - macOS (arm)
+
+        export OMP_NUM_THREADS=8; export OMP_PROC_BIND=disabled; \
+        export OMP_PLACES=cores; export OMP_DYNAMIC=FALSE; \
+        export OPENBLAS_NUM_THREADS=1; export MKL_NUM_THREADS=1
 
 **Step :three:**: start Jupyter.
 
@@ -582,11 +598,19 @@ unset IGNORE_COSMOLIKE_ROMAN_FOURIER_COVARIANCE
 source ./projects/roman_fourier/scripts/compile_roman_fourier.sh
 ```
 
-**Step :five:**: set the OpenMP team size.
+**Step :five:**: Select the number of OpenMP cores (below, we set it to 8).
 
-```bash
-export OMP_NUM_THREADS=8
-```
+  - Linux
+
+        export OMP_NUM_THREADS=8; export OMP_PROC_BIND=close; \
+        export OMP_PLACES=cores; export OMP_DYNAMIC=FALSE; \
+        export OPENBLAS_NUM_THREADS=1; export MKL_NUM_THREADS=1
+
+  - macOS (arm)
+
+        export OMP_NUM_THREADS=8; export OMP_PROC_BIND=disabled; \
+        export OMP_PLACES=cores; export OMP_DYNAMIC=FALSE; \
+        export OPENBLAS_NUM_THREADS=1; export MKL_NUM_THREADS=1
 
 **Step :six:**: compute the fixed YAML cosmology.
 
