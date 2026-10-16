@@ -1,33 +1,24 @@
 """Baryonic feedback drift tests BD1-BD7: frozen-vector pinning.
 
-Each test evaluates the example1 configuration (cosmic shear, NLA) with
-the bfmt theory block computing one baryonic-feedback method (the
-suppression of the small-scale matter power by gas physics), against
-that method's frozen data vector: the default-settings theory
-prediction written at freeze time by generate_frozen_reference.py
---baryons, at the frozen fiducial point plus the method's cosmology
-override (cocoa_test_utils.BARYON_POINT_OVERRIDES). At freeze time the
-chi2 against that vector was zero by construction, so the assertion
+The class these tests live in is built by the shared factory
+baryon_drift_suite (cosmolike_core/cocoa_testing_suites.py), and what
+each test means physically is documented in the cosmolike_core
+README's shared data-vector checks, baryonic-feedback section. In
+short: each test evaluates this project's example1 configuration
+(cosmic shear, NLA) with the bfmt theory block computing one feedback
+method, against that method's frozen data vector (written at freeze
+time by generate_frozen_reference.py --baryons, when the chi2 against
+it was zero by construction), so the assertion
 
-    chi2 <= CHI2_TOLERANCE (0.2)
+    chi2 <= chi2_tolerance
 
-pins the whole feedback pipeline: a failure means cosmolike or the
-bfmt theory block changed its prediction since the freeze. This is
-the reference-test idea (test_example1.py) applied to the feedback
-pipeline, and it complements test_accuracy_baryons.py: the accuracy
-checks regenerate their vector on the fly per run, so they measure
-numerical settings and can never see drift; these tests hold the
-frozen vector still, so they measure drift and nothing else. The
-seven tests cover every method the bfmt theory block implements (fb is
-the baryon fraction of a halo as a function of its mass):
+pins the whole feedback pipeline against drift. The methods and their
+fixed parameter points live in cocoa_test_utils.BARYON_METHODS and
+BARYON_POINT_OVERRIDES.
 
-  BD1. SP(k), power-law fb relation     BD2. SP(k), Akino et al. 2022
-  BD3. SP(k), double power-law relation BD4. BCEmu
-  BD5. FlamingoBaryonResponseEmulator   BD6. BACCOemu
-  BD7. BCemu2025
-
-To run only this file (from the Cocoa/ folder, cocoa environment
-active, start_cocoa.sh sourced):
+One evaluation per test: expect minutes per test. To run only this
+file (from the Cocoa/ folder, cocoa environment active,
+start_cocoa.sh sourced):
 
     python -m pytest ./projects/roman_fourier/tests/data_vector/test_baryons.py
 """
@@ -41,95 +32,19 @@ os.environ["OMP_NUM_THREADS"] = "4"
 import sys
 import unittest
 
-# The shim cocoa_test_utils.py lives in the parent folder tests/; putting
-# that folder first on the module search path finds this project's copy
-# (every project names its shim the same) under pytest or direct runs.
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# The tests folder is not a package; put it on the import path so the
+# shared harness resolves no matter where pytest was launched from.
+sys.path.insert(0, os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
+# The factory builds the test class bound to this project's tables;
+# assigning it to the usual module-level name is what makes pytest
+# collect it here, with unchanged test ids.
+TestBaryonDrift = u.baryon_drift_suite(u)
 
-class TestBaryonDrift(unittest.TestCase):
-    """Drift tests BD1-BD7: the feedback pipeline against its freeze.
-
-    setUpClass runs once: it moves to ROOTDIR and verifies every
-    frozen file against the SHA-256 manifest before any physics runs.
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        """Check the environment and the frozen state once, before the tests.
-
-        Moves to ROOTDIR and verifies every frozen file against the SHA-256
-        manifest.
-
-        Raises:
-          RuntimeError outside an activated Cocoa shell; AssertionError
-          when a frozen file differs from the manifest.
-        """
-        u.require_cocoa_environment()
-        u.verify_frozen()
-
-    def _baryon_drift_check(self, name, baryon, label):
-        """Check one method's chi2 against its frozen feedback vector.
-
-        The chi2 comes from a worker subprocess (u.baryon_drift_chi2).
-
-        Arguments:
-          name   = the test label (BD1-BD7) for the report.
-          baryon = a label of cocoa_test_utils.BARYON_METHODS.
-          label  = one line naming the feedback method.
-
-        Returns:
-          nothing; the report is printed.
-
-        Raises:
-          AssertionError when the chi2 exceeds CHI2_TOLERANCE.
-        """
-        chi2 = u.baryon_drift_chi2(baryon)
-        print(f"""
-{'-' * 66}
-DRIFT: {name}: {label}
-  chi2 against the frozen feedback vector = {chi2:.6f}
-  (zero at freeze time; tolerance {u.CHI2_TOLERANCE})
-{'-' * 66}""", flush=True)
-        self.assertLessEqual(
-            chi2, u.CHI2_TOLERANCE,
-            f"{name}: chi2 {chi2:.6f} exceeds the tolerance "
-            f"{u.CHI2_TOLERANCE}; cosmolike or the bfmt theory block "
-            "changed its prediction since the freeze")
-
-    def test_bd1_spk_power_law(self):
-        """BD1: SP(k) with the power-law fb relation matches its frozen vector."""
-        self._baryon_drift_check("BD1", "spk power law",
-                                 "SP(k), power-law fb relation")
-
-    def test_bd2_spk_akino(self):
-        """BD2: SP(k) with the Akino et al. 2022 fb relation matches its frozen vector."""
-        self._baryon_drift_check("BD2", "spk akino",
-                                 "SP(k), Akino et al. 2022")
-
-    def test_bd3_spk_double_power_law(self):
-        """BD3: SP(k) with the double power-law fb relation matches its frozen vector."""
-        self._baryon_drift_check("BD3", "spk double power law",
-                                 "SP(k), double power-law fb relation")
-
-    def test_bd4_bcemu(self):
-        """BD4: BCEmu matches its frozen vector."""
-        self._baryon_drift_check("BD4", "bcemu", "BCEmu")
-
-    def test_bd5_flamingo(self):
-        """BD5: FlamingoBaryonResponseEmulator matches its frozen vector."""
-        self._baryon_drift_check("BD5", "flamingo",
-                                 "FlamingoBaryonResponseEmulator")
-
-    def test_bd6_baccoemu(self):
-        """BD6: BACCOemu matches its frozen vector."""
-        self._baryon_drift_check("BD6", "baccoemu", "BACCOemu")
-
-    def test_bd7_bcemu2025(self):
-        """BD7: BCemu2025 matches its frozen vector."""
-        self._baryon_drift_check("BD7", "bcemu2025", "BCemu2025")
-
-
+# __name__ is "__main__" only when this file runs directly as a
+# script; pytest imports the module instead, so this block stays
+# idle under pytest
 if __name__ == "__main__":
     unittest.main(verbosity=2)
