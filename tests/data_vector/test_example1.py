@@ -35,91 +35,24 @@ os.environ["OMP_NUM_THREADS"] = "4"
 import sys
 import unittest
 
-# The shim cocoa_test_utils.py lives in the parent folder tests/; putting
-# that folder first on the module search path finds this project's copy
-# (every project names its shim the same) under pytest or direct runs.
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# The tests folder is not a package; put it on the import path so the
+# shared harness resolves no matter where pytest was launched from.
+sys.path.insert(0, os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
-EXAMPLE = "example1"
+# The shared factory (cosmolike_core/cocoa_testing_suites.py) builds
+# the chi2 + race test class for one frozen example; assigning its
+# return value to the usual module-level name is what makes pytest
+# collect it here, with unchanged test ids. The numbers name the
+# methods and the printed reports; the label opens every report line.
+TestExample1CosmicShear = u.example_suite(
+    u, name="TestExample1CosmicShear", example="example1",
+    label="example1 (cosmic shear",
+    numbers=("1", "2"), tatt_numbers=("3", "4"))
 
-
-class TestExample1CosmicShear(unittest.TestCase):
-    """Tests 1-4, sharing one frozen-state verification.
-
-    setUpClass runs once before the tests: it moves to ROOTDIR,
-    verifies every frozen file against the SHA-256 manifest (an edited
-    frozen state must fail loudly before any physics runs), and loads
-    the frozen reference chi2 values.
-    """
-
-    # @classmethod hands the class itself in as cls; unittest calls
-    # this once, before the first test of the class
-    @classmethod
-    def setUpClass(cls):
-        """Check the environment and the frozen state once, before the tests.
-
-        Moves to ROOTDIR, verifies every frozen file against the SHA-256
-        manifest and stores the frozen reference chi2 values in
-        cls.reference (cls is the class itself, shared by its tests).
-
-        Raises:
-          RuntimeError outside an activated Cocoa shell; AssertionError
-          when a frozen file differs from the manifest.
-        """
-        u.require_cocoa_environment()
-        u.verify_frozen()
-        cls.reference = u.load_reference()
-
-    def test_1_chi2_matches_frozen_reference(self):
-        """chi2 at the frozen NLA point stays within 0.2 of the reference."""
-        chi2 = u.single_model_chi2(EXAMPLE, tatt=False)
-        ref = self.reference[f"{EXAMPLE}_nla"]
-        u.report_chi2_test(
-            1, "example1 (cosmic shear, NLA) chi2 vs frozen reference",
-            chi2, ref, u.CHI2_TOLERANCE)
-        # :.6f in the failure message = fixed six decimals
-        self.assertLess(
-            abs(chi2 - ref), u.CHI2_TOLERANCE,
-            msg=f"chi2 = {chi2:.6f} vs frozen reference {ref:.6f} "
-                f"(|delta| >= {u.CHI2_TOLERANCE})")
-
-    def test_2_no_race_condition_ten_in_a_row(self):
-        """The fiducial as 10th of 10 cosmologies matches a fresh run."""
-        u.assert_omp_threads()
-        # the call returns a (fresh, tenth) pair; the assignment
-        # unpacks it into the two names
-        fresh, tenth = u.ten_in_a_row_chi2(EXAMPLE, tatt=False)
-        u.report_race_test(
-            2, "example1 (cosmic shear, NLA) race check: 10 cosmologies in a row",
-            fresh, tenth, u.RACE_TOLERANCE)
-        self.assertLess(
-            abs(tenth - fresh), u.RACE_TOLERANCE,
-            msg=f"10th-in-a-row chi2 = {tenth:.8f} vs fresh {fresh:.8f}")
-
-    def test_3_chi2_matches_frozen_reference_tatt(self):
-        """Test 1 repeated with the TATT IA model and nonzero A2/BTA."""
-        chi2 = u.single_model_chi2(EXAMPLE, tatt=True)
-        ref = self.reference[f"{EXAMPLE}_tatt"]
-        u.report_chi2_test(
-            3, "example1 (cosmic shear, TATT) chi2 vs frozen reference",
-            chi2, ref, u.CHI2_TOLERANCE)
-        self.assertLess(
-            abs(chi2 - ref), u.CHI2_TOLERANCE,
-            msg=f"TATT chi2 = {chi2:.6f} vs frozen reference {ref:.6f} "
-                f"(|delta| >= {u.CHI2_TOLERANCE})")
-
-    def test_4_no_race_condition_ten_in_a_row_tatt(self):
-        """Test 2 repeated with the TATT IA model."""
-        u.assert_omp_threads()
-        fresh, tenth = u.ten_in_a_row_chi2(EXAMPLE, tatt=True)
-        u.report_race_test(
-            4, "example1 (cosmic shear, TATT) race check: 10 cosmologies in a row",
-            fresh, tenth, u.RACE_TOLERANCE)
-        self.assertLess(
-            abs(tenth - fresh), u.RACE_TOLERANCE,
-            msg=f"TATT 10th-in-a-row chi2 = {tenth:.8f} vs fresh {fresh:.8f}")
-
-
+# __name__ is "__main__" only when this file runs directly as a
+# script; pytest imports the module instead, so this block stays
+# idle under pytest
 if __name__ == "__main__":
     unittest.main(verbosity=2)
