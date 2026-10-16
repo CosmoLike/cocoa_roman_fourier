@@ -35,61 +35,18 @@ os.environ["OMP_NUM_THREADS"] = "4"
 import sys
 import unittest
 
-# The shim cocoa_test_utils.py lives in the parent folder tests/; putting
-# that folder first on the module search path finds this project's copy
-# (every project names its shim the same) under pytest or direct runs.
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# The tests folder is not a package; put it on the import path so the
+# shared harness resolves no matter where pytest was launched from.
+sys.path.insert(0, os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
-
-class TestEE2Race(unittest.TestCase):
-    """Test 18, with the frozen-state verification.
-
-    setUpClass runs once before the test: it moves to ROOTDIR and
-    verifies every frozen file against the SHA-256 manifest. No
-    frozen reference chi2 is loaded: the test compares one build
-    against itself, so the frozen state only supplies the
-    configuration and the data files.
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        """Check the environment and the frozen state once, before the tests.
-
-        Moves to ROOTDIR and verifies every frozen file against the SHA-256
-        manifest.
-
-        Raises:
-          RuntimeError outside an activated Cocoa shell; AssertionError
-          when a frozen file differs from the manifest.
-        """
-        u.require_cocoa_environment()
-        u.verify_frozen()
-
-    def test_x18_ee2_race_ten_in_a_row(self):
-        """The fiducial with EE2 as 10th of 10 matches a fresh run.
-
-        EE2's OpenMP-threaded compute runs inside every evaluation
-        of the row, so a thread race or leaked state in it moves
-        the second fiducial value. The x prefix marks a two-digit test
-        number (unittest sorts method names alphabetically).
-
-        Raises:
-          RuntimeError when OMP_NUM_THREADS is not 4 (assert_omp_threads);
-          AssertionError when the two chi2 values differ by
-          RACE_TOLERANCE or more.
-        """
-        u.assert_omp_threads()
-        fresh, tenth = u.ten_in_a_row_chi2("example1", tatt=False,
-                                           ee2=True)
-        u.report_race_test(
-            18, "example1 (cosmic shear, NLA+EE2) race check: 10 "
-            "cosmologies in a row", fresh, tenth, u.RACE_TOLERANCE)
-        self.assertLess(
-            abs(tenth - fresh), u.RACE_TOLERANCE,
-            msg=f"10th-in-a-row chi2 = {tenth:.8f} vs fresh "
-                f"{fresh:.8f}")
-
+# The shared factories (cosmolike_core/cocoa_testing_suites.py) build
+# the classes; assigning each return value to the usual module-level
+# name is what makes pytest collect it here, with unchanged test ids.
+TestEE2Race = u.ee2_suite(
+    u, name="TestEE2Race",
+    race=('test_x18_ee2_race_ten_in_a_row', 18, 'example1', 'example1 (cosmic shear, NLA+EE2)'))
 
 # __name__ is "__main__" only when this file runs directly as a
 # script; pytest imports the module instead, so this block stays
